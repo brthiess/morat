@@ -192,7 +192,7 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 AgentMCTS::Node * AgentMCTS::AgentThread::choose_move(const Node * node, int toplay, int remain) const {
 	float val, maxval = -1000000000;
 	float logvisits = log(node->exp.num());
-	int dynwidenlim = (agent->dynwiden > 0 ? (int)(logvisits/agent->logdynwiden)+2 : 361);
+	int dynwidenlim = (agent->dynwiden > 0 ? (int)(logvisits/agent->logdynwiden)+2 : Board::max_vecsize);
 
 	float raveval = use_rave * (agent->ravefactor + agent->decrrave*remain);
 	float explore = use_explore * agent->explore;
@@ -263,21 +263,21 @@ bool AgentMCTS::do_backup(Node * node, Node * backup, int toplay){
 			//these should be sorted in likelyness of matching, most likely first
 			if(childoutcome == -3){ // win/draw/loss
 				outcome = 3;
-			}else if(childoutcome == 3 -toplay){ //win
+			}else if(childoutcome == toplay){ //win
 				backup = child;
 				outcome = 6;
 				proofdepth = child->proofdepth+1;
 				break;
-			}else if(childoutcome == toplay){ //loss
+			}else if(childoutcome == 3 - toplay){ //loss
 				outcome = 0;
 			}else if(childoutcome == 0){ //draw
 				if(nodeoutcome == toplay-3) //draw/loss
 					outcome = 2;
 				else
 					outcome = 4;
-			}else if(childoutcome == toplay - 3){ //win/draw
+			}else if(childoutcome == -toplay){ //win/draw
 				outcome = 5;
-			}else if(childoutcome == -toplay){ //draw/loss
+			}else if(childoutcome == toplay - 3){ //draw/loss
 				outcome = 1;
 			}else{
 				logerr("childoutcome == " + to_str(childoutcome) + "\n");
@@ -333,8 +333,8 @@ void AgentMCTS::AgentThread::add_knowledge(const Board & board, Node * node, Nod
 	if(agent->connect || agent->size)
 		cell = board.test_cell(child->move);
 
-	if(agent->connect) //boost for moves that connect to edges
-		child->know += agent->connect * cell.numedges();
+//	if(agent->connect) //boost for moves that connect to edges
+//		child->know += agent->connect * cell.numedges();
 
 	if(agent->size) //boost for size of the group
 		child->know += agent->size * cell.size;
@@ -446,6 +446,6 @@ Move AgentMCTS::AgentThread::rollout_choose_move(Board & board, const Move & pre
 		if(move != M_UNKNOWN)
 			return move;
 	}
-
+	* 
 	return random_policy.choose_move(board, prev);
 }
