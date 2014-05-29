@@ -263,21 +263,21 @@ bool AgentMCTS::do_backup(Node * node, Node * backup, int toplay){
 			//these should be sorted in likelyness of matching, most likely first
 			if(childoutcome == -3){ // win/draw/loss
 				outcome = 3;
-			}else if(childoutcome == toplay){ //win
+			}else if(childoutcome == 3 -toplay){ //win
 				backup = child;
 				outcome = 6;
 				proofdepth = child->proofdepth+1;
 				break;
-			}else if(childoutcome == 3-toplay){ //loss
+			}else if(childoutcome == toplay){ //loss
 				outcome = 0;
 			}else if(childoutcome == 0){ //draw
 				if(nodeoutcome == toplay-3) //draw/loss
-					outcome = 4;
-				else
 					outcome = 2;
-			}else if(childoutcome == -toplay){ //win/draw
+				else
+					outcome = 4;
+			}else if(childoutcome == toplay - 3){ //win/draw
 				outcome = 5;
-			}else if(childoutcome == toplay-3){ //draw/loss
+			}else if(childoutcome == -toplay){ //draw/loss
 				outcome = 1;
 			}else{
 				logerr("childoutcome == " + to_str(childoutcome) + "\n");
