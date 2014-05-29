@@ -446,6 +446,6 @@ Move AgentMCTS::AgentThread::rollout_choose_move(Board & board, const Move & pre
 		if(move != M_UNKNOWN)
 			return move;
 	}
-	* 
+	
 	return random_policy.choose_move(board, prev);
 }
