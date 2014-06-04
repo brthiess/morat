@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "../lib/bitcount.h"
 #include "../lib/hashset.h"
 #include "../lib/string.h"
 #include "../lib/types.h"
@@ -16,12 +17,6 @@
 
 using namespace std;
 
-static const int BitsSetTable64[] = {
-	0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
-	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
-	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
-	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6
-};
 
 /*
  * the board is represented as a flattened 2d array of the form:
@@ -60,21 +55,21 @@ public:
 	typedef uint64_t Pattern;
 
 	struct Cell {
-		uint8_t piece;  //who controls this cell, 0 for none, 1,2 for players
-		uint8_t size;   //size of this group of cells
+		uint8_t piece;   //who controls this cell, 0 for none, 1,2 for players
+		uint8_t size;    //size of this group of cells
 mutable uint16_t parent; //parent for this group of cells
-		uint8_t corner; //which corners are this group connected to
-		uint8_t edge;   //which edges are this group connected to
-mutable uint8_t mark;   //when doing a ring search, has this position been seen?
-		unsigned perm : 4;   //is this a permanent piece or a randomly placed piece?
-		Pattern  pattern: 36; //the pattern of pieces for neighbours, but from their perspective. Rotate 180 for my perpective
+		uint8_t corner;  //which corners are this group connected to
+		uint8_t edge;    //which edges are this group connected to
+mutable uint8_t mark;    //when doing a ring search, has this position been seen?
+		uint8_t perm;    //is this a permanent piece or a randomly placed piece?
+		Pattern pattern; //the pattern of pieces for neighbours, but from their perspective. Rotate 180 for my perpective
 
 		Cell() : piece(0), size(0), parent(0), corner(0), edge(0), mark(0), perm(0), pattern(0) { }
 		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e, Pattern t) :
 			piece(p), size(s), parent(a), corner(c), edge(e), mark(0), perm(0), pattern(t) { }
 
-		int numcorners() const { return BitsSetTable64[corner]; }
-		int numedges()   const { return BitsSetTable64[edge];   }
+		int numcorners() const { return BitsSetTable256[corner]; }
+		int numedges()   const { return BitsSetTable256[edge];   }
 
 		string to_s(int i) const {
 			return "Cell " + to_str(i) +": "
