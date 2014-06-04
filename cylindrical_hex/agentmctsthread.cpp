@@ -135,22 +135,14 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 	for(; !move.done() && child != end; ++move, ++child){
 		*child = Node(*move);
 
-
 		if(agent->minimax){
-			
-			//Test if we win with this move			
 			child->outcome = board.test_win(*move);
 
-			//Test if the opponent wins by playing this move
-			//If it does, then add it to the losses
-			//If losses >= then we know we have lost for sure
 			if(agent->minimax >= 2 && board.test_win(*move, 3 - board.toplay()) > 0){
 				losses++;
 				loss = child;
 			}
 
-			//Test if we win by playing this move
-			//If so, then play it.
 			if(child->outcome == board.toplay()){ //proven win from here, don't need children
 				node->outcome = child->outcome;
 				node->proofdepth = 1;
@@ -351,7 +343,7 @@ void AgentMCTS::AgentThread::add_knowledge(const Board & board, Node * node, Nod
 		child->know += agent->bridge;
 
 	if(agent->dists)
-		child->know += abs(agent->dists) * max(0, board.get_size() - dists.get(child->move, board.toplay()));
+		child->know += abs(agent->dists) * max(0, board.get_x_size() - dists.get(child->move, board.toplay()));
 }
 
 //test whether this move is a forced reply to the opponent probing your virtual connections

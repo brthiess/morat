@@ -112,7 +112,7 @@ AgentMCTS::AgentMCTS() : pool(this) {
 
 	shortrave   = false;
 	keeptree    = true;
-	minimax     = 2;
+	minimax     = 0;
 	visitexpand = 1;
 	prunesymmetry = false;
 	gcsolved    = 100000;
