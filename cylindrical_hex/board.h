@@ -271,8 +271,10 @@ public:
 	}
 	
 	int adjacencies(int x, int y) const {
-		return (x == 0	  		? 1 : 0) |
-		       (x == size_x_m1 	? 2 : 0);
+		return (x == 0      	? 1 : 0) |
+		       (x == size_x_m1 	? 2 : 0) |
+		       (y == 0      	? 4 : 0) |
+		       (y == size_y_m1 	? 8 : 0);
 	}
 
 	MoveValid * get_neighbour_list(){
@@ -443,7 +445,7 @@ public:
 		cells[j].parent = i;
 		cells[i].size   	+= cells[j].size;
 		cells[i].edge   	|= cells[j].edge;
-		cells[i].adjacent 	|= cells[i].adjacent;
+		cells[i].adjacent 	|= cells[j].adjacent;
 
 		return false;
 	}
@@ -630,12 +632,9 @@ public:
 		Cell * g = & cells[find_group(pos.xy)];
 		uint8_t winmask = (turn == 1 ? 3 : 0xC);
 		if((g->edge & winmask) == winmask) {
-			if (turn == 2) {
+			if((g->adjacent & winmask) == winmask)
 				outcome = turn;
-			}
-			else if ((g->adjacent & winmask) == winmask) {
-				outcome = turn;
-			}			
+				
 		}
 		return true;
 	}
@@ -666,14 +665,10 @@ public:
 		
 			int winmask = (turn == 1 ? 3 : 0xC);
 			if((testcell.edge & winmask) == winmask) {
-				if (turn == 2) {
-					return turn;
-				}
-				else if ((testcell.adjacent & winmask) == winmask) {
-					return turn;
-				}
-				
-			}
+				if((testcell.adjacent & winmask) == winmask)
+					return turn;				
+			}				
+			
 		}
 
 		return -3;

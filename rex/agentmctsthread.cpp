@@ -129,20 +129,35 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 
 	Node * child = temp.begin(),
 	     * end   = temp.end(),
-	     * loss  = NULL;
+	     * loss  = NULL,
+	     * mustPlay = NULL;
+	     
 	Board::MoveIterator move = board.moveit(agent->prunesymmetry);
 	int nummoves = 0;
 	for(; !move.done() && child != end; ++move, ++child){
 		*child = Node(*move);
 		
-
-		
-		
-		
+		/*printf("*****Move X: %d Y: %d********\n", child->move.x, child->move.y);
+		board.to_s(true);
+		board.print(true);		
+		*/
 		if(agent->minimax){
 			//Test if the opponent wins by us playing this move
 			child->outcome = board.test_win(*move);
-						
+			//printf("Child->Outcome = %d\n", child->outcome);
+			
+			
+			if (child->outcome == -3) {
+				mustPlay = child;
+			}
+				
+			//If the opponent would make a connection playing this move	
+			//Does nothing yet	
+			if (board.test_win(*move, 3 - board.toplay()) > 0) {
+				numberOfOpponentToxicCells++;
+			}
+			
+			
 			
 			
 			//If playing this move connects your pieces. (i.e. opponent wins)
@@ -152,15 +167,27 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 			if (child->outcome == 3 - board.toplay()) {	
 				numberOfSelfToxicCells++;	
 				loss = child;
-			}
-		
+				//If number of empty cells before move is odd or
+				//the number of toxic cells after we move is at least 2
+				//then this is a proven loss
+				if (board.movesremain() % 2 == 1 || numberOfSelfToxicCells >= 3) {
+					//printf("Board.MovesRemain() = %d\n", board.movesremain());
+					node->outcome = 3 - board.toplay();
+					node->proofdepth = board.movesremain();
+					node->bestmove = loss->move;
+					node->children.unlock();
+					temp.dealloc(agent->ctmem);
+					return true;
+				}
+			}		
 
-			//If there remains two spots left on the board and 
+			//If there remains two spots left on the board  or
+			//if the board only has opponent toxic cells and 
 			//if playing this move leaves the outcome 'unknown' 
 			//then that logically means the last spot will cause the opponent
 			//to connect his pieces and lose
 			//Therefore set this move as the bestmove
-			if((board.movesremain() == 2 && child->outcome == -3)){ //proven win from here, don't need children
+			if((board.movesremain() == 2 || (numberOfOpponentToxicCells == board.movesremain())) && child->outcome == -3){ //proven win from here, don't need children
 				node->outcome = board.toplay();
 				node->proofdepth = 1;
 				node->bestmove = *move;
@@ -179,9 +206,17 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 	else //both end conditions should happen in parallel
 		assert(move.done() && child == end);
 
+	//If there is only one available cell to play, then we must play it
+	if (numberOfSelfToxicCells == board.movesremain() - 1 && agent->minimax) {
+		Node macro = *mustPlay;
+		temp.dealloc(agent->ctmem);
+		temp.alloc(1, agent->ctmem);
+		macro.exp.addwins(agent->visitexpand);
+		*(temp.begin()) = macro;
+	}
 	//If the only available moves are toxic cells
 	//then we have lost
-	if(numberOfSelfToxicCells == board.movesremain()){
+	else if(numberOfSelfToxicCells == board.movesremain() && agent->minimax){
 		node->outcome = 3 - board.toplay();
 		node->proofdepth = board.movesremain();
 		node->bestmove = loss->move;
@@ -189,14 +224,13 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 		temp.dealloc(agent->ctmem);
 		return true;
 	}
-
 	if(agent->dynwiden > 0) //sort in decreasing order by knowledge
 		sort(temp.begin(), temp.end(), sort_node_know);
 
 	PLUS(agent->nodes, temp.num());
 	node->children.swap(temp);
 	assert(temp.unlock());
-
+	
 	return true;
 }
 

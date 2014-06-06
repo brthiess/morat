@@ -36,7 +36,7 @@ protected:
 		for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
 			++nodes;
 			int won = board.test_win(*move, turn);
-
+			
 			if(won == turn)
 				return won;
 			if(won == 0)

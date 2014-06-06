@@ -143,7 +143,7 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 
 			//Test if the opponent wins by playing this move
 			//If it does, then add it to the losses
-			//If losses >= then we know we have lost for sure
+			//If losses >= 2 then we know we have lost for sure
 			if(agent->minimax >= 2 && board.test_win(*move, 3 - board.toplay()) > 0){
 				losses++;
 				loss = child;
@@ -165,6 +165,8 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 			add_knowledge(board, node, child);
 		nummoves++;
 	}
+	
+
 
 	if(agent->prunesymmetry)
 		temp.shrink(nummoves); //shrink the node to ignore the extra moves
