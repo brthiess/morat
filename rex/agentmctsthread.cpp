@@ -117,6 +117,7 @@ bool sort_node_know(const AgentMCTS::Node & a, const AgentMCTS::Node & b){
 bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 	if(!node->children.lock())
 		return false;
+
 	if(agent->dists){
 		dists.run(&board, (agent->dists > 0), board.toplay());
 	}
@@ -124,6 +125,8 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 	CompactTree<Node>::Children temp;
 	temp.alloc(board.movesremain(), agent->ctmem);
 
+	int losses = 0;
+	
 	int numberOfSelfToxicCells = 0;
 	int numberOfOpponentToxicCells = 0;
 
@@ -136,103 +139,142 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 	int nummoves = 0;
 	for(; !move.done() && child != end; ++move, ++child){
 		*child = Node(*move);
-		
-		/*printf("*****Move X: %d Y: %d********\n", child->move.x, child->move.y);
-		board.to_s(true);
-		board.print(true);		
-		*/
+
+
 		if(agent->minimax){
-			//Test if the opponent wins by us playing this move
+			
+			//Test if we win with this move			
 			child->outcome = board.test_win(*move);
-			//printf("Child->Outcome = %d\n", child->outcome);
-			
-			//Bank this move in memory so that we have a move to play if
-			//we have proven that we lost
-			if (child->outcome == -3) {
-				mustPlay = child;
+
+			if (board.my_move_can_win) {
+				//Test if the opponent wins by playing this move
+				//If it does, then add it to the losses
+				//If losses >= 2 then we know we have lost for sure
+				if(agent->minimax >= 2 && board.test_win(*move, 3 - board.toplay()) > 0){
+					losses++;
+					loss = child;
+				}
+
+				//Test if we win by playing this move
+				//If so, then play it.
+				if(child->outcome == board.toplay()){ //proven win from here, don't need children
+					node->outcome = child->outcome;
+					node->proofdepth = 1;
+					node->bestmove = *move;
+					node->children.unlock();
+					temp.dealloc(agent->ctmem);
+					return true;
+				}
 			}
+			else if (board.my_move_can_win == false) {
+				//Bank this move in memory so that we have a move to play if
+				//we have proven that we lost
+				if (child->outcome == -3) {
+					mustPlay = child;
+				}		
 				
-			//If the opponent would make a connection playing this move	
-			//Does nothing yet	
-			if (board.test_win(*move, 3 - board.toplay()) > 0) {
-				numberOfOpponentToxicCells++;
-			}		
+					//If the opponent would make a connection playing this move
+				if (board.test_win(*move, 3 - board.toplay()) > 0) {
+					numberOfOpponentToxicCells++;
+				}	
 			
-			
-			//If playing this move connects your pieces. (i.e. opponent wins)
-			//Then mark this cell as a toxic cell
-			//If the number of toxic cells equals the number of moves that remain
-			//Then we have lost
-			if (child->outcome == 3 - board.toplay()) {	
-				numberOfSelfToxicCells++;	
-				loss = child;
-				//If number of empty cells before move is odd or
-				//the number of toxic cells after we move is at least 2
-				//then this is a proven loss
-				if (board.movesremain() % 2 == 1 || numberOfSelfToxicCells >= 3) {
-					Node macro;
-					if (mustPlay != NULL) {
-						macro = *mustPlay;
+				//If playing this move connects your pieces. (i.e. opponent wins)
+				//Then mark this cell as a toxic cell
+				//If the number of toxic cells equals the number of moves that remain
+				//Then we have lost
+				if (child->outcome == 3 - board.toplay()) {	
+					numberOfSelfToxicCells++;	
+					loss = child;
+					//If number of empty cells before move is odd or
+					//the number of toxic cells after we move is at least 2
+					//then this is a proven loss
+					if (board.movesremain() % 2 == 1 || numberOfSelfToxicCells >= 3) {
+						Node macro;
+						if (mustPlay != NULL) {
+							macro = *mustPlay;
+						}
+						else {
+							macro = *child;
+						}
+						temp.dealloc(agent->ctmem);
+						temp.alloc(1, agent->ctmem);
+						macro.exp.addwins(agent->visitexpand);
+						*(temp.begin()) = macro;
 					}
-					else {
-						macro = *child;
-					}
+				}		
+
+				//If there remains two spots left on the board  or
+				//if the board only has opponent toxic cells and 
+				//if playing this move leaves the outcome 'unknown' 
+				//then that logically means the last spot will cause the opponent
+				//to connect his pieces and lose
+				//Therefore set this move as the bestmove
+				if((board.movesremain() == 2 || (numberOfOpponentToxicCells == board.movesremain())) && child->outcome == -3){ //proven win from here, don't need children
+					Node macro = *child;
 					temp.dealloc(agent->ctmem);
 					temp.alloc(1, agent->ctmem);
 					macro.exp.addwins(agent->visitexpand);
 					*(temp.begin()) = macro;
-				}
-			}		
-
-			//If there remains two spots left on the board  or
-			//if the board only has opponent toxic cells and 
-			//if playing this move leaves the outcome 'unknown' 
-			//then that logically means the last spot will cause the opponent
-			//to connect his pieces and lose
-			//Therefore set this move as the bestmove
-			if((board.movesremain() == 2 || (numberOfOpponentToxicCells == board.movesremain())) && child->outcome == -3){ //proven win from here, don't need children
-				Node macro = *child;
-				temp.dealloc(agent->ctmem);
-				temp.alloc(1, agent->ctmem);
-				macro.exp.addwins(agent->visitexpand);
-				*(temp.begin()) = macro;
+				}			
 			}
 		}
 
-		if(agent->knowledge)
-			add_knowledge(board, node, child);
-		nummoves++;
-	}
+			if(agent->knowledge)
+				add_knowledge(board, node, child);
+			nummoves++;
+		}
+	
+
+
 	if(agent->prunesymmetry)
 		temp.shrink(nummoves); //shrink the node to ignore the extra moves
 	else //both end conditions should happen in parallel
 		assert(move.done() && child == end);
+	if (board.my_move_can_win) {
+		//Make a macro move, add experience to the move so the current simulation continues past this move
+		if(losses == 1){
+			Node macro = *loss;
+			temp.dealloc(agent->ctmem);
+			temp.alloc(1, agent->ctmem);
+			macro.exp.addwins(agent->visitexpand);
+			*(temp.begin()) = macro;
+		}else if(losses >= 2){ //proven loss, but at least try to block one of them
+			node->outcome = 3 - board.toplay();
+			node->proofdepth = 2;
+			node->bestmove = loss->move;
+			node->children.unlock();
+			temp.dealloc(agent->ctmem);
+			return true;
+		}
+	}
+	else if (board.my_move_can_win == false) {		
+		//If there is only one available cell to play (minus the toxic cells)
+		//then we must play it
+		if (numberOfSelfToxicCells == board.movesremain() - 1 && agent->minimax) {
+			Node macro = *mustPlay;
+			temp.dealloc(agent->ctmem);
+			temp.alloc(1, agent->ctmem);
+			macro.exp.addwins(agent->visitexpand);
+			*(temp.begin()) = macro;
+		}
+		//If the only available moves are toxic cells
+		//then we have lost
+		else if(numberOfSelfToxicCells == board.movesremain() && agent->minimax){
+			Node macro = *loss;
+			temp.dealloc(agent->ctmem);
+			temp.alloc(1, agent->ctmem);
+			macro.exp.addwins(agent->visitexpand);
+			*(temp.begin()) = macro;
+		}
+	}
 
-	//If there is only one available cell to play (minus the toxic cells)
-	//then we must play it
-	if (numberOfSelfToxicCells == board.movesremain() - 1 && agent->minimax) {
-		Node macro = *mustPlay;
-		temp.dealloc(agent->ctmem);
-		temp.alloc(1, agent->ctmem);
-		macro.exp.addwins(agent->visitexpand);
-		*(temp.begin()) = macro;
-	}
-	//If the only available moves are toxic cells
-	//then we have lost
-	else if(numberOfSelfToxicCells == board.movesremain() && agent->minimax){
-		Node macro = *loss;
-		temp.dealloc(agent->ctmem);
-		temp.alloc(1, agent->ctmem);
-		macro.exp.addwins(agent->visitexpand);
-		*(temp.begin()) = macro;
-	}
 	if(agent->dynwiden > 0) //sort in decreasing order by knowledge
 		sort(temp.begin(), temp.end(), sort_node_know);
 
 	PLUS(agent->nodes, temp.num());
 	node->children.swap(temp);
 	assert(temp.unlock());
-	
+
 	return true;
 }
 
@@ -315,16 +357,16 @@ bool AgentMCTS::do_backup(Node * node, Node * backup, int toplay){
 				outcome = 6;
 				proofdepth = child->proofdepth+1;
 				break;
-			}else if(childoutcome == 3 - toplay){ //loss
+			}else if(childoutcome == 3-toplay){ //loss
 				outcome = 0;
 			}else if(childoutcome == 0){ //draw
 				if(nodeoutcome == toplay-3) //draw/loss
-					outcome = 2;
-				else
 					outcome = 4;
+				else
+					outcome = 2;
 			}else if(childoutcome == -toplay){ //win/draw
 				outcome = 5;
-			}else if(childoutcome == toplay - 3){ //draw/loss
+			}else if(childoutcome == toplay-3){ //draw/loss
 				outcome = 1;
 			}else{
 				logerr("childoutcome == " + to_str(childoutcome) + "\n");
@@ -493,6 +535,6 @@ Move AgentMCTS::AgentThread::rollout_choose_move(Board & board, const Move & pre
 		if(move != M_UNKNOWN)
 			return move;
 	}
-	
+
 	return random_policy.choose_move(board, prev);
 }

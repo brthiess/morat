@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <string>
 #include <vector>
+#include <stack>
 
 #include "../lib/hashset.h"
 #include "../lib/string.h"
@@ -55,6 +56,8 @@ public:
 
 	static const int pattern_cells = 18;
 	typedef uint64_t Pattern;
+	
+	static const bool my_move_can_win = false;
 
 	struct Cell {
 		uint16_t piece;   //who controls this cell, 0 for none, 1,2 for players
@@ -580,6 +583,9 @@ public:
 	bool move(const Move & pos, bool checkwin = true, bool permanent = true){
 		return move(MoveValid(pos, xy(pos)), checkwin, permanent);
 	}
+	
+	
+	
 	bool move(const MoveValid & pos, bool checkwin = true, bool permanent = true){
 		assert(outcome < 0);
 
@@ -598,6 +604,9 @@ public:
 			p <<= 2;
 		}
 
+
+		
+		
 		// join the groups for win detection
 		for(const MoveValid * i = nb_begin(pos.xy), *e = nb_end(i); i < e; i++){
 			if(i->onboard() && turn == get(i->xy)){
@@ -606,8 +615,74 @@ public:
 					 //it is already connected and forms a corner, which we can ignore
 			}
 		}
+		/*
+		const MoveValid * i = nb_begin(posxy);
+			for(const MoveValid * b = nb_end(i), *e = nb_end_small_hood(i); b < e; b++){
+				if(b->onboard() && turn == get(b->xy)){
+					join_groups(pos.xy, b->xy);
+					
+				}
+			}
+			*/
 
 		// did I win?
+		Cell * g = & cells[find_group(pos.xy)];
+		uint8_t winmask = (turn == 1 ? 3 : 0xC);
+		if((g->edge & winmask) == winmask){
+			outcome = 3 - turn;
+		}
+		return true;
+	}
+	/**
+	 * Same as move, but joins virtual connections too
+	 */
+	bool move_vc(const MoveValid & pos, bool checkwin = true, bool permanent = true){
+		assert(outcome < 0);
+
+		if(!valid_move(pos))
+			return false;
+
+		char turn = toplay();
+		set(pos, permanent);
+
+		// update the nearby patterns
+		Pattern p = turn;
+		for(const MoveValid * i = nb_begin(pos.xy), *e = nb_end_big_hood(i); i < e; i++){
+			if(i->onboard()){
+				cells[i->xy].pattern |= p;
+			}
+			p <<= 2;
+		}
+			
+			
+			int neighbour_counter = 0;
+			int vc_neighbour = 5;
+			for(const MoveValid * i = nb_begin(pos.xy), *e = nb_end_small_hood(i); i < e; i++){
+				//Checking to make sure this neighbour is onboard and
+				//it is our colour
+				if(i->onboard() && turn == get(i->xy)) {
+					//Checking immediate neighbours
+					if (neighbour_counter <= 5){
+						join_groups(pos.xy, i->xy);
+						i++; //skip the next one
+						neighbour_counter += 1;
+					}
+					//checking VC neighbours
+					else if (neighbour_counter >= 6 && neighbour_counter <= 11) {
+						if (neighbour_counter == 11) {
+							vc_neighbour = 11;
+						}
+						//Check if the two spots in between VC neighbour are empty 
+						//if so, then add VC neighbour to group
+						if(get((i - 6)->xy) == 0 && get((i - vc_neighbour)->xy) == 0) {
+							join_groups(pos.xy, i->xy);
+						}					
+					}
+				}
+				neighbour_counter += 1;
+			}
+
+		// did I lose?
 		Cell * g = & cells[find_group(pos.xy)];
 		uint8_t winmask = (turn == 1 ? 3 : 0xC);
 		if((g->edge & winmask) == winmask){
@@ -619,7 +694,207 @@ public:
 	bool test_local(const Move & pos, char turn) const {
 		return (local(pos, turn) == 3);
 	}
+	/**
+	 * Returns true if the board is virtually connected 
+	 * for the turn specified.  Otherwise false
+	 */
+	bool virtually_connected(char turn = 0) const {
+		uint8_t edge = 0;
+		
+		if(turn == 0)
+			turn = toplay();
+		vector<bool> already_explored;		
+		already_explored.resize(vecsize());
+		std::fill(already_explored.begin(), already_explored.end(), false);
+			
+		stack<int> previous;
+		stack<int> neighbour_counters;
+		int vc_neighbour = 5;
+		for (int xy = 0; xy < size*size; xy++) {
+			//printf("Cells[%d].piece (%d) == %d\n", xy, cells[xy].piece,  turn);
+			if (cells[xy].piece == turn && !already_explored[xy]) {
+				previous.push(xy);
+				neighbour_counters.push(0);
+				edge |= cells[xy].edge;
+				already_explored[xy] = true;
+				const MoveValid * m = nb_begin(xy), *e = nb_end_small_hood(m); 
+				
+				while(m < e){
+					//Checking for neighbours of our colour that have not been explored
+					//printf("m->xy = %d\tm->onboard = %d\tturn= %d\tNeighbour Counter = %d\n", m->xy, m->onboard(), get(m->xy), neighbour_counters.top());
+					
+					if(m->onboard()&& !already_explored[m->xy]) {
+						//Found an immediate neighbour.  Explore that one
+						if (turn == get(m->xy) ) {
+							if (neighbour_counters.top() <= 5) {
+								edge |= cells[m->xy].edge;							
+								already_explored[m->xy] = true;
+								//printf("Exploring %d as immediate neighbour\n", m->xy);
+								//printf("Edge: %d\n", edge);
+								previous.push(m->xy);
+								neighbour_counters.push(0);
+								m = nb_begin(m->xy);
+								e = nb_end_small_hood(m);							
+								
+								continue;
+							}
+							else if (neighbour_counters.top() >= 6 && neighbour_counters.top() <= 11) {
+								if (neighbour_counters.top() == 11) {
+									vc_neighbour = 11;
+								}
+								//Found a VC neighbour.  Explore that one
+								if(get((m - 6)->xy) == 0 && get((m - vc_neighbour)->xy) == 0) {
+									neighbour_counters.push(0);
+									edge |= cells[m->xy].edge;
+									already_explored[m->xy] = true;
+									//printf("Exploring %d as VC Neighbour\n", m->xy);
+									previous.push(m->xy);
+									m = nb_begin(m->xy);
+									e = nb_end_small_hood(m);							
+									continue;
+								}	
+							}
+						}
+						//If the neighbour is empty
+						//Check if it is on an edge
+						else if (0 == get(m->xy) && !already_explored[m->xy] ) {
+							
+						}
+					}
+					//If we have reached the end without finding a neighbour 
+					//that has not been visited, go back one and try again
+						if ((m+1) >= e) {
+							//printf("Reached the end without finding a neighbour\n");
+						previous.pop();
+						neighbour_counters.pop();
+						if (!previous.empty()) {
+							//printf("Going Back.. Exploring %d now\n", previous.top());
+							//printf("Edge: %d\n", edge);
+							
+							m = nb_begin(previous.top());
+							e = nb_end_small_hood(m);	
+												
+							continue;
+						}
+						//If we have reached the first cell again with 
+						//no more cells to explore
+						else {
+							//printf("Reached Top Cell.  Nothing More to Explore\n");
+							clear(neighbour_counters);
+							int winmask = (turn == 1 ? 3 : 0xC);
+							//If the edge is connected to both edges
+							//then it is Virtually Connected
+							if((edge & winmask) == winmask)
+								return true;
+							edge = 0;
+							break;
+						}
+					}
+					neighbour_counters.top() += 1;
+					m += 1;
+				}
+			}
+		}
+		
+		
+			
+		//1. 	Navigate board from top left to bottom right.  
+		//2. 	Upon finding a piece:
+		//		1. Check: Is it connected to an appropriate edge?  If so, store that information
+		//		2. Look for immediate neighbours that have not been explored, if you find one, repeat step 1 for that neighbour
+		//		3. Look for VC neighbours, if you find one, repeat step 1 for that neighbour
+		//		4. If none found, back up one piece
+		//		5. If backed up all the way to original piece, check if both edges have been connected
+		//		If so, then board is virtually connected
+			return false;
+	}
+	
+	/**
+	 * Clears the given stack
+	 */
+	void clear( stack<int> &q ) const {
+		stack<int> empty;
+		swap( q, empty );
+	}
+	
 
+
+	/**
+	 * Returns true if the specified move creates a virtual connection
+	 * that would lose the game for the specified player
+	 */	
+	bool creates_miai(const Move & pos, char turn = 0) const {
+		if(turn == 0)
+			turn = toplay();
+
+		if(test_local(pos, turn)){
+			int posxy = xy(pos);
+			//Find group that the specified move belongs to
+			Cell testcell = cells[find_group(posxy)];
+			int numgroups = 0;
+			//1.	Iterate over all immediate neighbours (All neighbours as shown in diagram at top)
+			//2.	Check if the neighbour is onboard and the cell is occupied by the player
+			//		making a move
+			//3.	If so set g to equal that neighbour's group 
+			//4.	Sets the edges and size correctly
+			//5.	Iterate over all virtual connection neighbours (neighbours 6,7,8,9,10,11 as shown at top of diagram)
+			//6.	Check if the VC neighbour is onboard and the cell is occupied 
+			//		by the player making a move
+			//7.	Then, check if the two neighbours in between the VC are occupied
+			//8.	If they are empty, set g to equal that VC neighbour's group 
+			int neighbour_counter = 0;
+			int vc_neighbour = 5;
+			const Cell * g;
+			bool vc_found = false;
+			for(const MoveValid * i = nb_begin(posxy), *e = nb_end_small_hood(i); i < e; i++){
+				//Checking to make sure this neighbour is onboard and
+				//it is our colour
+				if(i->onboard() && turn == get(i->xy)) {
+					//Checking immediate neighbours
+					if (neighbour_counter <= 5){
+						g = & cells[find_group(i->xy)];
+						testcell.edge   |= g->edge;
+						testcell.size   += g->size;
+						i++; //skip the next one
+						neighbour_counter += 1;
+						numgroups++;
+					}
+					//checking VC neighbours
+					else if (neighbour_counter >= 6 && neighbour_counter <= 11) {
+						//Check if the two spots in between VC neighbour are empty 
+						//if so, then add VC neighbour to group
+						if (neighbour_counter == 11) {
+							vc_neighbour = 11;
+						}
+						if(get((i - 6)->xy) == 0 && get((i - vc_neighbour)->xy) % 6 == 0) {
+							//printf("Found VC at neighbour: %d\n", neighbour_counter);
+							vc_found = true;
+							g = & cells[find_group(i->xy)];
+							testcell.edge   |= g->edge;
+							testcell.size   += g->size;						
+							numgroups++;
+						}					
+					}
+				}
+				neighbour_counter += 1;
+			}
+			
+			int winmask = (turn == 1 ? 3 : 0xC);
+			//If the testcell is virtually connected to both edges
+			//then return true 
+			if((testcell.edge & winmask) == winmask  && vc_found) {
+				//printf("Found VC to lose\n\n\n\n\n");
+				return true;				
+			}
+			else {
+				//printf("Winmask: %d   \t\t testcell.edge: %d\n\n\n\n", winmask, testcell.edge);
+				return false;
+			}
+		}
+		//printf("****Didn't pass the test_local test****\n\n\n");
+		return false;
+	}
+	
 	//test if making this move would win, but don't actually make the move
 	int test_win(const Move & pos, char turn = 0) const {
 		if(turn == 0)
@@ -627,8 +902,15 @@ public:
 
 		if(test_local(pos, turn)){
 			int posxy = xy(pos);
+			//Find group that the specified move belongs to
 			Cell testcell = cells[find_group(posxy)];
 			int numgroups = 0;
+			//1.	Iterate over all immediate neighbours (All neighbours as shown in diagram at top)
+			//2.	Check if the neighbour is onboard and the cell is occupied by the player
+			//making a move (?)
+			//3.	If so set g to equal that neighbour's group 
+			//4.	Sets the edges and size correctly
+			
 			for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
 				if(i->onboard() && turn == get(i->xy)){
 					const Cell * g = & cells[find_group(i->xy)];
@@ -638,8 +920,10 @@ public:
 					numgroups++;
 				}
 			}
-
+			
 			int winmask = (turn == 1 ? 3 : 0xC);
+			//If the testcell is connected to both edges
+			//then call it a loss
 			if((testcell.edge & winmask) == winmask)
 				return 3 - turn;
 		}
@@ -647,3 +931,5 @@ public:
 		return -3;
 	}
 };
+
+

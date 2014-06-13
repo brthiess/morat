@@ -70,6 +70,7 @@ struct MoveScore : public Move {
 struct MoveValid : public Move {
 	int16_t xy;
 
+	
 	MoveValid() : Move(), xy(-1) { }
 	MoveValid(int x, int y, int XY) : Move(x,y), xy(XY) { }
 	MoveValid(const Move & m, int XY) : Move(m), xy(XY) { }

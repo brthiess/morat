@@ -52,6 +52,8 @@ public:
 	static const int min_size = 2;
 	static const int max_size = 16;
 	static const int max_vecsize = max_size * max_size;
+	
+	static const bool my_move_can_win = true;
 
 	static const int pattern_cells = 18;
 	typedef uint64_t Pattern;
