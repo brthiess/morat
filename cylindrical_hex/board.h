@@ -67,12 +67,11 @@ public:
 mutable uint16_t parent;  //parent for this group of cells. 8 bits limits board size to 16 until it's no longer stored as a square
 		uint8_t  edge;    //which edges are this group connected to
 		uint8_t  perm;    //is this a permanent piece or a randomly placed piece?
-		vector<int>  adjacent;//which y-level this cell is connected to
 		Pattern  pattern; //the pattern of pieces for neighbours, but from their perspective. Rotate 180 for my perpective
 
-		Cell() : piece(73), size(0), parent(0), edge(0), perm(0), adjacent(0), pattern(0) { }
-		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int e, vector<int> x, Pattern t) :
-			piece(p), size(s), parent(a), edge(e), perm(0), adjacent(x), pattern(t) { }
+		Cell() : piece(73), size(0), parent(0), edge(0), perm(0), pattern(0) { }
+		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int e, Pattern t) :
+			piece(p), size(s), parent(a), edge(e), perm(0), pattern(t) { }
 
 		string to_s(int i) const {
 			return "Cell " + to_str((int)i) +": "
@@ -184,7 +183,7 @@ public:
 						p |= j;
 					j <<= 2;
 				}
-				cells[posxy] = Cell(0, posxy, 1, edges(x, y), adjacencies(x, y), pattern_reverse(p));
+				cells[posxy] = Cell(0, posxy, 1, edges(x, y), pattern_reverse(p));
 			}
 		}
 	}
@@ -265,24 +264,10 @@ public:
 	const MoveValid * nb_end_big_hood(const MoveValid * m) const { return m + 18; }
 
 	int edges(int x, int y) const {
-		return (x == 0      	? 1 : 0) |
-		       (x == size_x_m1 	? 2 : 0) |
-		       (y == 0      	? 4 : 0) |
+		return (y == 0      	? 4 : 0) |
 		       (y == size_y_m1 	? 8 : 0);
 	}
 	
-	vector<int> adjacencies(int x, int y) const {
-		vector<int> adjacencies(y_size*2, 0);
-
-			if (x == 0) {
-				adjacencies[y] = true;
-			}
-			else if (x == size_x_m1) {
-				adjacencies[y + y_size] = true;
-			}
-
-		return adjacencies;
-	}
 
 	MoveValid * get_neighbour_list(){
 		
@@ -296,6 +281,13 @@ public:
 
 					for(int i = 0; i < 18; i++){
 						Move loc = pos + neighbours[i];
+						//Make the neighbour loop around
+						if (loc.x >=x_size) {
+							loc.x = loc.x - x_size;
+						}
+						else if (loc.x < 0) {
+							loc.x = loc.x + x_size;
+						}
 						*a = MoveValid(loc, (onboard(loc) ? xy(loc) : -1) );
 						++a;
 					}
@@ -452,12 +444,6 @@ public:
 		cells[j].parent = i;
 		cells[i].size   	+= cells[j].size;
 		cells[i].edge   	|= cells[j].edge;
-		for(uint k = 0; k < cells[i].adjacent.size(); k++) {
-			//If either of them are true, then set it true
-			if (cells[i].adjacent[k]  || cells[j].adjacent[k]) {
-				cells[i].adjacent[k] = true;
-			}
-		}
 
 		return false;
 	}
@@ -642,25 +628,11 @@ public:
 		// did I win?
 		Cell * g = & cells[find_group(pos.xy)];
 		uint8_t winmask = (turn == 1 ? 3 : 0xC);
-		if((g->edge & winmask) == winmask) {
-			//If it is up-down's turn
-			if (turn == 2) {
-				outcome = turn;
-			}
-			//If it is around's turn
-			//Check to see if player made it around
-			else {					
-				for(uint i = 0; i < g->adjacent.size()/2; i++) {
-					if (g->adjacent[i] == true && (g->adjacent[i + y_size] || g->adjacent[i + y_size+1])) {
-						outcome = turn;		
-					}
-				}
-			}
+		if((g->edge & winmask) == winmask){
+			outcome = turn;
 		}
-		//If around has not connected
-		//and the board is full, then up down logically has connected
-		if (won() < 0 && movesremain() <= 0) {
-			outcome = 2;
+		if (movesremain() <= 0 && won() <= 0) {
+			outcome = 1;
 		}
 		return true;
 	}
@@ -670,7 +642,7 @@ public:
 	}
 
 	//test if making this move would win, but don't actually make the move
-	int test_win(const Move & pos, char turn = 0) const {
+		int test_win(const Move & pos, char turn = 0) const {
 		if(turn == 0)
 			turn = toplay();
 
@@ -681,37 +653,19 @@ public:
 			for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
 				if(i->onboard() && turn == get(i->xy)){
 					const Cell * g = & cells[find_group(i->xy)];
-					testcell.edge   	|= g->edge;
-					for (uint i = 0; i < testcell.adjacent.size(); i++) {
-						if (testcell.adjacent[i] ||  g->adjacent[i]) {
-							testcell.adjacent[i] = true;
-						}
-					}
-					testcell.size  		+= g->size;
+					testcell.edge   |= g->edge;
+					testcell.size   += g->size;
 					i++; //skip the next one
 					numgroups++;
 				}
 			}
-		
+
 			int winmask = (turn == 1 ? 3 : 0xC);
-			if((testcell.edge & winmask) == winmask) {
-				if (turn == 2) {
-					return turn;	
-				}
-				//Check if around has connected
-				else {
-					for(uint i = 0; i < testcell.adjacent.size()/2; i++) {
-						if (testcell.adjacent[i] == true && (testcell.adjacent[i + y_size] || testcell.adjacent[i + y_size+1])) {
-							return turn;	
-						}
-					}
-				}
-			}
+			if((testcell.edge & winmask) == winmask)
+				return turn;
 		}
-		//If around has not connected and the board is full
-			//then up-down must have connected
-		if( won() < 0 && movesremain() <= 1) {
-			return 2;
+		if(movesremain() <= 1 && won() <= 0) {
+			return 1;
 		}
 		return -3;
 	}
