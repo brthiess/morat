@@ -122,6 +122,7 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 		dists.run(&board, (agent->dists > 0), board.toplay());
 	}
 
+
 	CompactTree<Node>::Children temp;
 	temp.alloc(board.movesremain(), agent->ctmem);
 
@@ -135,11 +136,17 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 	     * loss  = NULL,
 	     * mustPlay = NULL;
 	     
+
+	     
 	Board::MoveIterator move = board.moveit(agent->prunesymmetry);
 	int nummoves = 0;
 	for(; !move.done() && child != end; ++move, ++child){
 		*child = Node(*move);
 
+
+		/*printf("\n\nMove x: %d y: %d\n", child->move.x, child->move.y);
+		board.to_s(true);
+		board.print(true);*/
 
 		if(agent->minimax){
 			
@@ -175,7 +182,17 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 				
 					//If the opponent would make a connection playing this move
 				if (board.test_win(*move, 3 - board.toplay()) > 0) {
+					//printf("Opponent Connects Playing Here!\n");
 					numberOfOpponentToxicCells++;
+					//Proven Loss for opponent
+					if (numberOfOpponentToxicCells >= 2 || (numberOfOpponentToxicCells >= 1 && board.movesremain() % 2 == 0)){
+						node->outcome = board.toplay();
+						node->proofdepth = 2;
+						node->bestmove = child->move;
+						node->children.unlock();
+						temp.dealloc(agent->ctmem);
+						return true;
+					}
 				}	
 			
 				//If playing this move connects your pieces. (i.e. opponent wins)
@@ -185,10 +202,11 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 				if (child->outcome == 3 - board.toplay()) {	
 					numberOfSelfToxicCells++;	
 					loss = child;
+					//printf("We Connect Playing Here!\n");
 					//If number of empty cells before move is odd or
 					//the number of toxic cells after we move is at least 2
 					//then this is a proven loss
-					if (board.movesremain() % 2 == 1 || numberOfSelfToxicCells >= 3) {
+					if(numberOfSelfToxicCells >= 2 || (board.movesremain() % 2 == 1 && numberOfSelfToxicCells >= 1)) {
 						node->outcome = 3 - board.toplay();
 						node->proofdepth = 2;
 						node->bestmove = loss->move;

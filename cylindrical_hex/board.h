@@ -52,8 +52,8 @@ public:
 
 	static const int default_x_size = 8;
 	static const int default_y_size = 8;
-	static const int min_x_size = 3;
-	static const int min_y_size = 3;
+	static const int min_x_size = 2;
+	static const int min_y_size = 2;
 	static const int max_x_size = 16;
 	static const int max_y_size = 16;
 	static const int max_vecsize = max_x_size * max_y_size;

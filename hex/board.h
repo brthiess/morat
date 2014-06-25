@@ -163,6 +163,8 @@ public:
 		outcome = -3;
 		neighbourlist = get_neighbour_list();
 		num_cells = vecsize();
+		
+		
 
 		cells.resize(vecsize());
 
@@ -486,14 +488,13 @@ public:
 		//mirror is simply flip x,y
 		int x = pos.x,
 		    y = pos.y,
-		    z = sizem1 - x - y;
+		    z1 = sizem1 - x,
+		    z2 = sizem1 - y;
 
 		hash.update(0,  3*xy(x, y) + turn);
-		hash.update(1,  3*xy(z, y) + turn);
-		hash.update(2,  3*xy(z, x) + turn);
-		hash.update(3,  3*xy(x, z) + turn);
-		hash.update(4,  3*xy(y, z) + turn);
-		hash.update(5,  3*xy(y, x) + turn);
+		hash.update(1,  3*xy(y, x) + turn);
+		hash.update(2,  3*xy(z1, z2) + turn);
+		hash.update(3,  3*xy(z2, z1) + turn);
 	}
 
 	hash_t test_hash(const Move & pos) const {
@@ -506,14 +507,13 @@ public:
 
 		int x = pos.x,
 		    y = pos.y,
-		    z = sizem1 - x - y;
+		    z1 = sizem1 - x,
+		    z2 = sizem1 - y;
 
 		hash_t m = hash.test(0,  3*xy(x, y) + turn);
-		m = min(m, hash.test(1,  3*xy(z, y) + turn));
-		m = min(m, hash.test(2,  3*xy(z, x) + turn));
-		m = min(m, hash.test(3,  3*xy(x, z) + turn));
-		m = min(m, hash.test(4,  3*xy(y, z) + turn));
-		m = min(m, hash.test(5,  3*xy(y, x) + turn));
+		m = min(m, hash.test(1,  3*xy(y, x) + turn));
+		m = min(m, hash.test(2,  3*xy(z1, z2) + turn));
+		m = min(m, hash.test(3,  3*xy(z2, z1) + turn));
 		return m;
 	}
 
@@ -640,12 +640,10 @@ public:
 					numgroups++;
 				}
 			}
-
 			int winmask = (turn == 1 ? 3 : 0xC);
 			if((testcell.edge & winmask) == winmask)
 				return turn;
 		}
-
 		return -3;
 	}
 };

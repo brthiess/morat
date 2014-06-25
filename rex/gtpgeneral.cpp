@@ -39,7 +39,7 @@ GTPResponse GTP::gtp_boardsize(vecstr args){
 	if(size < Board::min_size || size > Board::max_size)
 		return GTPResponse(false, "Size " + to_str(size) + " is out of range.");
 
-	hist = History(size);
+	hist = History(Board(size));
 	set_board();
 	time_control.new_game();
 

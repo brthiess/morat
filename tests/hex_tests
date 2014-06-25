@@ -1,0 +1,20 @@
+test
+1
+expected_outcome
+1
+commands
+size 3
+genmove -t 20
+endtest
+
+test
+2
+expected_outcome
+1
+commands
+size 2
+genmove -t 20
+endtest
+
+quit
+

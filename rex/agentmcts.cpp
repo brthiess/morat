@@ -114,7 +114,7 @@ AgentMCTS::AgentMCTS() : pool(this) {
 	keeptree    = true;
 	minimax     = 2;
 	visitexpand = 1;
-	prunesymmetry = false;
+	prunesymmetry = true;
 	gcsolved    = 100000;
 
 	localreply  = 5;

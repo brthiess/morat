@@ -89,7 +89,6 @@ bool AgentPNS::AgentThread::pns(const Board & board, Node * node, int depth, uin
 			if(agent->ab){
 				Board next = board;
 				next.move(*move);
-
 				pd = 0;
 				outcome = (agent->ab == 1 ? solve1ply(next, pd) : solve2ply(next, pd));
 			}else{

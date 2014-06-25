@@ -49,20 +49,38 @@ protected:
 		int losses = 0;
 		int outcome = -3;
 		int turn = board.toplay(), opponent = 3 - turn;
+		if (board.won() > 0) {
+			//printf("Game is already over.  Don't search here!");
+			return board.won();
+		}
 		for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
 			++nodes;
 			int won = board.test_win(*move, turn);
+			
+			/*printf("\n\nMove x: %d y: %d\n", move->x, move->y);
+			board.to_s(true);
+			board.print(true);*/
 
-			if(won == turn)
+			if(won == turn) {
+				//printf("Our Win\n");
 				return won;
-			if(won == 0)
+			}
+			if(won == 0) {
+				//printf("Outcome is 0?\n");
 				outcome = 0;
+			}
 
-			if(board.test_win(*move, opponent) > 0)
+			if(board.test_win(*move, opponent) > 0) {
+				//printf("Opponent Wins playing here\n");
 				losses++;
+			}
+			//printf("Outcome: %d\n", outcome);
 		}
-		if(losses >= 2)
+		if(losses >= 2) {
+			//printf("More than 2 losses");
 			return opponent;
+		}
+		//printf("Return Outcome %d\n", outcome);
 		return outcome;
 	}
 

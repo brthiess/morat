@@ -1,0 +1,370 @@
+test
+1
+expected_outcome
+0
+commands
+size 3
+genmove -t 20
+endtest
+
+test
+2
+expected_outcome
+1
+commands
+size 2
+genmove
+endtest
+
+test
+3
+expected_outcome
+1
+commands
+size 2
+white a2
+genmove
+endtest
+
+test
+4
+expected_outcome
+1
+commands
+size 2
+white a2
+black a1
+genmove
+endtest
+
+test
+5
+expected_outcome
+1
+commands
+size 3
+white b2
+genmove
+endtest
+
+test
+6
+expected_outcome
+0
+commands
+size 3
+genmove
+endtest
+
+test
+7
+expected_outcome
+1
+commands
+size 2
+white a1
+black b2
+genmove
+endtest
+
+test
+8_4x4_Obtuse_corner
+expected_outcome
+0
+commands
+size 4
+white d1
+genmove -t 20
+endtest
+
+test
+9_4x4_acute_corner
+expected_outcome
+1
+commands
+size 4
+white a1
+black d4
+genmove -t 20
+endtest
+
+test
+10_4x4_middle_acute
+expected_outcome
+1
+commands
+size 4
+white b2
+black d4
+genmove -t 20
+endtest
+
+test
+11_4x4_middle_obtuse
+expected_outcome
+0
+commands
+size 4
+white c2
+black d4
+genmove -t 5
+endtest
+
+test
+12_4x4_top_middle
+expected_outcome
+0
+commands
+size 4
+white a2
+genmove -t 20
+endtest
+
+test
+13_4x4_top_middle
+expected_outcome
+0
+commands
+size 4
+white a3
+genmove -t 20
+endtest
+
+test
+14
+expected_outcome
+0
+commands
+size 4
+white a1
+black d4
+white b1
+black d3
+white c1
+black d2
+white d1
+genmove -t 5
+endtest
+
+test
+15
+expected_outcome
+1
+commands
+size 3
+white c1
+genmove -t 5
+endtest
+
+test
+16_3x3
+expected_outcome
+0
+commands
+size 3
+white a2
+black b2
+genmove -t 20
+endtest
+
+test
+17_3x3
+expected_outcome
+0
+commands
+size 3
+white a3
+black b2
+genmove -t 20
+endtest
+
+test
+18_3x3
+expected_outcome
+1
+commands
+size 3
+white a1
+black b2
+genmove -t 5
+endtest
+
+test
+19_3x3
+expected_outcome
+1
+commands
+size 3
+white b1
+black b2
+genmove -t 5
+endtest
+
+test
+20_4x4
+expected_outcome
+1
+commands
+size 4
+white a1
+black d4
+white b1
+black d3
+white c1
+black d2
+white d1
+black c4
+white a2
+black c3
+white b2
+black c2
+genmove
+endtest
+
+test
+21_4x4
+expected_outcome
+0
+commands
+size 4
+white c1
+black a3
+white b3
+black d3
+genmove -t 20
+endtest
+
+test
+22
+expected_outcome
+1
+commands
+size 4
+white a1
+black c2
+white d4
+black a3
+genmove -t 20
+endtest
+
+test
+23
+expected_outcome
+1
+commands
+size 4
+white a1
+black d4
+genmove -t 20
+endtest
+
+test
+24
+expected_outcome
+1
+commands
+size 4
+white b1
+black b2
+white c1
+black c2
+genmove -t 20
+endtest
+
+test
+25
+expected_outcome
+0
+commands
+size 5
+white d1
+black a2
+white c3
+black a3
+white b5
+black a4
+genmove -t 20
+endtest
+
+test
+26
+expected_outcome
+1
+commands
+size 5
+white a1
+black d3
+white b1
+black b4
+genmove -t 20
+endtest
+
+test
+27
+expected_outcome
+0
+commands
+size 5
+white a1
+black b1
+white a2
+black b2
+white a3
+black b3
+white a4
+black b4
+genmove -t 20
+endtest
+
+test
+28
+expected_outcome
+0
+commands
+size 6
+white a1
+black b1
+white a2
+black b2
+white a3
+black b3
+white a4
+black b4
+white a5
+black b5
+white c1
+black d1
+white c2
+black d2
+white c3
+black d3
+white c4
+black d4
+white c5
+black d5
+white e1
+black f1
+genmove -t 20
+endtest
+
+test
+29
+expected_outcome
+1
+commands
+size 4
+white a2
+black a1
+white a3
+black a4
+white b2
+black b1
+white c2
+black b3
+white d1
+black c1
+genmove -t 20
+endtest
+
+
+quit
