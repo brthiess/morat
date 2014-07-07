@@ -16,5 +16,286 @@ size 2
 genmove -t 20
 endtest
 
+test
+3
+expected_outcome
+1
+commands
+size 2
+white a1
+genmove -t 5
+endtest
+
+test
+4
+expected_outcome
+0
+commands
+size 4
+white c2
+genmove -t 20
+endtest
+
+test
+5
+expected_outcome
+1
+commands
+size 4
+white a1
+black c3
+genmove -t 5
+endtest
+
+test
+5.5
+expected_outcome
+1
+commands
+size 4
+white a1
+genmove -t 20
+endtest
+
+test
+6
+expected_outcome
+1
+commands
+size 4
+white a1
+genmove -t 20
+endtest
+
+test
+7
+expected_outcome
+1
+commands
+size 4
+white a1
+black b2
+genmove -t 5
+endtest
+
+test
+8
+expected_outcome
+1
+commands
+size 5
+white a1
+black b2
+white e5
+genmove -t 20
+endtest
+
+test
+9
+expected_outcome
+1
+commands
+size 3
+white a1
+genmove -t 5
+endtest
+
+test
+10
+expected_outcome
+1
+commands
+size 3
+white a1
+black c3
+genmove -t 5
+endtest
+
+test
+11
+expected_outcome
+0
+commands
+size 3
+white a2
+genmove -t 5
+endtest
+
+test
+12
+expected_outcome
+0
+commands
+size 3
+white c1
+genmove -t 5
+endtest
+
+test
+13
+expected_outcome
+0
+commands
+size 4
+white d1
+genmove -t 5
+endtest
+
+test
+14
+expected_outcome
+1
+commands
+size 5
+genmove -t 20
+endtest
+
+test
+15
+expected_outcome
+0
+commands
+size 2
+white a1
+black a2
+genmove -t 5
+endtest
+
+test
+16
+expected_outcome
+1
+commands
+size 2
+white a1
+black b1
+genmove -t 5
+endtest
+
+test
+17
+expected_outcome
+1
+commands
+size 2
+white b1
+black b2
+genmove -t 5
+endtest
+
+test
+18
+expected_outcome
+0
+commands
+size 2
+white b2
+genmove -t 5
+endtest
+
+test
+19
+expected_outcome
+0
+commands
+size 3
+white a2
+genmove -t 5
+endtest
+
+test
+20
+expected_outcome
+1
+commands
+size 3
+white b1
+genmove -t 5
+endtest
+
+test
+21
+expected_outcome
+1
+commands
+size 3
+white b3
+genmove -t 5
+endtest
+
+test
+22
+expected_outcome
+0
+commands
+size 3
+white c2
+genmove -t 5
+endtest
+
+test
+23
+expected_outcome
+1
+commands
+size 3
+white b2
+black b3
+genmove -t 5
+endtest
+
+test
+23.5
+expected_outcome
+1
+commands
+size 3
+white a1
+black c3
+white b1
+black c2
+white c1
+genmove -t 5
+endtest
+
+test
+24
+expected_outcome
+1
+commands
+size 4
+white a1
+black d4
+white b1
+black d3
+white c1
+black d2
+white d1
+genmove -t 5
+endtest
+
+test
+25
+expected_outcome
+0
+commands
+size 4
+white b2
+black b3
+genmove -t 5
+endtest
+
+test
+26
+expected_outcome
+1
+commands
+size 4
+white c2
+black b4
+white a1
+genmove -t 5
+endtest
+
 quit
 

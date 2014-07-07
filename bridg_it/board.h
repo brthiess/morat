@@ -111,7 +111,7 @@ mutable uint16_t parent;  //parent for this group of cells. 8 bits limits board 
 
 					if(move.x >= lineend){
 						move.y++;
-						if(move.y >= board.size){ //done
+						if(move.y >= board.y_size){ //done
 							move.xy = -1;
 							return *this;
 						}
@@ -135,6 +135,7 @@ mutable uint16_t parent;  //parent for this group of cells. 8 bits limits board 
 
 private:
 	char size; //the length of one side of the hexagon
+	char y_size;
 	char sizem1; //size - 1
 
 	short num_cells;
@@ -155,6 +156,7 @@ public:
 
 	Board(int s){
 		size = s;
+		y_size = size * 2 - 1;
 		sizem1 = s - 1;
 		last = M_NONE;
 		nummoves = 0;
@@ -163,13 +165,14 @@ public:
 		outcome = -3;
 		neighbourlist = get_neighbour_list();
 		num_cells = vecsize();
-
 		
 		
-
+		
 		cells.resize(vecsize());
-
-		for(int y = 0; y < size; y++){
+		
+		
+		
+		for(int y = 0; y < y_size; y++){
 			for(int x = 0; x < lineend(y); x++){
 				int posxy = xy(x, y);
 				Pattern p = 0, j = 3;
@@ -191,7 +194,7 @@ public:
 
 	int get_size() const{ return size; }
 
-	int vecsize() const { return size*size; }
+	int vecsize() const { return size*(size+1)*2; }
 	int numcells() const { return num_cells; }
 
 	int num_moves() const { return nummoves; }
@@ -229,8 +232,8 @@ public:
 
 
 	//assumes x, y are in array bounds
-	bool onboard_fast(int x, int y)   const { return (  y < size &&   x < size); }
-	bool onboard_fast(const Move & m) const { return (m.y < size && m.x < size); }
+	bool onboard_fast(int x, int y)   const { return (  y < y_size &&   x < lineend(y)); }
+	bool onboard_fast(const Move & m) const { return (m.y < y_size && m.x < size); }
 	//checks array bounds too
 	bool onboard(int x, int y)  const { return (  x >= 0 &&   y >= 0 && onboard_fast(x, y) ); }
 	bool onboard(const Move & m)const { return (m.x >= 0 && m.y >= 0 && onboard_fast(m) ); }
@@ -259,9 +262,9 @@ public:
 
 	int edges(int x, int y) const {
 		return (x == 0      ? 1 : 0) |
-		       (x == sizem1 ? 2 : 0) |
+		       (x == lineend(y) - 1 ? 2 : 0) |
 		       (y == 0      ? 4 : 0) |
-		       (y == sizem1 ? 8 : 0);
+		       (y == y_size - 1 ? 8 : 0);
 	}
 
 	MoveValid * get_neighbour_list(){
@@ -287,48 +290,68 @@ public:
 	}
 
 
-	int lineend(int y)   const { return size; }
+	int lineend(int y)   const { 
+		if (y % 2 == 0) {
+			return size - 1; 
+		}
+		else return size;
+		
+	}
+			
 
 	string to_s(bool color) const {
 		string white = "O",
 		       black = "@",
-		       empty = ".",
+		       empty_blue = ".",
+		       empty_white = ".",
 		       coord = "",
 		       reset = "";
 		if(color){
 			string esc = "\033";
 			reset = esc + "[0m";
 			coord = esc + "[1;37m";
-			empty = reset + ".";
+			empty_white = reset + esc + "[1;33m" + ".";
+			empty_blue  = reset + esc + "[1;34m" + ".";
 			white = esc + "[1;33m" + "@"; //yellow
 			black = esc + "[1;34m" + "@"; //blue
 		}
 
 		string s;
+		s += "  ";
 		for(int i = 0; i < size; i++)
-			s += " " + coord + to_str(i+1);
+			s += "   " + coord + to_str(i+1);
 		s += "\n";
-
-		for(int y = 0; y < size; y++){
-			s += string(y, ' ');
+		for(int y = 0; y < y_size; y++){
+			
 			s += coord + char('A' + y);
+			if (y % 2 == 0) {
+				s += string(2, ' ');
+			}
 			int end = lineend(y);
-			for(int x = 0; x < size; x++){
+
+			for(int x = 0; x < end; x++){
+				s += "  ";
 				s += (last == Move(x, y)   ? coord + "[" :
 				      last == Move(x-1, y) ? coord + "]" : " ");
 				int p = get(x, y);
-				if(p == 0) s += empty;
+				if 		(p == 0 && y % 2 == 0) s += empty_blue;
+				else if (p == 0 && y % 2 == 1) s += empty_white;
 				if(p == 1) s += white;
 				if(p == 2) s += black;
 				if(p >= 3) s += "?";
 			}
 			s += (last == Move(end-1, y) ? coord + "]" : " ");
+			//If it is an even row, add a space so that the white edge markers are all 
+			//evenly aligned
+			if (y % 2 == 0){
+				s += "  ";
+			}
 			s += white + reset;
 			s += '\n';
 		}
-		s += string(size + 2, ' ');
+		s += string(2, ' ');
 		for(int i = 0; i < size; i++)
-			s += black + " ";
+			s += black + black + black + black;
 		s += "\n";
 
 		s += reset;

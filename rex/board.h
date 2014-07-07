@@ -489,14 +489,14 @@ public:
 
 		//mirror is simply flip x,y
 		int x = pos.x,
-		    y = pos.y,
-		    z1 = sizem1 - x,
-		    z2 = sizem1 - y;
+		    y = pos.y;
+		    //z1 = sizem1 - x,
+		    //z2 = sizem1 - y;
 
 		hash.update(0,  3*xy(x, y) + turn);
-		hash.update(1,  3*xy(y, x) + turn);
-		hash.update(2,  3*xy(z1, z2) + turn);
-		hash.update(3,  3*xy(z2, z1) + turn);
+		//hash.update(1,  3*xy(y, x) + turn);
+		//hash.update(2,  3*xy(z1, z2) + turn);
+		//hash.update(3,  3*xy(z2, z1) + turn);
 	}
 
 	hash_t test_hash(const Move & pos) const {
@@ -508,14 +508,14 @@ public:
 			return hash.test(0, 3*xy(pos) + turn);
 
 		int x = pos.x,
-		    y = pos.y,
-		    z1 = sizem1 - x,
-		    z2 = sizem1 - y;
+		    y = pos.y;
+		    //z1 = sizem1 - x,
+		    //z2 = sizem1 - y;
 
 		hash_t m = hash.test(0,  3*xy(x, y) + turn);
-		m = min(m, hash.test(1,  3*xy(y, x) + turn));
-		m = min(m, hash.test(2,  3*xy(z1, z2) + turn));
-		m = min(m, hash.test(3,  3*xy(z2, z1) + turn));
+		//m = min(m, hash.test(1,  3*xy(y, x) + turn));
+		//m = min(m, hash.test(2,  3*xy(z1, z2) + turn));
+		//m = min(m, hash.test(3,  3*xy(z2, z1) + turn));
 		return m;
 	}
 

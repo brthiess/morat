@@ -2,6 +2,7 @@ from __future__ import print_function
 import subprocess
 import os
 import sys
+import time
 
 
 
@@ -55,6 +56,7 @@ def getCommands(tests):
 	found_test = False
 	#Check to see if we have found the commands for that test
 	found_commands = False
+	found_size = False
 
 	#List of Commands to execute in Rex Program
 	commands = []
@@ -79,6 +81,9 @@ def getCommands(tests):
 			continue
 		#Else if we have come to the end of a test case
 		elif ('endtest' == tests[r]):
+			if (found_size == False):
+				print("Error found in test script.  A test is missing the 'size' command")
+			found_size = False
 			found_test = False
 			found_commands = False
 			#Append either mcts or pns to the commands list
@@ -96,6 +101,8 @@ def getCommands(tests):
 		#Append all of the commands to the list
 		if (found_commands):
 			commands.append(tests[r])
+		if ('size' in tests[r]):
+			found_size = True
 	
 	test_commands.append("quit")			
 	return test_commands, theoretical_results
@@ -175,7 +182,10 @@ def parseResults(results):
 		if ('PV:' in actual_results[r]):
 			if (not found_solution):
 				actual_results[r] = "Unknown"
-			found_solution = False		
+			found_solution = False	
+		if ("It is the other player's turn" in actual_results[r] or "Unknown command" in actual_results[r]):
+			print("Error found on line " + str(r))
+			
 	
 	#Remove all lines from the results data except for the lines
 	#that contain relevant information (i.e. Whether it solved it as a win
@@ -213,6 +223,10 @@ def runTests(tests, game_type):
 	temp = sys.stdout
 	#Create a file and write the test results to it
 	sys.stdout = open('test_results', 'w')
+	
+	#Start a timer
+	start = time.clock()
+	
 	#Run the program and pipe in the commands
 	#Save the output to a file
 	if (game_type == REX):
@@ -224,10 +238,12 @@ def runTests(tests, game_type):
 	elif (game_type == Y):
 		output = external_command("../moy -f commands_file")
 	print(output)
+	#Stop the timer
+	elapsed = (time.clock() - start)
 	#Set stdout back to what it was normally
 	sys.stdout = temp
 	
-	print("Completed " + game + " Tests.  Analyzing...")
+	print("Completed " + game + " Tests.  Time Taken: " + str(elapsed) + "s. \n\n Analyzing Results...")
 	#Parse Results
 	actual_results = parseResults('test_results')
 	
@@ -243,14 +259,21 @@ def runTests(tests, game_type):
 
 if __name__ == '__main__':
 	#Open Test File
-	rex_tests = getTests('rex_tests')
-	hex_tests = getTests('hex_tests')
-	chex_tests = getTests('chex_tests')
+	game = raw_input("Which program do you want to run tests for? (nhex, rex, chex): ")
+	if ("rex" in game):
+		rex_tests = getTests('rex_tests')
+		runTests(rex_tests, REX)
+	elif("nhex" in game):
+		hex_tests = getTests('hex_tests')
+		runTests(hex_tests, HEX)
+	elif("chex" in game):
+		chex_tests = getTests('chex_tests')
+		runTests(chex_tests, CHEX)
 	
 	
-	runTests(rex_tests, REX)
-	runTests(hex_tests, HEX)
-	runTests(chex_tests, CHEX)
+
+	
+
 
 
 

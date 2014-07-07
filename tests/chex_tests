@@ -1,1 +1,271 @@
+test
+1
+expected_outcome
+1
+commands
+size 3 5
+white b1
+genmove -t 20
+endtest
+
+
+test
+2
+expected_outcome
+0
+commands
+size 3 3
+genmove -t 5
+endtest
+
+test
+3
+expected_outcome
+0
+commands
+size 3 4
+genmove -t 5
+endtest
+
+test
+4
+expected_outcome
+0
+commands
+size 3 5
+genmove -t 5
+endtest
+
+test
+5
+expected_outcome
+0
+commands
+size 3 6
+genmove -t 5
+endtest
+
+
+test
+6
+expected_outcome
+1
+commands
+size 3 4
+white b1
+genmove -t 5
+endtest
+
+test
+7
+expected_outcome
+1
+commands
+size 4 4
+white b1
+genmove -t 5
+endtest
+
+test
+8
+expected_outcome
+1
+commands
+size 3 5
+white a1
+genmove -t 5
+endtest
+
+test
+9
+expected_outcome
+1
+commands
+size 3 5
+white b1
+genmove -t 5
+endtest
+
+
+test
+12
+expected_outcome
+1
+commands
+size 3 5
+white e1
+genmove -t 5
+endtest
+
+
+test
+10
+expected_outcome
+1
+commands
+size 3 5
+white c1
+genmove -t 5
+endtest
+
+
+test
+11
+expected_outcome
+1
+commands
+size 3 5
+white d1
+genmove -t 5
+endtest
+
+test
+13
+expected_outcome
+0
+commands
+size 3 3
+genmove -t 10
+endtest
+
+test
+14
+expected_outcome
+0
+commands
+size 3 4
+genmove -t 10
+endtest
+
+test
+15
+expected_outcome
+0
+commands
+size 3 5
+genmove -t 10
+endtest
+
+test
+16
+expected_outcome
+0
+commands
+size 3 6
+genmove -t 10
+endtest
+
+test
+17
+expected_outcome
+0
+commands
+size 4 3
+genmove -t 10
+endtest
+
+test
+18
+expected_outcome
+0
+commands
+size 4 4
+genmove -t 10
+endtest
+
+test
+19
+expected_outcome
+0
+commands
+size 4 5
+genmove -t 10
+endtest
+
+test
+20
+expected_outcome
+0
+commands
+size 4 6
+genmove -t 10
+endtest
+
+test
+21
+expected_outcome
+0
+commands
+size 2 2
+genmove -t 10
+endtest
+
+test
+22
+expected_outcome
+0
+commands
+size 2 3
+genmove -t 10
+endtest
+
+test
+23
+expected_outcome
+0
+commands
+size 2 4
+genmove -t 10
+endtest
+
+test
+24
+expected_outcome
+0
+commands
+size 2 5
+genmove -t 10
+endtest
+
+test
+25
+expected_outcome
+0
+commands
+size 2 6
+genmove -t 10
+endtest
+
+test
+26
+expected_outcome
+0
+commands
+size 2 7
+genmove -t 10
+endtest
+
+test
+27
+expected_outcome
+0
+commands
+size 2 8
+genmove -t 10
+endtest
+
+test
+28
+expected_outcome
+0
+commands
+size 6 2
+genmove -t 10
+endtest
+
+
+
+
+
+
 
