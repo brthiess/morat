@@ -1,8 +1,0 @@
-size 3
-white c3 
-black b3
-white c2 
-black a3
-print 
-genmove
-print
