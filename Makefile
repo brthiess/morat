@@ -25,10 +25,50 @@ else
 endif
 
 
-all: castro chex nhex moy trex gale pentagod 
+all: castro nhex chex moy trex pentagod
+
+test: \
+		lib/test.o \
+		lib/fileio.o \
+		lib/outcome.o \
+		lib/outcome_test.o \
+		lib/sgf_test.o \
+		lib/string.o \
+		lib/string_test.o \
+		lib/zobrist.o \
+		havannah/agentmcts.o \
+		havannah/agentmctsthread.o \
+		havannah/agentmcts_test.o \
+		havannah/agentpns.o \
+		havannah/agentpns_test.o \
+		havannah/board_test.o \
+		hex/agentmcts.o \
+		hex/agentmctsthread.o \
+		hex/agentmcts_test.o \
+		hex/agentpns.o \
+		hex/agentpns_test.o \
+		pentago/agentmcts.o \
+		pentago/agentmctsthread.o \
+		pentago/agentmcts_test.o \
+		pentago/agentpns.o \
+		pentago/agentpns_test.o \
+		pentago/board.o \
+		rex/agentmcts.o \
+		rex/agentmctsthread.o \
+		rex/agentmcts_test.o \
+		rex/agentpns.o \
+		rex/agentpns_test.o \
+		y/agentmcts.o \
+		y/agentmctsthread.o \
+		y/agentmcts_test.o \
+		y/agentpns.o \
+		y/agentpns_test.o \
+		$(ALARM)
+	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
+	./test
 
 castro: \
-		havannah/castro.o \
+		havannah/main.o \
 		havannah/agentmcts.o \
 		havannah/agentmctsthread.o \
 		havannah/agentpns.o \
@@ -36,13 +76,14 @@ castro: \
 		havannah/gtpagent.o \
 		lib/fileio.o \
 		lib/gtpcommon.o \
+		lib/outcome.o \
 		lib/string.o \
 		lib/zobrist.o \
 		$(ALARM)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
 
 pentagod: \
-		pentago/pentagod.o \
+		pentago/main.o \
 		pentago/agentab.o \
 		pentago/agentmcts.o \
 		pentago/agentmctsthread.o \
@@ -50,16 +91,16 @@ pentagod: \
 		pentago/board.o \
 		pentago/gtpgeneral.o \
 		pentago/gtpagent.o \
-		pentago/move.o \
 		pentago/moveiterator.o \
 		lib/fileio.o \
 		lib/gtpcommon.o \
+		lib/outcome.o \
 		lib/string.o \
 		$(ALARM)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
 
 moy: \
-		y/moy.o \
+		y/main.o \
 		y/agentmcts.o \
 		y/agentmctsthread.o \
 		y/agentpns.o \
@@ -67,13 +108,14 @@ moy: \
 		y/gtpgeneral.o \
 		lib/fileio.o \
 		lib/gtpcommon.o \
+		lib/outcome.o \
 		lib/string.o \
 		lib/zobrist.o \
 		$(ALARM)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
 
 nhex: \
-		hex/nhex.o \
+		hex/main.o \
 		hex/agentmcts.o \
 		hex/agentmctsthread.o \
 		hex/agentpns.o \
@@ -81,13 +123,14 @@ nhex: \
 		hex/gtpgeneral.o \
 		lib/fileio.o \
 		lib/gtpcommon.o \
+		lib/outcome.o \
 		lib/string.o \
 		lib/zobrist.o \
 		$(ALARM)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
 	
 chex: \
-		cylindrical_hex/chex.o \
+		cylindrical_hex/main.o \
 		cylindrical_hex/agentmcts.o \
 		cylindrical_hex/agentmctsthread.o \
 		cylindrical_hex/agentpns.o \
@@ -95,13 +138,14 @@ chex: \
 		cylindrical_hex/gtpgeneral.o \
 		lib/fileio.o \
 		lib/gtpcommon.o \
+		lib/outcome.o \
 		lib/string.o \
 		lib/zobrist.o \
 		$(ALARM)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
-	
+
 trex: \
-		rex/trex.o \
+		rex/main.o \
 		rex/agentmcts.o \
 		rex/agentmctsthread.o \
 		rex/agentpns.o \
@@ -109,28 +153,14 @@ trex: \
 		rex/gtpgeneral.o \
 		lib/fileio.o \
 		lib/gtpcommon.o \
+		lib/outcome.o \
 		lib/string.o \
 		lib/zobrist.o \
 		$(ALARM)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
 
-
-gale: \
-		bridg_it/gale.o \
-		bridg_it/agentmcts.o \
-		bridg_it/agentmctsthread.o \
-		bridg_it/agentpns.o \
-		bridg_it/gtpagent.o \
-		bridg_it/gtpgeneral.o \
-		lib/fileio.o \
-		lib/gtpcommon.o \
-		lib/string.o \
-		lib/zobrist.o \
-		$(ALARM)
-	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
-	
 clean:
-	rm -f */*.o castro moy pentagod chex nhex trex gale .Makefile
+	rm -f */*.o test castro moy pentagod nhex chex trex .Makefile
 
 fresh: clean all
 

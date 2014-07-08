@@ -6,6 +6,10 @@
 
 #include "../lib/string.h"
 
+
+namespace Morat {
+namespace Y {
+
 enum MoveSpecial {
 	M_SWAP    = -1, //-1 so that adding 1 makes it into a valid move
 	M_RESIGN  = -2,
@@ -38,6 +42,8 @@ struct Move {
 
 		return std::string() + char(y + 'a') + to_str(x + 1);
 	}
+
+	friend std::ostream& operator<< (std::ostream &out, const Move & m) { return out << m.to_s(); }
 
 	bool operator< (const Move & b) const { return (y == b.y ? x <  b.x : y <  b.y); }
 	bool operator<=(const Move & b) const { return (y == b.y ? x <= b.x : y <= b.y); }
@@ -77,15 +83,11 @@ struct MoveValid : public Move {
 };
 
 struct MovePlayer : public Move {
-	char player;
+	Side player;
 
-	MovePlayer() : Move(M_UNKNOWN), player(0) { }
-	MovePlayer(const Move & m, char p = 0) : Move(m), player(p) { }
+	MovePlayer() : Move(M_UNKNOWN), player(Side::NONE) { }
+	MovePlayer(const Move & m, Side p = Side::NONE) : Move(m), player(p) { }
 };
 
-
-struct PairMove {
-	Move a, b;
-	PairMove(Move A = M_UNKNOWN, Move B = M_UNKNOWN) : a(A), b(B) { }
-	PairMove(MoveSpecial A) : a(Move(A)), b(M_UNKNOWN) { }
-};
+}; // namespace Y
+}; // namespace Morat
