@@ -59,6 +59,7 @@ test: \
 		rex/agentmcts_test.o \
 		rex/agentpns.o \
 		rex/agentpns_test.o \
+		rex/board_test.o \
 		cylindrical_hex/agentmcts.o \
 		cylindrical_hex/agentmctsthread.o \
 		cylindrical_hex/agentmcts_test.o \
