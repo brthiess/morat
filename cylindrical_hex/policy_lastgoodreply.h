@@ -7,7 +7,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace Chex {
 
 class LastGoodReply : public Policy {
 	Move goodreply[2][Board::max_vecsize];
@@ -45,5 +45,5 @@ public:
 	}
 };
 
-}; // namespace Hex
+}; // namespace Chex
 }; // namespace Morat

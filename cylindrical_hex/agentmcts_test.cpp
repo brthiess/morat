@@ -4,9 +4,9 @@
 #include "agentmcts.h"
 
 using namespace Morat;
-using namespace Hex;
+using namespace Chex;
 
-TEST_CASE("Hex::AgentMCTS::Node::to_s/from_s", "[hex][agentmcts]") {
+TEST_CASE("Chex::AgentMCTS::Node::to_s/from_s", "[chex][agentmcts]") {
 	AgentMCTS::Node n(Move("a1"));
 	auto s = n.to_s();
 	AgentMCTS::Node k;

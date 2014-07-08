@@ -9,7 +9,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace Rex {
 
 class AgentAB : public Agent {
 	static const int16_t SCORE_WIN  = 32767;
@@ -110,5 +110,5 @@ private:
 	void tt_set(const Node & n) ;
 };
 
-}; // namespace Hex
+}; // namespace Rex
 }; // namespace Morat

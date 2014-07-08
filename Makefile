@@ -47,6 +47,7 @@ test: \
 		hex/agentmcts_test.o \
 		hex/agentpns.o \
 		hex/agentpns_test.o \
+		hex/board_test.o \
 		pentago/agentmcts.o \
 		pentago/agentmctsthread.o \
 		pentago/agentmcts_test.o \
@@ -58,6 +59,12 @@ test: \
 		rex/agentmcts_test.o \
 		rex/agentpns.o \
 		rex/agentpns_test.o \
+		cylindrical_hex/agentmcts.o \
+		cylindrical_hex/agentmctsthread.o \
+		cylindrical_hex/agentmcts_test.o \
+		cylindrical_hex/agentpns.o \
+		cylindrical_hex/agentpns_test.o \
+		cylindrical_hex/board_test.o \
 		y/agentmcts.o \
 		y/agentmctsthread.o \
 		y/agentmcts_test.o \

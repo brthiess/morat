@@ -16,7 +16,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace Chex {
 
 class AgentPNS : public Agent {
 	static const uint32_t LOSS  = (1<<30)-1;
@@ -310,5 +310,5 @@ private:
 	void load_sgf(SGFParser<Move> & sgf, const Board & board, Node & node);
 };
 
-}; // namespace Hex
+}; // namespace Chex
 }; // namespace Morat

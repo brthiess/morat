@@ -28,7 +28,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace Chex {
 
 class AgentMCTS : public Agent{
 public:
@@ -308,5 +308,5 @@ protected:
 	void load_sgf(SGFParser<Move> & sgf, const Board & board, Node & node);
 };
 
-}; // namespace Hex
+}; // namespace Chex
 }; // namespace Morat

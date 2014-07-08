@@ -8,7 +8,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace Chex {
 
 enum MoveSpecial {
 	M_SWAP    = -1, //-1 so that adding 1 makes it into a valid move
@@ -89,5 +89,5 @@ struct MovePlayer : public Move {
 	MovePlayer(const Move & m, Side p = Side::NONE) : Move(m), player(p) { }
 };
 
-}; // namespace Hex
+}; // namespace Chex
 }; // namespace Morat

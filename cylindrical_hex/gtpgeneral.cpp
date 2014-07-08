@@ -8,7 +8,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace Chex {
 
 GTPResponse GTP::gtp_mcts(vecstr args){
 	delete agent;
@@ -375,5 +375,5 @@ GTPResponse GTP::gtp_load_sgf(vecstr args){
 	return true;
 }
 
-}; // namespace Hex
+}; // namespace Chex
 }; // namespace Morat

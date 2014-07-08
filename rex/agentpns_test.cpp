@@ -4,9 +4,9 @@
 #include "agentpns.h"
 
 using namespace Morat;
-using namespace Hex;
+using namespace Rex;
 
-TEST_CASE("Hex::AgentPNS::Node::to_s/from_s", "[hex][agentpns]") {
+TEST_CASE("Rex::AgentPNS::Node::to_s/from_s", "[hex][agentpns]") {
 	AgentPNS::Node n(Move("a1"));
 	auto s = n.to_s();
 	AgentPNS::Node k;

@@ -11,7 +11,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace Rex {
 
 class Agent {
 protected:
@@ -79,5 +79,5 @@ protected:
 	}
 };
 
-}; // namespace Hex
+}; // namespace Rex
 }; // namespace Morat

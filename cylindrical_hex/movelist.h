@@ -8,7 +8,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace Chex {
 
 struct MoveList {
 	ExpPair    exp[2];       //aggregated outcomes overall
@@ -79,5 +79,5 @@ struct MoveList {
 	}
 };
 
-}; // namespace Hex
+}; // namespace Chex
 }; // namespace Morat

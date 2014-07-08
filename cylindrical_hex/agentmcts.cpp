@@ -12,7 +12,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace Chex {
 
 const float AgentMCTS::min_rave = 0.1;
 
@@ -393,5 +393,5 @@ void AgentMCTS::load_sgf(SGFParser<Move> & sgf, const Board & board, Node & node
 	}
 }
 
-}; // namespace Hex
+}; // namespace Chex
 }; // namespace Morat

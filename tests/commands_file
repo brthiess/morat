@@ -1,0 +1,245 @@
+mcts
+size 3
+genmove -t 20
+pns
+size 3
+genmove -t 20
+mcts
+size 2
+genmove -t 20
+pns
+size 2
+genmove -t 20
+mcts
+size 2
+white a1
+genmove -t 5
+pns
+size 2
+white a1
+genmove -t 5
+mcts
+size 4
+white a1
+genmove -t 20
+pns
+size 4
+white a1
+genmove -t 20
+mcts
+size 4
+white a1
+genmove -t 20
+pns
+size 4
+white a1
+genmove -t 20
+mcts
+size 4
+white a1
+black b2
+genmove -t 5
+pns
+size 4
+white a1
+black b2
+genmove -t 5
+mcts
+size 5
+white a1
+black b2
+white e5
+genmove -t 20
+pns
+size 5
+white a1
+black b2
+white e5
+genmove -t 20
+mcts
+size 3
+white a1
+genmove -t 5
+pns
+size 3
+white a1
+genmove -t 5
+mcts
+size 3
+white a1
+black c3
+genmove -t 5
+pns
+size 3
+white a1
+black c3
+genmove -t 5
+mcts
+size 3
+white a2
+genmove -t 5
+pns
+size 3
+white a2
+genmove -t 5
+mcts
+size 3
+white c1
+genmove -t 5
+pns
+size 3
+white c1
+genmove -t 5
+mcts
+size 4
+white d1
+genmove -t 5
+pns
+size 4
+white d1
+genmove -t 5
+mcts
+size 5
+genmove -t 20
+pns
+size 5
+genmove -t 20
+mcts
+size 2
+white a1
+black a2
+genmove -t 5
+pns
+size 2
+white a1
+black a2
+genmove -t 5
+mcts
+size 2
+white a1
+black b1
+genmove -t 5
+pns
+size 2
+white a1
+black b1
+genmove -t 5
+mcts
+size 2
+white b1
+black b2
+genmove -t 5
+pns
+size 2
+white b1
+black b2
+genmove -t 5
+mcts
+size 2
+white b2
+genmove -t 5
+pns
+size 2
+white b2
+genmove -t 5
+mcts
+size 3
+white a2
+genmove -t 5
+pns
+size 3
+white a2
+genmove -t 5
+mcts
+size 3
+white b1
+genmove -t 5
+pns
+size 3
+white b1
+genmove -t 5
+mcts
+size 3
+white b3
+genmove -t 5
+pns
+size 3
+white b3
+genmove -t 5
+mcts
+size 3
+white c2
+genmove -t 5
+pns
+size 3
+white c2
+genmove -t 5
+mcts
+size 3
+white b2
+black b3
+genmove -t 5
+pns
+size 3
+white b2
+black b3
+genmove -t 5
+mcts
+size 3
+white a1
+black c3
+white b1
+black c2
+white c1
+genmove -t 5
+pns
+size 3
+white a1
+black c3
+white b1
+black c2
+white c1
+genmove -t 5
+mcts
+size 4
+white a1
+black d4
+white b1
+black d3
+white c1
+black d2
+white d1
+genmove -t 5
+pns
+size 4
+white a1
+black d4
+white b1
+black d3
+white c1
+black d2
+white d1
+genmove -t 5
+mcts
+size 4
+white b2
+black b3
+genmove -t 5
+pns
+size 4
+white b2
+black b3
+genmove -t 5
+mcts
+size 4
+white c2
+black b4
+white a1
+genmove -t 5
+pns
+size 4
+white c2
+black b4
+white a1
+genmove -t 5
+quit

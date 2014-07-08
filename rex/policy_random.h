@@ -10,7 +10,7 @@
 #include "policy.h"
 
 namespace Morat {
-namespace Hex {
+namespace Rex {
 
 class RandomPolicy : public Policy {
 	XORShift_uint32 rand;
@@ -47,5 +47,5 @@ public:
 	}
 };
 
-}; // namespace Hex
+}; // namespace Rex
 }; // namespace Morat

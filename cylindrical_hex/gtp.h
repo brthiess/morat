@@ -14,7 +14,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace Chex {
 
 class GTP : public GTPCommon {
 	History hist;
@@ -134,5 +134,5 @@ public:
 	std::string solve_str(int outcome) const;
 };
 
-}; // namespace Hex
+}; // namespace Chex
 }; // namespace Morat

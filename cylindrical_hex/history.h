@@ -10,7 +10,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace Chex {
 
 class History {
 	std::vector<Move> hist;
@@ -73,5 +73,5 @@ public:
 	}
 };
 
-}; // namespace Hex
+}; // namespace Chex
 }; // namespace Morat

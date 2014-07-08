@@ -18,7 +18,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace Chex {
 
 /*
  * the board is represented as a flattened 2d array of the form:
@@ -668,11 +668,11 @@ public:
 				return turn;
 		}
 		if(movesremain() <= 1 && won() <= 0) {
-			return 1;
+			return Outcome::P1;
 		}
-		return -3;
+		return Outcome::UNKNOWN;
 	}
 };
 
-}; // namespace Hex
+}; // namespace Chex
 }; // namespace Morat

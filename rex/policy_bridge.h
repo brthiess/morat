@@ -10,7 +10,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace Rex {
 
 class ProtectBridge : public Policy {
 	int offset;
@@ -57,5 +57,5 @@ public:
 	}
 };
 
-}; // namespace Hex
+}; // namespace Rex
 }; // namespace Morat

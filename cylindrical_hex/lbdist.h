@@ -17,7 +17,7 @@ Decrease distance when crossing your own virtual connection?
 
 
 namespace Morat {
-namespace Hex {
+namespace Chex {
 
 class LBDists {
 	struct MoveDist {
@@ -162,5 +162,5 @@ public:
 	}
 };
 
-}; // namespace Hex
+}; // namespace Chex
 }; // namespace Morat
