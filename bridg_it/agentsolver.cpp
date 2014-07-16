@@ -7,17 +7,203 @@
 #include "../lib/string.h"
 #include "../lib/time.h"
 
-#include "agentmcts.h"
+#include "agentsolver.h"
 #include "board.h"
 
+
+/***************************
+ * 
+ * This is how the Bridg-It board is translated into a graph
+ * Note:  First and last rows are condensed to single point 
+ * 
+ * 
+ * 				*		First Row
+ * 			  / | \
+ * 			 *--*--*	Second Row
+ * 			 |  |  |
+ * 			 *--*--*	Third Row
+ *  		  \ | /
+ * 				*		Last Row 
+ * 
+ ****************************/
 
 namespace Morat {
 namespace Hex {
 
-const float AgentMCTS::min_rave = 0.1;
 
-std::string AgentMCTS::Node::to_s() const {
-	return "AgentMCTS::Node"
+void AgentSolver::search(double time, uint64_t max_runs, int verbose){
+	printf("Hello");
+}
+
+/**
+ * Returns an adjacency list representing the board in its current state
+ */ 
+AgentSolver::Undirected_Graph AgentSolver::getAdjacencyList() {	
+	
+	//Get the number of vertices on the bridg_it board 
+	int numberOfVertices = AgentSolver::getNumberOfVertices();
+	int size = rootboard.get_size();
+	//Create an adjacency list
+	AgentSolver::Undirected_Graph adjacency_list (numberOfVertices);
+
+	//Get every connection
+	//If 'Edge' contains opponent, then that edge is gone
+	//If 'Edge' contains us, then that edge is reinforced
+	Side edge;
+
+	//Go through every spot on the board
+	//When an edge is found, check to see who is in it
+	printf("RootBoard.toplay() %d\n", rootboard.toplay().to_i());
+	for (int xy = 0; xy < rootboard.vecsize(); xy++) {
+		//If i is in the first row
+		//and i contains one of our pieces
+		printf("XY: %d\n", xy);
+		printf("i is in first row and contains one of our pieces");
+		//Check if piece (aka edge) directly below contains 
+		//one of ours, theirs, or neither
+		printf("Piece is owned by %d\n", rootboard.get(xy + size).to_i());
+		if (xy % 2 == 1 && AgentSolver::xy_from_whites_perspective(xy) % 2 == 0) {
+			if (rootboard.get(xy + size) == Side::NONE) {
+				printf("Piece right below is empty\n");
+				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + size*2));
+			}
+			else if (rootboard.get(xy + size) == rootboard.toplay()) {
+				printf("Piece right below is ours\n");
+				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + size*2));
+				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + size*2));
+			}
+		
+			//Check directly above
+			if (rootboard.get(xy - size) == Side::NONE) {
+				printf("Piece right above is empty\n");
+				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - size*2));
+			}
+			else if (rootboard.get(xy - size) == rootboard.toplay()) {
+				printf("Piece right above is ours\n");
+				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - size*2));
+				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - size*2));
+			}
+		
+			//Check directly to the right
+			if (rootboard.get(xy + 1) == Side::NONE) {
+				printf("Piece to the right is empty\n");
+				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + 2));
+			}
+			else if (rootboard.get(xy + 1) == rootboard.toplay()) {
+				printf("Piece to the right is ours\n");
+				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + 2));
+				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + 2));
+			}
+		
+			//Check directly to the left
+			if (rootboard.get(xy - 1) == Side::NONE) {
+				printf("Piece to the left is empty\n");
+				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - 2));
+			}		
+			else if (rootboard.get(xy - 1) == rootboard.toplay()) {
+				printf("Piece to the left is ours\n");
+				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - 2));
+				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - 2));
+			}
+		}
+	}
+	return adjacency_list;
+}
+
+/**
+ * Is given the xy value of the piece and returns which vertice # 
+ * on the graph it represents
+ */
+int AgentSolver::xy_to_vertice(int xy) {
+	int size = rootboard.get_size();
+	int vertice_number = 0;
+	for (int i = 0; i <= xy; i++) {
+		if ((i >= size) && (i < size * (size - 1)) && (rootboard.get(i) == rootboard.toplay())) {
+			vertice_number += 1;
+		}
+	}
+	return vertice_number;
+ }
+
+/**
+ * Returns the total number of vertices on the board for one player
+ */
+int AgentSolver::getNumberOfVertices() {
+	int size = rootboard.get_size();
+
+	int numberOfVertices = ((size - 1) / 2) * ((size - 1) / 2 - 1) + 2;
+
+	return numberOfVertices;
+}
+
+int AgentSolver::xy_from_whites_perspective(int xy) {
+	//bottomfunction(n/5) + (n(mod5))* 5
+	return 0;
+}
+
+void AgentSolver::set_board(const Board & board, bool clear){
+	rootboard = board;
+	Side a;
+	
+	Undirected_Graph board_matrix = AgentSolver::getAdjacencyList();
+	board_matrix.graph_to_s();
+
+	
+}
+
+
+Move AgentSolver::return_move(const Node * node, Side toplay, int verbose) const {
+	Move * m = new Move("a1");
+	return *m;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const float AgentSolver::min_rave = 0.1;
+
+std::string AgentSolver::Node::to_s() const {
+	return "AgentSolver::Node"
 	       ", move " + move.to_s() +
 	       ", exp " + exp.to_s() +
 	       ", rave " + rave.to_s() +
@@ -28,7 +214,7 @@ std::string AgentMCTS::Node::to_s() const {
 	       ", children " + to_str(children.num());
 }
 
-bool AgentMCTS::Node::from_s(std::string s) {
+bool AgentSolver::Node::from_s(std::string s) {
 	auto dict = parse_dict(s, ", ", " ");
 
 	if(dict.size() == 9){
@@ -45,71 +231,9 @@ bool AgentMCTS::Node::from_s(std::string s) {
 	return false;
 }
 
-void AgentMCTS::search(double time, uint64_t max_runs, int verbose){
-	Side toplay = rootboard.toplay();
-
-	if(rootboard.won() >= Outcome::DRAW || (time <= 0 && max_runs == 0))
-		return;
-
-	Time starttime;
-
-	pool.pause();
-
-	if(runs)
-		logerr("Pondered " + to_str(runs) + " runs\n");
-
-	runs = 0;
-	maxruns = max_runs;
-	pool.reset();
-
-	//let them run!
-	pool.resume();
-
-	pool.wait_pause(time);
-
-	double time_used = Time() - starttime;
 
 
-	if(verbose){
-		DepthStats gamelen, treelen;
-		double times[4] = {0,0,0,0};
-		for(auto & t : pool){
-			gamelen += t->gamelen;
-			treelen += t->treelen;
-
-			for(int a = 0; a < 4; a++)
-				times[a] += t->times[a];
-		}
-
-		logerr("Finished:    " + to_str(runs) + " runs in " + to_str(time_used*1000, 0) + " msec: " + to_str(runs/time_used, 0) + " Games/s\n");
-		if(runs > 0){
-			logerr("Game length: " + gamelen.to_s() + "\n");
-			logerr("Tree depth:  " + treelen.to_s() + "\n");
-			if(profile)
-				logerr("Times:       " + to_str(times[0], 3) + ", " + to_str(times[1], 3) + ", " + to_str(times[2], 3) + ", " + to_str(times[3], 3) + "\n");
-		}
-
-		if(root.outcome != Outcome::UNKNOWN)
-			logerr("Solved as a " + root.outcome.to_s_rel(toplay) + "\n");
-
-		std::string pvstr;
-		for(auto m : get_pv())
-			pvstr += " " + m.to_s();
-		logerr("PV:         " + pvstr + "\n");
-
-		if(verbose >= 3 && !root.children.empty())
-			logerr("Move stats:\n" + move_stats(vecmove()));
-	}
-
-	pool.reset();
-	runs = 0;
-
-
-	if(ponder && root.outcome < Outcome::DRAW)
-		pool.resume();
-}
-
-AgentMCTS::AgentMCTS() : pool(this) {
+AgentSolver::AgentSolver() : pool(this) {
 	nodes = 0;
 	runs = 0;
 	gclimit = 5;
@@ -158,7 +282,7 @@ AgentMCTS::AgentMCTS() : pool(this) {
 	for(int i = 0; i < 4096; i++)
 		gammas[i] = 1;
 }
-AgentMCTS::~AgentMCTS(){
+AgentSolver::~AgentSolver(){
 	pool.pause();
 	pool.set_num_threads(0);
 
@@ -166,7 +290,7 @@ AgentMCTS::~AgentMCTS(){
 	ctmem.compact();
 }
 
-void AgentMCTS::set_ponder(bool p){
+void AgentSolver::set_ponder(bool p){
 	if(ponder != p){
 		ponder = p;
 		pool.pause();
@@ -176,19 +300,8 @@ void AgentMCTS::set_ponder(bool p){
 	}
 }
 
-void AgentMCTS::set_board(const Board & board, bool clear){
-	pool.pause();
 
-	nodes -= root.dealloc(ctmem);
-	root = Node();
-	root.exp.addwins(visitexpand+1);
-
-	rootboard = board;
-
-	if(ponder)
-		pool.resume();
-}
-void AgentMCTS::move(const Move & m){
+void AgentSolver::move(const Move & m){
 	pool.pause();
 
 	uword nodesbefore = nodes;
@@ -227,14 +340,14 @@ void AgentMCTS::move(const Move & m){
 		pool.resume();
 }
 
-double AgentMCTS::gamelen() const {
+double AgentSolver::gamelen() const {
 	DepthStats len;
 	for(auto & t : pool)
 		len += t->gamelen;
 	return len.avg();
 }
 
-std::vector<Move> AgentMCTS::get_pv() const {
+std::vector<Move> AgentSolver::get_pv() const {
 	vecmove pv;
 
 	const Node * n = & root;
@@ -252,7 +365,7 @@ std::vector<Move> AgentMCTS::get_pv() const {
 	return pv;
 }
 
-std::string AgentMCTS::move_stats(vecmove moves) const {
+std::string AgentSolver::move_stats(vecmove moves) const {
 	std::string s = "";
 	const Node * node = & root;
 
@@ -274,45 +387,8 @@ std::string AgentMCTS::move_stats(vecmove moves) const {
 	return s;
 }
 
-Move AgentMCTS::return_move(const Node * node, Side toplay, int verbose) const {
-	if(node->outcome >= Outcome::DRAW)
-		return node->bestmove;
 
-	double val, maxval = -1000000000000.0; //1 trillion
-
-	Node * ret = NULL,
-		 * child = node->children.begin(),
-		 * end = node->children.end();
-
-	for( ; child != end; child++){
-		if(child->outcome >= Outcome::DRAW){
-			if(child->outcome == toplay)             val =  800000000000.0 - child->exp.num(); //shortest win
-			else if(child->outcome == Outcome::DRAW) val = -400000000000.0 + child->exp.num(); //longest tie
-			else                                     val = -800000000000.0 + child->exp.num(); //longest loss
-		}else{ //not proven
-			if(msrave == -1) //num simulations
-				val = child->exp.num();
-			else if(msrave == -2) //num wins
-				val = child->exp.sum();
-			else
-				val = child->value(msrave, 0, 0) - msexplore*sqrt(log(node->exp.num())/(child->exp.num() + 1));
-		}
-
-		if(maxval < val){
-			maxval = val;
-			ret = child;
-		}
-	}
-
-	assert(ret);
-
-	if(verbose)
-		logerr("Score:       " + to_str(ret->exp.avg()*100., 2) + "% / " + to_str(ret->exp.num()) + "\n");
-
-	return ret->move;
-}
-
-void AgentMCTS::garbage_collect(Board & board, Node * node){
+void AgentSolver::garbage_collect(Board & board, Node * node){
 	Node * child = node->children.begin(),
 		 * end = node->children.end();
 
@@ -332,14 +408,14 @@ void AgentMCTS::garbage_collect(Board & board, Node * node){
 	}
 }
 
-AgentMCTS::Node * AgentMCTS::find_child(const Node * node, const Move & move) const {
+AgentSolver::Node * AgentSolver::find_child(const Node * node, const Move & move) const {
 	for(auto & c : node->children)
 		if(c.move == move)
 			return &c;
 	return NULL;
 }
 
-void AgentMCTS::gen_sgf(SGFPrinter<Move> & sgf, unsigned int limit, const Node & node, Side side) const {
+void AgentSolver::gen_sgf(SGFPrinter<Move> & sgf, unsigned int limit, const Node & node, Side side) const {
 	for(auto & child : node.children){
 		if(child.exp.num() >= limit && (side != node.outcome || child.outcome == node.outcome)){
 			sgf.child_start();
@@ -351,7 +427,7 @@ void AgentMCTS::gen_sgf(SGFPrinter<Move> & sgf, unsigned int limit, const Node &
 	}
 }
 
-void AgentMCTS::create_children_simple(const Board & board, Node * node){
+void AgentSolver::create_children_simple(const Board & board, Node * node){
 	assert(node->children.empty());
 
 	node->children.alloc(board.movesremain(), ctmem);
@@ -373,7 +449,7 @@ void AgentMCTS::create_children_simple(const Board & board, Node * node){
 	PLUS(nodes, node->children.num());
 }
 
-void AgentMCTS::load_sgf(SGFParser<Move> & sgf, const Board & board, Node & node) {
+void AgentSolver::load_sgf(SGFParser<Move> & sgf, const Board & board, Node & node) {
 	assert(sgf.has_children());
 	create_children_simple(board, & node);
 
@@ -392,6 +468,37 @@ void AgentMCTS::load_sgf(SGFParser<Move> & sgf, const Board & board, Node & node
 		}
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }; // namespace Hex
 }; // namespace Morat

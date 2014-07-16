@@ -158,6 +158,7 @@ def analyzeResults(actual_results, theoretical_results):
 	print(str(number_of_agreeing_tests) + "/" + str(number_of_tests) + " MCTS and PNS agree with each other")
 	print(str(number_of_MCTS_passed_tests) + "/" + str(number_of_tests / 2) + " MCTS Tests Passed")
 	print(str(number_of_PNS_passed_tests) + "/" + str(number_of_tests / 2) + " PNS Tests Passed")
+	print(str(len(failed_tests)) + "/" + str(number_of_tests) + " Tests Failed")
 	print(str(len(unknown_tests)) + "/" + str(number_of_tests) + " Tests were unknown")
 	print("Failed Tests: " )
 	for f in failed_tests:

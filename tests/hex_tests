@@ -186,7 +186,7 @@ endtest
 test
 18
 expected_outcome
-0
+1
 commands
 size 2
 white b2
@@ -288,7 +288,7 @@ endtest
 test
 26
 expected_outcome
-1
+0
 commands
 size 4
 white c2

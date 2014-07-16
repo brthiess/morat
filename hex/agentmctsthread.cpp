@@ -50,11 +50,11 @@ void AgentMCTS::AgentThread::walk_tree(Board & board, Node * node, int depth){
 					logerr("move failed: " + child->move.to_s() + "\n" + board.to_s(true));
 					assert(false && "move failed");
 				}
-
 				child->exp.addvloss(); //balanced out after rollouts
 
 				walk_tree(board, child, depth+1);
-
+				
+				
 				child->exp.addv(movelist.getexp(toplay));
 
 				if(!agent->do_backup(node, child, toplay) && //not solved
@@ -417,8 +417,11 @@ Outcome AgentMCTS::AgentThread::rollout(Board & board, Move move, int depth){
 
 		movelist.addrollout(move, turn);
 
+		
+
 		assert2(board.move(move, true, false), "\n" + board.to_s(true) + "\n" + move.to_s());
 		depth++;
+		
 	}
 
 	gamelen.add(depth);

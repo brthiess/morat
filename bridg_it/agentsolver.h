@@ -1,10 +1,10 @@
 
 #pragma once
 
-//A Monte-Carlo Tree Search based player
 
 #include <cmath>
 #include <cassert>
+#include <list>
 
 #include "../lib/agentpool.h"
 #include "../lib/compacttree.h"
@@ -15,6 +15,8 @@
 #include "../lib/time.h"
 #include "../lib/types.h"
 #include "../lib/xorshift.h"
+
+
 
 #include "agent.h"
 #include "board.h"
@@ -30,7 +32,7 @@
 namespace Morat {
 namespace Hex {
 
-class AgentMCTS : public Agent{
+class AgentSolver : public Agent{
 public:
 
 	struct Node {
@@ -131,9 +133,66 @@ public:
 			return val;
 		}
 	};
+public:	
+	struct AdjacencyListNode{
+		int destination;
+		struct AdjacencyListNode *next;
+	};
 
 
-	class AgentThread : public AgentThreadBase<AgentMCTS> {
+	struct AdjacencyList{
+		struct AdjacencyListNode *head;
+	};
+	
+	class Undirected_Graph{
+		private:
+			int size;
+			struct AdjacencyList *array;
+
+		public:
+			Undirected_Graph(int size){
+				this->size = size;
+				array = new AdjacencyList[size];
+				for (int i = 0; i < size; ++i)
+					array[i].head = NULL;
+			}
+	
+			AdjacencyListNode* newAdjacencyListNode(int destination){
+				AdjacencyListNode* newNode = new AdjacencyListNode;
+				newNode->destination = destination;
+				newNode->next = NULL;
+				return newNode;
+			}
+
+			void addEdge(int src, int destination){
+				AdjacencyListNode* newNode = newAdjacencyListNode(destination);
+				newNode->next = array[src].head;
+				array[src].head = newNode;
+				newNode = newAdjacencyListNode(src);
+				newNode->next = array[destination].head;
+				array[destination].head = newNode;
+			}
+
+			void graph_to_s(){           
+				for (int i = 0; i < size; i++){
+					AdjacencyListNode* n = array[i].head;
+					std::cout<<"\n Vertex:  "<<i<<"|";
+                
+					while (n){
+						std::cout<<", "<<n->destination;
+						n = n->next;
+					}
+				}
+			}
+	};
+public:	
+	Undirected_Graph getAdjacencyList();
+	int getNumberOfVertices();
+	int xy_to_vertice(int xy);
+	int xy_from_whites_perspective(int xy);
+
+
+	class AgentThread : public AgentThreadBase<AgentSolver> {
 		mutable XORShift_float unitrand;
 		LastGoodReply last_good_reply;
 		RandomPolicy random_policy;
@@ -152,7 +211,7 @@ public:
 		double times[4]; //time spent in each of the stages
 		Time timestamps[4]; //timestamps for the beginning, before child creation, before rollout, after rollout
 
-		AgentThread(AgentThreadPool<AgentMCTS> * p, AgentMCTS * a) : AgentThreadBase<AgentMCTS>(p, a) { }
+		AgentThread(AgentThreadPool<AgentSolver> * p, AgentSolver * a) : AgentThreadBase<AgentSolver>(p, a) { }
 
 
 		void reset(){
@@ -237,13 +296,14 @@ public:
 
 	CompactTree<Node> ctmem;
 
-	AgentThreadPool<AgentMCTS> pool;
+	AgentThreadPool<AgentSolver> pool;
 
-	AgentMCTS();
-	~AgentMCTS();
+	AgentSolver();
+	~AgentSolver();
 
 	void set_memlimit(uint64_t lim) { }; // in bytes
 	void clear_mem() { };
+	
 
 	void set_ponder(bool p);
 	void set_board(const Board & board, bool clear = true);
@@ -306,7 +366,14 @@ protected:
 
 	void gen_sgf(SGFPrinter<Move> & sgf, unsigned int limit, const Node & node, Side side) const ;
 	void load_sgf(SGFParser<Move> & sgf, const Board & board, Node & node);
+
+
 };
+
+
+
+
+
 
 }; // namespace Hex
 }; // namespace Morat

@@ -4,13 +4,17 @@
 
 #include "../lib/string.h"
 
-#include "agentmcts.h"
+#include "agentsolver.h"
 
 
 namespace Morat {
-namespace Rex {
+namespace Hex {
 
-void AgentMCTS::AgentThread::iterate(){
+
+
+
+
+void AgentSolver::AgentThread::iterate(){
 	INCR(agent->runs);
 	if(agent->profile){
 		timestamps[0] = Time();
@@ -33,7 +37,7 @@ void AgentMCTS::AgentThread::iterate(){
 	}
 }
 
-void AgentMCTS::AgentThread::walk_tree(Board & board, Node * node, int depth){
+void AgentSolver::AgentThread::walk_tree(Board & board, Node * node, int depth){
 	Side toplay = board.toplay();
 
 	if(!node->children.empty() && node->outcome < Outcome::DRAW){
@@ -114,11 +118,11 @@ void AgentMCTS::AgentThread::walk_tree(Board & board, Node * node, int depth){
 	return;
 }
 
-bool sort_node_know(const AgentMCTS::Node & a, const AgentMCTS::Node & b){
+bool sort_node_know(const AgentSolver::Node & a, const AgentSolver::Node & b){
 	return (a.know > b.know);
 }
 
-bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
+bool AgentSolver::AgentThread::create_children(const Board & board, Node * node){
 	if(!node->children.lock())
 		return false;
 
@@ -131,14 +135,11 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 
 	Side toplay = board.toplay();
 	Side opponent = ~toplay;
-	
-	int numberOfSelfToxicCells = 0;
-	int numberOfOpponentToxicCells = 0;
+	int losses = 0;
 
 	Node * child = temp.begin(),
 	     * end   = temp.end(),
-	     * loss  = NULL,
-	     * mustPlay = NULL;
+	     * loss  = NULL;
 	Board::MoveIterator move = board.moveit(agent->prunesymmetry);
 	int nummoves = 0;
 	for(; !move.done() && child != end; ++move, ++child){
@@ -146,55 +147,19 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 
 		if(agent->minimax){
 			child->outcome = board.test_outcome(*move);
-			
-			if (child->outcome == Outcome::UNKNOWN) {
-				mustPlay = child;
-			}
-			
-			//If the opponent would make a connection playing this move
-			//Does nothing yet
-			if (board.test_outcome(*move, opponent) == toplay) {
-				numberOfOpponentToxicCells++;
-			}	
-			
-					
-			//If playing this move connects your pieces. (i.e. opponent wins)
-			//Then mark this cell as a toxic cell
-			//If the number of toxic cells equals the number of moves that remain
-			//Then we have lost
-			if (child->outcome == +opponent) {	
-				numberOfSelfToxicCells++;	
+
+			if(agent->minimax >= 2 && board.test_outcome(*move, opponent) == +opponent){
+				losses++;
 				loss = child;
-				//If number of empty cells before move is odd or
-				//the number of toxic cells after we move is at least 2
-				//then this is a proven loss
-				if (board.movesremain() % 2 == 1 || numberOfSelfToxicCells >= 3) {
-					Node macro;
-					if (mustPlay != NULL) {
-						macro = *mustPlay;
-					}
-					else {
-						macro = *child;
-					}
-					temp.dealloc(agent->ctmem);
-					temp.alloc(1, agent->ctmem);
-					macro.exp.addwins(agent->visitexpand);
-					*(temp.begin()) = macro;
-				}
 			}
-			
-			//If there remains two spots left on the board or
-			//if the board only has opponent toxic cells and
-			//if playing this move leaves the outcome 'unknown'
-			//then that logically means the last spot will cause the opponent
-			//to connect his pieces and lose
-			//Therefore set this move as the bestmove
-			if((board.movesremain() == 2 || (numberOfOpponentToxicCells == board.movesremain())) && child->outcome == Outcome::UNKNOWN){ //proven win from here, don't need children
-				Node macro = *child;
+
+			if(child->outcome == +toplay){ //proven win from here, don't need children
+				node->outcome = child->outcome;
+				node->proofdepth = 1;
+				node->bestmove = *move;
+				node->children.unlock();
 				temp.dealloc(agent->ctmem);
-				temp.alloc(1, agent->ctmem);
-				macro.exp.addwins(agent->visitexpand);
-				*(temp.begin()) = macro;
+				return true;
 			}
 		}
 
@@ -208,23 +173,20 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 	else //both end conditions should happen in parallel
 		assert(move.done() && child == end);
 
-	//If there is only one available cell to play (minus the toxic cells)
-	//then we must play it
-	if (numberOfSelfToxicCells == board.movesremain() - 1 && agent->minimax) {
-		Node macro = *mustPlay;
+	//Make a macro move, add experience to the move so the current simulation continues past this move
+	if(losses == 1){
+		Node macro = *loss;
 		temp.dealloc(agent->ctmem);
 		temp.alloc(1, agent->ctmem);
 		macro.exp.addwins(agent->visitexpand);
 		*(temp.begin()) = macro;
-	}
-	//If the only available moves are toxic cells
-	//then we have lost
-	else if(numberOfSelfToxicCells == board.movesremain() && agent->minimax){
-		Node macro = *loss;
+	}else if(losses >= 2){ //proven loss, but at least try to block one of them
+		node->outcome = +opponent;
+		node->proofdepth = 2;
+		node->bestmove = loss->move;
+		node->children.unlock();
 		temp.dealloc(agent->ctmem);
-		temp.alloc(1, agent->ctmem);
-	macro.exp.addwins(agent->visitexpand);
-	*(temp.begin()) = macro;
+		return true;
 	}
 
 	if(agent->dynwiden > 0) //sort in decreasing order by knowledge
@@ -237,7 +199,7 @@ bool AgentMCTS::AgentThread::create_children(const Board & board, Node * node){
 	return true;
 }
 
-AgentMCTS::Node * AgentMCTS::AgentThread::choose_move(const Node * node, Side toplay, int remain) const {
+AgentSolver::Node * AgentSolver::AgentThread::choose_move(const Node * node, Side toplay, int remain) const {
 	float val, maxval = -1000000000;
 	float logvisits = log(node->exp.num());
 	int dynwidenlim = (agent->dynwiden > 0 ? (int)(logvisits/agent->logdynwiden)+2 : Board::max_vecsize);
@@ -285,7 +247,7 @@ backup in this order:
 0 lose
 return true if fully solved, false if it's unknown or partially unknown
 */
-bool AgentMCTS::do_backup(Node * node, Node * backup, Side toplay){
+bool AgentSolver::do_backup(Node * node, Node * backup, Side toplay){
 	Outcome node_outcome = node->outcome;
 	if(node_outcome >= Outcome::DRAW) //already proven, probably by a different thread
 		return true;
@@ -358,7 +320,7 @@ bool AgentMCTS::do_backup(Node * node, Node * backup, Side toplay){
 }
 
 //update the rave score of all children that were played
-void AgentMCTS::AgentThread::update_rave(const Node * node, Side toplay){
+void AgentSolver::AgentThread::update_rave(const Node * node, Side toplay){
 	Node * child = node->children.begin(),
 	     * childend = node->children.end();
 
@@ -367,7 +329,7 @@ void AgentMCTS::AgentThread::update_rave(const Node * node, Side toplay){
 }
 
 
-void AgentMCTS::AgentThread::add_knowledge(const Board & board, Node * node, Node * child){
+void AgentSolver::AgentThread::add_knowledge(const Board & board, Node * node, Node * child){
 	if(agent->localreply){ //boost for moves near the previous move
 		int dist = node->move.dist(child->move);
 		if(dist < 4)
@@ -395,7 +357,7 @@ void AgentMCTS::AgentThread::add_knowledge(const Board & board, Node * node, Nod
 }
 
 //test whether this move is a forced reply to the opponent probing your virtual connections
-bool AgentMCTS::AgentThread::test_bridge_probe(const Board & board, const Move & move, const Move & test) const {
+bool AgentSolver::AgentThread::test_bridge_probe(const Board & board, const Move & move, const Move & test) const {
 	//TODO: switch to the same method as policy_bridge.h, maybe even share code
 	if(move.dist(test) != 1)
 		return false;
@@ -444,7 +406,7 @@ bool AgentMCTS::AgentThread::test_bridge_probe(const Board & board, const Move &
 
 
 //play a random game starting from a board state, and return the results of who won
-Outcome AgentMCTS::AgentThread::rollout(Board & board, Move move, int depth){
+Outcome AgentSolver::AgentThread::rollout(Board & board, Move move, int depth){
 	Outcome won;
 
 	if(agent->instantwin)
@@ -473,7 +435,7 @@ Outcome AgentMCTS::AgentThread::rollout(Board & board, Move move, int depth){
 	return won;
 }
 
-Move AgentMCTS::AgentThread::rollout_choose_move(Board & board, const Move & prev){
+Move AgentSolver::AgentThread::rollout_choose_move(Board & board, const Move & prev){
 	//look for instant wins
 	if(agent->instantwin){
 		Move move = instant_wins.choose_move(board, prev);
@@ -498,5 +460,6 @@ Move AgentMCTS::AgentThread::rollout_choose_move(Board & board, const Move & pre
 	return random_policy.choose_move(board, prev);
 }
 
-}; // namespace Rex
+
+}; // namespace Hex
 }; // namespace Morat

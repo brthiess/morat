@@ -53,7 +53,7 @@ class Board{
 public:
 
 	static const int default_size = 8;
-	static const int min_size = 3;
+	static const int min_size = 2;
 	static const int max_size = 16;
 	static const int max_vecsize = max_size * max_size;
 
@@ -463,15 +463,11 @@ public:
 
 		//mirror is simply flip x,y
 		int x = pos.x,
-		    y = pos.y,
-		    z = sizem1 - x - y;
+		    y = pos.y;
+		    //z = sizem1 - x - y;
 
 		hash.update(0,  3*xy(x, y) + turn);
-		hash.update(1,  3*xy(z, y) + turn);
-		hash.update(2,  3*xy(z, x) + turn);
-		hash.update(3,  3*xy(x, z) + turn);
-		hash.update(4,  3*xy(y, z) + turn);
-		hash.update(5,  3*xy(y, x) + turn);
+
 	}
 
 	hash_t test_hash(const Move & pos) const {
@@ -484,15 +480,10 @@ public:
 			return hash.test(0, 3*xy(pos) + turn);
 
 		int x = pos.x,
-		    y = pos.y,
-		    z = sizem1 - x - y;
+		    y = pos.y;
+		    //z = sizem1 - x - y;
 
 		hash_t m = hash.test(0,  3*xy(x, y) + turn);
-		m = std::min(m, hash.test(1,  3*xy(z, y) + turn));
-		m = std::min(m, hash.test(2,  3*xy(z, x) + turn));
-		m = std::min(m, hash.test(3,  3*xy(x, z) + turn));
-		m = std::min(m, hash.test(4,  3*xy(y, z) + turn));
-		m = std::min(m, hash.test(5,  3*xy(y, x) + turn));
 		return m;
 	}
 
