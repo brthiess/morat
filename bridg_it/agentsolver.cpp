@@ -169,7 +169,7 @@ int AgentSolver::xy_to_vertice(int xy) {
 		else {
 			vertice = rootboard.get(i);
 		}
-		if ((i >= size) && (i < size * (size - 1)) && AgentSolver::xy_is_a_vertice(xy) && (vertice == rootboard.toplay())) {
+		if ((i >= size) && (i < size * (size - 1)) && AgentSolver::xy_is_a_vertice(i) && (vertice == rootboard.toplay())) {
 			vertice_number += 1;
 		}
 	}
