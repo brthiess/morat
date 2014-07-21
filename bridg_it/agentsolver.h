@@ -144,13 +144,13 @@ public:
 		struct AdjacencyListNode *head;
 	};
 	
-	class Undirected_Graph{
+	class Adjacency_List{
 		private:
 			int size;
 			struct AdjacencyList *array;
 
 		public:
-			Undirected_Graph(int size){
+			Adjacency_List(int size){
 				this->size = size;
 				array = new AdjacencyList[size];
 				for (int i = 0; i < size; ++i)
@@ -172,6 +172,20 @@ public:
 				newNode->next = array[src].head;
 				array[src].head = newNode;
 			}
+			
+			int get_number_of_edges() {
+				int number_of_edges = 0;
+				for (int i = 0; i < size; i++) {					
+					AdjacencyListNode* n = array[i].head;
+					
+					while(n) {
+						n = n->next;
+						number_of_edges += 1;
+					}
+				}
+				std::cout<<number_of_edges;
+				return number_of_edges/2;
+			}
 
 			void graph_to_s(){           
 				for (int i = 0; i < size; i++){
@@ -186,11 +200,13 @@ public:
 			}
 	};
 public:	
-	Undirected_Graph getAdjacencyList();
-	int getNumberOfVertices();
+	Adjacency_List getAdjacencyList();
+	int get_number_of_vertices();
 	int xy_to_vertice(int xy);
 	int xy_from_whites_perspective(int xy);
 	bool xy_on_board(int xy, int xy2);
+	bool xy_is_a_vertice(int xy);
+	Side find_winner(Adjacency_List board_matrix);
 
 
 	class AgentThread : public AgentThreadBase<AgentSolver> {
@@ -239,8 +255,7 @@ public:
 		Outcome rollout(Board & board, Move move, int depth);
 		Move rollout_choose_move(Board & board, const Move & prev);
 		Move rollout_pattern(const Board & board, const Move & move);
-	};
-
+	}; 
 
 public:
 

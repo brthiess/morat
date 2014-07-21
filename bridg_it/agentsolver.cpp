@@ -31,35 +31,69 @@ namespace Morat {
 namespace Hex {
 
 
+
+/**
+ * This function is called when genmove is called
+ */
 void AgentSolver::search(double time, uint64_t max_runs, int verbose){
-	printf("Hello");
+	//Get the adjacency list representation of the board
+	AgentSolver::Adjacency_List board_matrix = AgentSolver::getAdjacencyList();
+	
+	//Find out if we have won 
+	find_winner(board_matrix);
 }
+
+/**
+ * Is given an adjacency list of the current board state
+ * 
+ * Finds out if the person to play next has won the game
+ * Uses the graph partitioning method
+ */
+Side AgentSolver::find_winner(Adjacency_List board_matrix) {
+	
+	//Simple Case:  Partition Graph into v sets where v = number of vertices
+	int winning_number = 2 * (AgentSolver::get_number_of_vertices() - 1);
+	
+	//Check how many edges cross
+	int number_of_edges = board_matrix.get_number_of_edges();
+	
+	//If the number of edges that cross is greater than the winning number
+	//then we know there are at least 2 edge disjoint spanning trees
+	//therefore we have won
+	if (number_of_edges >= winning_number) {
+		return rootboard.toplay();
+	}
+	else {
+		return Side::NONE;
+	}
+	
+}
+
 
 /**
  * Returns an adjacency list representing the board in its current state
  */ 
-AgentSolver::Undirected_Graph AgentSolver::getAdjacencyList() {	
+AgentSolver::Adjacency_List AgentSolver::getAdjacencyList() {	
 	
 	//Get the number of vertices on the bridg_it board 
-	int numberOfVertices = AgentSolver::getNumberOfVertices();
+	int numberOfVertices = AgentSolver::get_number_of_vertices();
 	//Get the size of the board
 	int size = rootboard.get_size();
 	//Create an adjacency list
-	AgentSolver::Undirected_Graph adjacency_list (numberOfVertices);
+	AgentSolver::Adjacency_List adjacency_list (numberOfVertices);
 
 	//Get every connection
 	//If 'Edge' contains opponent, then that edge is gone
 	//If 'Edge' contains us, then that edge is reinforced
 	Side edge;
 
-	//Go through every spot on the board
-	//When an edge is found, check to see who is in it
+
 	printf("RootBoard.toplay() %d\n", rootboard.toplay().to_i());
+	//Go through every piece on the board.  Look for vertices and check for connecting edges
 	for (int xy = 0; xy < rootboard.vecsize(); xy++) {
 		printf("XY: %d\n", xy);
-		//Check if piece (aka edge) directly below contains 
-		//one of ours, theirs, or neither
-		if (rootboard.get(xy) == rootboard.toplay() && xy % 2 == 1 && AgentSolver::xy_from_whites_perspective(xy) % 2 == 1) {
+		//Check if piece is a vertice of the person to play next
+		if (rootboard.get(xy) == rootboard.toplay() && AgentSolver::xy_is_a_vertice(xy)) {
 			printf("Got through\n");
 			if (AgentSolver::xy_on_board(xy, xy + size * 2) && rootboard.get(xy + size) == Side::NONE) {
 				printf("Piece right below is empty\t");
@@ -135,7 +169,7 @@ int AgentSolver::xy_to_vertice(int xy) {
 		else {
 			vertice = rootboard.get(i);
 		}
-		if ((i >= size) && (i < size * (size - 1)) && (vertice == rootboard.toplay())) {
+		if ((i >= size) && (i < size * (size - 1)) && AgentSolver::xy_is_a_vertice(xy) && (vertice == rootboard.toplay())) {
 			vertice_number += 1;
 		}
 	}
@@ -144,11 +178,21 @@ int AgentSolver::xy_to_vertice(int xy) {
 	}
 	return vertice_number;
  }
+ 
+
+bool AgentSolver::xy_is_a_vertice(int xy) {
+	if (xy % 2 == 1 && AgentSolver::xy_from_whites_perspective(xy) % 2 == 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
 
 /**
  * Returns the total number of vertices on the board for one player
  */
-int AgentSolver::getNumberOfVertices() {
+int AgentSolver::get_number_of_vertices() {
 	int size = rootboard.get_size();
 
 	int numberOfVertices = ((size - 1) / 2) * ((size - 1) / 2 - 1) + 2;
@@ -184,10 +228,8 @@ void AgentSolver::set_board(const Board & board, bool clear){
 	rootboard = board;
 	Side a;
 	
-	Undirected_Graph board_matrix = AgentSolver::getAdjacencyList();
-	board_matrix.graph_to_s();
-
-	
+	AgentSolver::Adjacency_List board_matrix = AgentSolver::getAdjacencyList();
+	board_matrix.graph_to_s();	
 }
 
 
