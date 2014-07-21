@@ -395,8 +395,6 @@ public:
 				s += " ";
 			}
 		}
-		s += "\n Moves Made:";
-		s += to_str(nummoves);//TODO Remove this code
 
 		s += reset;
 		return s;

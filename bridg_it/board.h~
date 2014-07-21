@@ -182,12 +182,12 @@ public:
 			}
 		}
 		
-		initializeBridgIt(size);
+		initializeBridgIt();
 		toPlay = Side::P1;
 		last = M_NONE;
 	}
 	
-	void initializeBridgIt(int size){		
+	void initializeBridgIt(){		
 		for(int y = 0; y < size; y++){
 			for(int x = 0; x < size; x++){
 				//If it is an even row and an odd column
@@ -395,8 +395,6 @@ public:
 				s += " ";
 			}
 		}
-		s += "\n Moves Made:";
-		s += to_str(nummoves);//TODO Remove this code
 
 		s += reset;
 		return s;
