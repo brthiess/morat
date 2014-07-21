@@ -348,13 +348,36 @@ public:
 		s += "\n";
 
 		for(int y = 0; y < size; y++){
-			//s += string(y, ' ');
 			s += coord + char('A' + y);
 			int end = lineend(y);
 			for(int x = 0; x < end; x++){
-				s += (last == Move(x, y)   ? coord + "[" :
-				      last == Move(x-1, y) ? coord + "]" : " ");
 				Side p = get(x, y);
+				if (last == Move(x,y)) {
+					s += coord + "[";
+				} else if (last == Move (x-1, y)) {
+					s += coord + "]";
+				} else {
+					if (p == Side::P1 && y % 2 != 0 && x % 2 != 0) {
+						if (x == 0) {
+							s += " ";
+						} else if (x < end - 1) {
+							s += whiteh;
+						}
+						s += whiteh;
+					} else if (p == Side::P2 && y % 2 == 0 && x % 2 == 0) {
+						if (x == 0) {
+							s += " ";
+						} else if (x < end - 1) {
+							s += blackh;
+						}
+						s += blackh;
+					} else {
+						if (!((get(x-1, y) == Side::P1 && y % 2 != 0 && (x-1) % 2 != 0) ||
+						      (get(x-1, y) == Side::P2 && y % 2 == 0 && (x-1) % 2 == 0)))
+						s += " ";
+					}
+				}
+
 				if(      p == Side::NONE) {
 					s += empty;
 				} else if (p == Side::P1) {
@@ -380,15 +403,17 @@ public:
 				} else {
 					s += "?";
 				}
+
 				if (size >= 10) {
 					s += " ";
 				}
 			}
+
 			s += (last == Move(end-1, y) ? coord + "]" : " ");
 			s += white + reset;
 			s += '\n';
 		}
-		s += "  "; //s += string(size + 2, ' ');
+		s += "  ";
 		for(int i = 0; i < size; i++) {
 			s += black + " ";
 			if (size >= 10) {
