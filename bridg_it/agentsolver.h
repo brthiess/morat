@@ -165,12 +165,12 @@ public:
 			}
 
 			void addEdge(int src, int destination){
+				if (src == destination){
+					return;
+				}
 				AdjacencyListNode* newNode = newAdjacencyListNode(destination);
 				newNode->next = array[src].head;
 				array[src].head = newNode;
-				newNode = newAdjacencyListNode(src);
-				newNode->next = array[destination].head;
-				array[destination].head = newNode;
 			}
 
 			void graph_to_s(){           
@@ -179,7 +179,7 @@ public:
 					std::cout<<"\n Vertex:  "<<i<<"|";
                 
 					while (n){
-						std::cout<<", "<<n->destination;
+						std::cout<<n->destination<<", ";
 						n = n->next;
 					}
 				}
@@ -190,6 +190,7 @@ public:
 	int getNumberOfVertices();
 	int xy_to_vertice(int xy);
 	int xy_from_whites_perspective(int xy);
+	bool xy_on_board(int xy, int xy2);
 
 
 	class AgentThread : public AgentThreadBase<AgentSolver> {

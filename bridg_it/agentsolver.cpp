@@ -17,13 +17,13 @@
  * Note:  First and last rows are condensed to single point 
  * 
  * 
- * 				*		First Row
+ * 				1		First Row
  * 			  / | \
- * 			 *--*--*	Second Row
+ * 			 2--3--4	Second Row
  * 			 |  |  |
- * 			 *--*--*	Third Row
+ * 			 5--6--7	Third Row
  *  		  \ | /
- * 				*		Last Row 
+ * 				8		Last Row 
  * 
  ****************************/
 
@@ -42,6 +42,7 @@ AgentSolver::Undirected_Graph AgentSolver::getAdjacencyList() {
 	
 	//Get the number of vertices on the bridg_it board 
 	int numberOfVertices = AgentSolver::getNumberOfVertices();
+	//Get the size of the board
 	int size = rootboard.get_size();
 	//Create an adjacency list
 	AgentSolver::Undirected_Graph adjacency_list (numberOfVertices);
@@ -55,55 +56,60 @@ AgentSolver::Undirected_Graph AgentSolver::getAdjacencyList() {
 	//When an edge is found, check to see who is in it
 	printf("RootBoard.toplay() %d\n", rootboard.toplay().to_i());
 	for (int xy = 0; xy < rootboard.vecsize(); xy++) {
-		//If i is in the first row
-		//and i contains one of our pieces
 		printf("XY: %d\n", xy);
-		printf("i is in first row and contains one of our pieces");
 		//Check if piece (aka edge) directly below contains 
 		//one of ours, theirs, or neither
-		printf("Piece is owned by %d\n", rootboard.get(xy + size).to_i());
-		if (xy % 2 == 1 && AgentSolver::xy_from_whites_perspective(xy) % 2 == 0) {
-			if (rootboard.get(xy + size) == Side::NONE) {
-				printf("Piece right below is empty\n");
-				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + size*2));
+		if (rootboard.get(xy) == rootboard.toplay() && xy % 2 == 1 && AgentSolver::xy_from_whites_perspective(xy) % 2 == 1) {
+			printf("Got through\n");
+			if (AgentSolver::xy_on_board(xy, xy + size * 2) && rootboard.get(xy + size) == Side::NONE) {
+				printf("Piece right below is empty\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy + size*2));
+				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + size*2));
 			}
-			else if (rootboard.get(xy + size) == rootboard.toplay()) {
-				printf("Piece right below is ours\n");
-				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + size*2));
-				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + size*2));
+			else if (AgentSolver::xy_on_board(xy, xy + size * 2) && rootboard.get(xy + size) == rootboard.toplay()) {
+				printf("Piece right below is ours\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy + size*2));
+				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + size*2));
+				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + size*2));
 			}
 		
 			//Check directly above
-			if (rootboard.get(xy - size) == Side::NONE) {
-				printf("Piece right above is empty\n");
-				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - size*2));
+			if (AgentSolver::xy_on_board(xy, xy - size * 2) && rootboard.get(xy - size) == Side::NONE) {
+				printf("Piece right above is empty\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy - size*2));
+				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - size*2));
 			}
-			else if (rootboard.get(xy - size) == rootboard.toplay()) {
-				printf("Piece right above is ours\n");
-				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - size*2));
-				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - size*2));
+			else if (AgentSolver::xy_on_board(xy, xy - size * 2) && rootboard.get(xy - size) == rootboard.toplay()) {
+				printf("Piece right above is ours\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy - size*2));
+				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - size*2));
+				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - size*2));
 			}
 		
 			//Check directly to the right
-			if (rootboard.get(xy + 1) == Side::NONE) {
-				printf("Piece to the right is empty\n");
-				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + 2));
+			if (AgentSolver::xy_on_board(xy, xy + 2) && rootboard.get(xy + 1) == Side::NONE) {
+				printf("Piece to the right is empty\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy + 2));
+				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + 2));
 			}
-			else if (rootboard.get(xy + 1) == rootboard.toplay()) {
-				printf("Piece to the right is ours\n");
-				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + 2));
-				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + 2));
+			else if (AgentSolver::xy_on_board(xy, xy + 2) && rootboard.get(xy + 1) == rootboard.toplay()) {
+				printf("Piece to the right is ours\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy + 2));
+				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + 2));
+				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + 2));
 			}
 		
 			//Check directly to the left
-			if (rootboard.get(xy - 1) == Side::NONE) {
-				printf("Piece to the left is empty\n");
+			if (AgentSolver::xy_on_board(xy, xy - 2) && rootboard.get(xy - 1) == Side::NONE) {
+				printf("Piece to the left is empty\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy - 2));
 				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - 2));
 			}		
-			else if (rootboard.get(xy - 1) == rootboard.toplay()) {
-				printf("Piece to the left is ours\n");
-				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - 2));
-				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - 2));
+			else if (AgentSolver::xy_on_board(xy, xy - 2) && rootboard.get(xy - 1) == rootboard.toplay()) {
+				printf("Piece to the left is ours\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy - 2));
+				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - 2));
+				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - 2));
 			}
 		}
 	}
@@ -115,12 +121,26 @@ AgentSolver::Undirected_Graph AgentSolver::getAdjacencyList() {
  * on the graph it represents
  */
 int AgentSolver::xy_to_vertice(int xy) {
+	if (rootboard.toplay() == Side::P1) {
+		xy = AgentSolver::xy_from_whites_perspective(xy);
+		}
 	int size = rootboard.get_size();
 	int vertice_number = 0;
-	for (int i = 0; i <= xy; i++) {
-		if ((i >= size) && (i < size * (size - 1)) && (rootboard.get(i) == rootboard.toplay())) {
+	int i = 0;
+	for (; i <= xy; i++) {
+		Side vertice;
+		if (rootboard.toplay() == Side::P1) {
+			vertice = rootboard.get(xy_from_whites_perspective(i));
+		}
+		else {
+			vertice = rootboard.get(i);
+		}
+		if ((i >= size) && (i < size * (size - 1)) && (vertice == rootboard.toplay())) {
 			vertice_number += 1;
 		}
+	}
+	if (i >= (size * (size - 1))) {
+		vertice_number += 1;
 	}
 	return vertice_number;
  }
@@ -136,9 +156,28 @@ int AgentSolver::getNumberOfVertices() {
 	return numberOfVertices;
 }
 
+/**
+ * Returns the xy as if the board was mirrored on the diagonal line 
+ * from top left to bottom right
+ */
 int AgentSolver::xy_from_whites_perspective(int xy) {
-	//bottomfunction(n/5) + (n(mod5))* 5
-	return 0;
+	int size = rootboard.get_size();
+	int xy_from_whites_perspective = floor(xy / size) + (xy % size)*size;
+	return xy_from_whites_perspective;
+}
+
+/**
+ * Is given the xy of the original piece, and the connecting piece
+ * Checks if the given connecting piece is on the board
+ */
+bool AgentSolver::xy_on_board(int xy, int xy2) {
+	if (rootboard.get(xy) != rootboard.get(xy2)) {
+		return false;
+	}
+	if (xy2 < 0 && xy2 >= rootboard.vecsize()) {
+		return false;
+	}
+	return true;
 }
 
 void AgentSolver::set_board(const Board & board, bool clear){
