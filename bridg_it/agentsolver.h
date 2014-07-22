@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cassert>
 #include <list>
+#include <stack>
 
 #include "../lib/agentpool.h"
 #include "../lib/compacttree.h"
@@ -186,6 +187,28 @@ public:
 				std::cout<<number_of_edges;
 				return number_of_edges/2;
 			}
+			
+			bool not_empty() {
+				if (size != 0) {
+					return true;
+				}
+				return false;
+			}
+			
+			/**
+			 * Returns true if the two are connected by a single edge
+			 */
+			bool is_connected(int v1, int v2) {
+				AdjacencyListNode *n = array[v1].head;
+				while(n) {
+					if (v2 == n->destination) {
+						return true;
+					}
+					n = n->next;
+				}
+				return false;
+			}
+			
 
 			void graph_to_s(){           
 				for (int i = 0; i < size; i++){
@@ -207,6 +230,15 @@ public:
 	bool xy_on_board(int xy, int xy2);
 	bool xy_is_a_vertice(int xy);
 	Side find_winner(Adjacency_List board_matrix);
+	std::vector<Adjacency_List> find_edge_disjoint_trees(Adjacency_List board_matrix);
+	Adjacency_List get_spanning_tree(Adjacency_List board_matrix);
+	bool is_connected(Adjacency_List tree);
+	Adjacency_List subtract_trees(Adjacency_List tree1, Adjacency_List tree2);
+	void swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, Adjacency_List *used_edges);
+	bool not_all_edges_used(Adjacency_List edges_used, Adjacency_List board_matrix);
+	bool all_vertices_visited(std::vector<int> vertices_visited);
+	void clear(std::stack<int> &s);
+	
 
 
 	class AgentThread : public AgentThreadBase<AgentSolver> {

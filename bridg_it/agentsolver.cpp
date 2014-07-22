@@ -1,6 +1,8 @@
 
 #include <cmath>
 #include <string>
+#include <vector>
+#include <stack>  
 
 #include "../lib/alarm.h"
 #include "../lib/fileio.h"
@@ -41,6 +43,9 @@ void AgentSolver::search(double time, uint64_t max_runs, int verbose){
 	
 	//Find out if we have won 
 	find_winner(board_matrix);
+	
+	//Find 2 Edge Disjoint Spanning Trees
+	find_edge_disjoint_trees(board_matrix);
 }
 
 /**
@@ -61,12 +66,169 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 	//then we know there are at least 2 edge disjoint spanning trees
 	//therefore we have won
 	if (number_of_edges >= winning_number) {
+		printf("Found win");
+		return rootboard.toplay();
+	}
+	else if (number_of_edges >= winning_number - 1) {
+		printf("Found win if playing first");
 		return rootboard.toplay();
 	}
 	else {
+		printf("Found a loss");
 		return Side::NONE;
 	}
 	
+}
+
+std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(Adjacency_List board_matrix) {
+	
+	//To keep track of the edges used for the swapping
+	int number_of_vertices = AgentSolver::get_number_of_vertices();
+	Adjacency_List edges_used (number_of_vertices);
+	
+	std::vector<AgentSolver::Adjacency_List> edge_disjoint_trees;
+	
+	//Find a spanning tree from the main graph
+	Adjacency_List tree1 = get_spanning_tree(board_matrix);
+	
+	//Subtract the edges the edges from the main graph by tree1
+	Adjacency_List tree2 = subtract_trees(board_matrix, tree1);
+	
+
+	while(not_all_edges_used(edges_used, board_matrix)) {
+		//Check if both trees are connected
+		//If so then we have found 2 edge disjoint trees
+		if (is_connected(tree2) && is_connected(tree1)) {
+			edge_disjoint_trees.push_back(tree1);
+			edge_disjoint_trees.push_back(tree2);
+			break;
+		}
+		//Else find a connecting edge for tree2 (so that it is fully connected)
+		//and swap it with tree1
+		else {
+			swap_edges(&tree1, &tree2, &edges_used);			
+		}
+	}
+	
+	
+	return edge_disjoint_trees;	
+}
+
+/**
+ * Is given a set of edges and vertices (represented by an adjacency list)
+ * and returns an adjacency list of a spanning tree
+ * Returns null (?) if none exist
+ */
+AgentSolver::Adjacency_List AgentSolver::get_spanning_tree(Adjacency_List board_matrix) {
+	
+	//List of all visited vertices
+	std::vector<int> visited_vertices;
+	
+	int number_of_vertices = get_number_of_vertices();
+	AgentSolver::Adjacency_List spanning_tree (number_of_vertices);
+	
+	//Used to keep track of where we are in graph
+	std::stack<int> s;
+	
+	//Push first vertice onto stack
+	s.push(0);
+	visited_vertices.push_back(0);
+	while(!all_vertices_visited(visited_vertices)) {
+		while(!s.empty()) {
+			int v1 = s.top();
+			//Go through all vertices, 
+			//check if it is connected to the current vertice 
+			//and if it has not been visited before
+			for(int v2 = 0; v2 < number_of_vertices; v2++) {
+				if (board_matrix.is_connected(v1, v2) && std::find(visited_vertices.begin(), visited_vertices.end(), v2) == visited_vertices.end()) {
+					spanning_tree.addEdge(v1,v2);
+					spanning_tree.addEdge(v2,v1);
+					s.push(v2);
+					visited_vertices.push_back(v2);
+					v1 = s.top();
+					v2 = 0;
+				}
+			}
+			s.pop();
+		}
+		clear(s);
+		//Pop the unvisited vertice onto the stack
+		for(int v = 0; v < number_of_vertices; v++) {
+			//If v is not in visited_vertices array, then it has not been visited
+			//Push it onto stack and start depth first search again
+			if (std::find(visited_vertices.begin(), visited_vertices.end(), v) == visited_vertices.end()) {
+				s.push(v);
+				visited_vertices.push_back(v);
+				break;
+			}
+		}
+	}
+	spanning_tree.graph_to_s();
+	return spanning_tree;
+}
+
+void AgentSolver::clear( std::stack<int> &s ) {
+   std::stack<int> empty;
+   std::swap( s, empty );
+}
+
+
+bool AgentSolver::all_vertices_visited(std::vector<int> visited_vertices) {
+	int number_of_vertices = get_number_of_vertices();
+	for (int v = 0; v < number_of_vertices; v++) {
+		//If a vertice is not found in the visited_vertices array, return false
+		if ( std::find(visited_vertices.begin(), visited_vertices.end(), v) == visited_vertices.end()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+/**
+ * Is given 2 trees (represented as adjacency lists).  
+ * The second tree's edges are subtracted from the first
+ * It returns the result
+ */
+AgentSolver::Adjacency_List AgentSolver::subtract_trees(Adjacency_List tree1, Adjacency_List tree2) {
+	int number_of_vertices = get_number_of_vertices();
+	AgentSolver::Adjacency_List subtracted_tree (number_of_vertices);
+	//Go through all possible edge combinations and check to see if both graphs have them
+	for (int v1 = 0; v1 < number_of_vertices; v1++) {
+		for (int v2 = 0; v2 < number_of_vertices; v2++) {
+			//If the main graph is connected and the second graph is not, then add it to the subtracted tree
+			if (tree1.is_connected(v1,v2) && !tree2.is_connected(v1,v2)) {
+				subtracted_tree.addEdge(v1,v2);
+			}
+		}	
+	}
+	subtracted_tree.graph_to_s();
+	return subtracted_tree;
+}
+
+/**
+ * Checks if the given tree connects every vertice
+ * Returns true if it is connected
+ */
+bool AgentSolver::is_connected(Adjacency_List tree) {
+	return false;
+}
+
+/**
+ * Is given two trees and a list of edges (all in pointer form) that have already been swapped with,
+ * It finds an edge that will connect the unconnected tree
+ * and that has not been swapped yet 
+ * and swaps the two
+ */
+void AgentSolver::swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, Adjacency_List *used_edges) {
+	
+}
+
+/**
+ * Is given the edges used so far of a graph, and the total graph
+ * and determines if every edge of the total graph is in edges_used
+ */
+bool AgentSolver::not_all_edges_used(Adjacency_List edges_used, Adjacency_List board_matrix) {
+	return false;
 }
 
 
