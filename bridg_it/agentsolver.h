@@ -135,6 +135,40 @@ public:
 		}
 	};
 public:	
+	
+	struct Vertice_List {
+		std::vector<int> vertices;
+		void addVertice(int vertice_number) {
+			vertices.push_back(vertice_number);
+		}
+		std::vector<int> getVertices() {return vertices;}
+		void print() {
+			for (unsigned int i = 0; i < vertices.size(); i++) {
+				std::cout << vertices[i] << ", ";
+			}
+		}
+	};
+
+	struct Partition {
+		std::vector<Vertice_List> sets;
+		Partition(int number_of_sets) : sets (number_of_sets) {}
+		void addVertice(int vertice_number, int set_number) {
+			sets[set_number].addVertice(vertice_number);
+		}
+		std::vector<int> getVertices(int set_number) {
+			return sets[set_number].getVertices();
+		}
+		std::vector<Vertice_List> getSets() { return sets; }		
+		void print() {
+			std::cout << "\n****Partition*****\n";
+			for(unsigned int i = 0; i < sets.size(); i++) {
+				std::cout << "Set #" << i << ": ";
+				sets[i].print();
+				std::cout << "\n";
+			}
+		}
+	};
+	
 	struct AdjacencyListNode{
 		int destination;
 		struct AdjacencyListNode *next;
@@ -238,6 +272,7 @@ public:
 	bool not_all_edges_used(Adjacency_List edges_used, Adjacency_List board_matrix);
 	bool all_vertices_visited(std::vector<int> vertices_visited);
 	void clear(std::stack<int> &s);
+	std::vector<Partition> get_partitions(Adjacency_List board_matrix);
 	
 
 
