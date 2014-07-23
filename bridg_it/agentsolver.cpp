@@ -56,6 +56,9 @@ void AgentSolver::search(double time, uint64_t max_runs, int verbose){
  */
 Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 	
+	//Creates partitions
+	std::vector<AgentSolver::Partition> partitions = AgentSolver::get_partitions(board_matrix);
+	
 	//Simple Case:  Partition Graph into v sets where v = number of vertices
 	int winning_number = 2 * (AgentSolver::get_number_of_vertices() - 1);
 	
@@ -80,18 +83,75 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 	
 }
 
+/**
+ * Is given a graph (represented by an adjacency list) 
+ * And returns a vector of every partition
+ */
+ std::vector<AgentSolver::Partition> AgentSolver::get_partitions(Adjacency_List board_matrix) {
+	 //Example vertices
+	 int v1 = 1;
+	 int v2 = 2;
+	 int v3 = 3;
+	 int v4 = 4;
+	 
+	 //Example Sets
+	 int s0 = 0;
+	 int s1 = 1;
+	 int s2 = 2;
+
+
+	 
+	 //Create a partition with 3 sets
+	 AgentSolver::Partition example_one (3);
+	 
+	 //Add vertice 4 to set 2, add vertice 3 to set 1, etc...
+	 example_one.addVertice(v4, s2);
+	 example_one.addVertice(v3, s1);
+	 example_one.addVertice(v2, s1);
+	 example_one.addVertice(v1, s0);
+	 
+	 //Print this partition to the terminal
+	 example_one.print();
+	 
+	 //Create another example partition with 2 sets this time
+	 AgentSolver::Partition example_two (2);
+	 example_two.addVertice(v4, s0);
+	 example_two.addVertice(v3, s1);
+	 example_two.addVertice(v2, s1);
+	 example_two.addVertice(v1, s0);	 
+	 
+	 //Print this partition to the terminal
+	 example_two.print();
+	 
+	 
+	 //Create a vector of example partitions
+	 std::vector<AgentSolver::Partition> examples;
+	 
+	 //Add 'example_one' and 'example_two' to the examples vector
+	 examples.push_back(example_one);
+	 examples.push_back(example_two);
+	 
+	 //Return Examples
+	 return examples;
+ }
+
+/**
+ * Will return two edge disjoint trees, unless none are found in which case, 
+ * it returns only one.
+ */
 std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(Adjacency_List board_matrix) {
 	
 	//To keep track of the edges used for the swapping
 	int number_of_vertices = AgentSolver::get_number_of_vertices();
 	Adjacency_List edges_used (number_of_vertices);
 	
+	//Vector containing all edge disjoint trees found
 	std::vector<AgentSolver::Adjacency_List> edge_disjoint_trees;
 	
 	//Find a spanning tree from the main graph
 	Adjacency_List tree1 = get_spanning_tree(board_matrix);
 	
-	//Subtract the edges the edges from the main graph by tree1
+	//Subtract the edges the edges from the main graph by tree1 and get a second tree
 	Adjacency_List tree2 = subtract_trees(board_matrix, tree1);
 	
 
@@ -156,6 +216,7 @@ AgentSolver::Adjacency_List AgentSolver::get_spanning_tree(Adjacency_List board_
 		for(int v = 0; v < number_of_vertices; v++) {
 			//If v is not in visited_vertices array, then it has not been visited
 			//Push it onto stack and start depth first search again
+			//If we find a vertice here, then we know the graph is not connected
 			if (std::find(visited_vertices.begin(), visited_vertices.end(), v) == visited_vertices.end()) {
 				s.push(v);
 				visited_vertices.push_back(v);
@@ -210,7 +271,45 @@ AgentSolver::Adjacency_List AgentSolver::subtract_trees(Adjacency_List tree1, Ad
  * Returns true if it is connected
  */
 bool AgentSolver::is_connected(Adjacency_List tree) {
-	return false;
+	//List of all visited vertices
+	std::vector<int> visited_vertices;
+	
+	int number_of_vertices = get_number_of_vertices();
+	AgentSolver::Adjacency_List spanning_tree (number_of_vertices);
+	
+	//Used to keep track of where we are in graph
+	std::stack<int> s;
+	
+	//Push first vertice onto stack
+	s.push(0);
+	visited_vertices.push_back(0);
+	
+		while(!s.empty()) {
+			int v1 = s.top();
+			//Go through all vertices, 
+			//check if it is connected to the current vertice 
+			//and if it has not been visited before
+			for(int v2 = 0; v2 < number_of_vertices; v2++) {
+				if (tree.is_connected(v1, v2) && std::find(visited_vertices.begin(), visited_vertices.end(), v2) == visited_vertices.end()) {
+					spanning_tree.addEdge(v1,v2);
+					spanning_tree.addEdge(v2,v1);
+					s.push(v2);
+					visited_vertices.push_back(v2);
+					v1 = s.top();
+					v2 = 0;
+				}
+			}
+			s.pop();
+		}
+		
+	//Check to see if we have visited all the vertices through depth first search
+	//If we have not, then the graph is not connected
+	if (visited_vertices.size() < (unsigned)number_of_vertices) {
+		return false;
+	}
+	else {
+		return true;
+	}
 }
 
 /**
