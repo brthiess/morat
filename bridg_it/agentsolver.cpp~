@@ -19,13 +19,13 @@
  * Note:  First and last rows are condensed to single point 
  * 
  * 
- * 	    1		First Row
- * 	  / | \
- * 	 2--3--4	Second Row
- * 	 |  |  |
- * 	 5--6--7	Third Row
- * 	  \ | /
- * 	    8		Last Row 
+ * 				1		First Row
+ * 			  / | \
+ * 			 2--3--4	Second Row
+ * 			 |  |  |
+ * 			 5--6--7	Third Row
+ *  		  \ | /
+ * 				8		Last Row 
  * 
  ****************************/
 
