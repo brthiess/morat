@@ -110,6 +110,7 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 	 example_one.addVertice(v2, s1);
 	 example_one.addVertice(v1, s0);
 	 
+	 //Print this partition to the terminal
 	 example_one.print();
 	 
 	 //Create another example partition with 2 sets this time
@@ -119,13 +120,14 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 	 example_two.addVertice(v2, s1);
 	 example_two.addVertice(v1, s0);	 
 	 
+	 //Print this partition to the terminal
 	 example_two.print();
 	 
 	 
 	 //Create a vector of example partitions
 	 std::vector<AgentSolver::Partition> examples;
 	 
-	 //Add 'example' to the examples vector
+	 //Add 'example_one' and 'example_two' to the examples vector
 	 examples.push_back(example_one);
 	 examples.push_back(example_two);
 	 
