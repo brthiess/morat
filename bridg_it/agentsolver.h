@@ -218,8 +218,28 @@ public:
 						number_of_edges += 1;
 					}
 				}
-				std::cout<<number_of_edges;
 				return number_of_edges/2;
+			}
+			
+			bool delete_edge(int v1, int v2) {
+
+				AdjacencyListNode *previous_node = NULL;
+				AdjacencyListNode *n = array[v1].head;
+				while(n) {
+					if (v2 == n->destination) {
+						if (previous_node != NULL) {
+							previous_node->next = n->next;
+							return true;
+						}
+						else {
+							array[v1].head = NULL;
+							return true;
+						}
+					}
+					previous_node = n;
+					n = n->next;
+				}
+				return false;
 			}
 			
 			bool not_empty() {
@@ -273,7 +293,8 @@ public:
 	bool all_vertices_visited(std::vector<int> vertices_visited);
 	void clear(std::stack<int> &s);
 	std::vector<Partition> get_partitions(Adjacency_List board_matrix);
-	
+	bool vertices_are_in_the_same_set(Adjacency_List al, int v1, int v2);
+	bool edge_in(Adjacency_List al, int v1, int v2);
 
 
 	class AgentThread : public AgentThreadBase<AgentSolver> {
