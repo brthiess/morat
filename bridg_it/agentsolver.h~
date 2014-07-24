@@ -1,0 +1,483 @@
+
+#pragma once
+
+
+#include <cmath>
+#include <cassert>
+#include <list>
+#include <stack>
+
+#include "../lib/agentpool.h"
+#include "../lib/compacttree.h"
+#include "../lib/depthstats.h"
+#include "../lib/exppair.h"
+#include "../lib/log.h"
+#include "../lib/thread.h"
+#include "../lib/time.h"
+#include "../lib/types.h"
+#include "../lib/xorshift.h"
+
+
+
+#include "agent.h"
+#include "board.h"
+#include "lbdist.h"
+#include "move.h"
+#include "movelist.h"
+#include "policy_bridge.h"
+#include "policy_instantwin.h"
+#include "policy_lastgoodreply.h"
+#include "policy_random.h"
+
+
+namespace Morat {
+namespace Hex {
+
+class AgentSolver : public Agent{
+public:
+
+	struct Node {
+	public:
+		ExpPair rave;
+		ExpPair exp;
+		int16_t know;
+		Outcome outcome;
+		uint8_t proofdepth;
+		Move    move;
+		Move    bestmove; //if outcome is set, then bestmove is the way to get there
+		CompactTree<Node>::Children children;
+//		int padding;
+		//seems to need padding to multiples of 8 bytes or it segfaults?
+		//don't forget to update the copy constructor/operator
+
+		Node() : know(0), outcome(Outcome::UNKNOWN), proofdepth(0), move(M_NONE) { }
+		Node(const Move & m, Outcome o = Outcome::UNKNOWN) : know(0), outcome(o), proofdepth(0), move(m) { }
+		Node(const Node & n) { *this = n; }
+		Node & operator = (const Node & n){
+			if(this != & n){ //don't copy to self
+				//don't copy to a node that already has children
+				assert(children.empty());
+
+				rave = n.rave;
+				exp  = n.exp;
+				know = n.know;
+				move = n.move;
+				bestmove = n.bestmove;
+				outcome = n.outcome;
+				proofdepth = n.proofdepth;
+				//children = n.children; ignore the children, they need to be swap_tree'd in
+			}
+			return *this;
+		}
+
+		void swap_tree(Node & n){
+			children.swap(n.children);
+		}
+
+		std::string to_s() const ;
+		bool from_s(std::string s);
+
+		unsigned int size() const {
+			unsigned int num = children.num();
+
+			if(children.num())
+				for(Node * i = children.begin(); i != children.end(); i++)
+					num += i->size();
+
+			return num;
+		}
+
+		~Node(){
+			assert(children.empty());
+		}
+
+		unsigned int alloc(unsigned int num, CompactTree<Node> & ct){
+			return children.alloc(num, ct);
+		}
+		unsigned int dealloc(CompactTree<Node> & ct){
+			unsigned int num = 0;
+
+			if(children.num())
+				for(Node * i = children.begin(); i != children.end(); i++)
+					num += i->dealloc(ct);
+			num += children.dealloc(ct);
+
+			return num;
+		}
+
+		//new way, more standard way of changing over from rave scores to real scores
+		float value(float ravefactor, bool knowledge, float fpurgency){
+			float val = fpurgency;
+			float expnum = exp.num();
+			float ravenum = rave.num();
+
+			if(ravefactor <= min_rave){
+				if(expnum > 0)
+					val = exp.avg();
+			}else if(ravenum > 0 || expnum > 0){
+				float alpha = ravefactor/(ravefactor + expnum);
+//				float alpha = sqrt(ravefactor/(ravefactor + 3.0f*expnum));
+//				float alpha = ravenum/(expnum + ravenum + expnum*ravenum*ravefactor);
+
+				val = 0;
+				if(ravenum > 0) val += alpha*rave.avg();
+				if(expnum  > 0) val += (1.0f-alpha)*exp.avg();
+			}
+
+			if(knowledge && know > 0){
+				if(expnum <= 1)
+					val += 0.01f * know;
+				else if(expnum < 1000) //knowledge is only useful with little experience
+					val += 0.01f * know / sqrt(expnum);
+			}
+
+			return val;
+		}
+	};
+public:	
+	
+	struct Vertice_List {
+		std::vector<int> vertices;
+		void addVertice(int vertice_number) {
+			vertices.push_back(vertice_number);
+		}
+		std::vector<int> getVertices() {return vertices;}
+		void print() {
+			for (unsigned int i = 0; i < vertices.size(); i++) {
+				std::cout << vertices[i] << ", ";
+			}
+		}
+	};
+
+	struct Partition {
+		std::vector<Vertice_List> sets;
+		Partition(int number_of_sets) : sets (number_of_sets) {}
+		void addVertice(int vertice_number, int set_number) {
+			sets[set_number].addVertice(vertice_number);
+		}
+		std::vector<int> getVertices(int set_number) {
+			return sets[set_number].getVertices();
+		}
+		std::vector<Vertice_List> getSets() { return sets; }		
+		void print() {
+			std::cout << "\n****Partition*****\n" << std::endl;
+			for(unsigned int i = 0; i < sets.size(); i++) {
+				std::cout << "Set #" << i << ": ";
+				sets[i].print();
+				std::cout << "\n";
+			}
+		}
+	};
+	
+	struct AdjacencyListNode{
+		int destination;
+		struct AdjacencyListNode *next;
+	};
+
+
+	struct AdjacencyList{
+		struct AdjacencyListNode *head;
+	};
+	
+	class Adjacency_List{
+		private:
+			int size;
+			struct AdjacencyList *array;
+
+		public:
+			Adjacency_List(int size){
+				this->size = size;
+				array = new AdjacencyList[size];
+				for (int i = 0; i < size; ++i)
+					array[i].head = NULL;
+			}
+	
+			AdjacencyListNode* newAdjacencyListNode(int destination){
+				AdjacencyListNode* newNode = new AdjacencyListNode;
+				newNode->destination = destination;
+				newNode->next = NULL;
+				return newNode;
+			}
+
+			void addEdge(int src, int destination){
+				if (src == destination){
+					return;
+				}
+				AdjacencyListNode* newNode = newAdjacencyListNode(destination);
+				newNode->next = array[src].head;
+				array[src].head = newNode;
+			}
+			
+			int get_number_of_edges() {
+				int number_of_edges = 0;
+				for (int i = 0; i < size; i++) {					
+					AdjacencyListNode* n = array[i].head;
+					
+					while(n) {
+						n = n->next;
+						number_of_edges += 1;
+					}
+				}
+				return number_of_edges/2;
+			}
+			
+			bool delete_edge(int v1, int v2) {
+
+				AdjacencyListNode *previous_node = NULL;
+				AdjacencyListNode *n = array[v1].head;
+				while(n) {
+					if (v2 == n->destination) {
+						if (previous_node != NULL) {
+							previous_node->next = n->next;
+							return true;
+						}
+						else {
+							array[v1].head = NULL;
+							return true;
+						}
+					}
+					previous_node = n;
+					n = n->next;
+				}
+				return false;
+			}
+			
+			bool not_empty() {
+				if (size != 0) {
+					return true;
+				}
+				return false;
+			}
+			
+			/**
+			 * Returns true if the two are connected by a single edge
+			 */
+			bool is_connected(int v1, int v2) {
+				AdjacencyListNode *n = array[v1].head;
+				while(n) {
+					if (v2 == n->destination) {
+						return true;
+					}
+					n = n->next;
+				}
+				return false;
+			}
+			
+
+			void graph_to_s(){           
+				for (int i = 0; i < size; i++){
+					AdjacencyListNode* n = array[i].head;
+					std::cout<<"\n Vertex:  "<<i<<"|";
+                
+					while (n){
+						std::cout<<n->destination<<", ";
+						n = n->next;
+					}
+				}
+			}
+	};
+public:	
+	Adjacency_List getAdjacencyList();
+	int get_number_of_vertices();
+	int xy_to_vertice(int xy);
+	int xy_from_whites_perspective(int xy);
+	bool xy_on_board(int xy, int xy2);
+	bool xy_is_a_vertice(int xy);
+	Side find_winner(Adjacency_List board_matrix);
+	std::vector<Adjacency_List> find_edge_disjoint_trees(Adjacency_List board_matrix);
+	Adjacency_List get_spanning_tree(Adjacency_List board_matrix);
+	bool is_connected(Adjacency_List tree);
+	Adjacency_List subtract_trees(Adjacency_List tree1, Adjacency_List tree2);
+	void swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, Adjacency_List *used_edges);
+	bool not_all_edges_used(Adjacency_List edges_used, Adjacency_List board_matrix);
+	bool all_vertices_visited(std::vector<int> vertices_visited);
+	void clear(std::stack<int> &s);
+	std::vector<Partition> get_partitions(Adjacency_List board_matrix);
+	bool vertices_are_in_the_same_set(Adjacency_List al, int v1, int v2);
+	bool edge_in(Adjacency_List al, int v1, int v2);
+
+
+	class AgentThread : public AgentThreadBase<AgentSolver> {
+		mutable XORShift_float unitrand;
+		LastGoodReply last_good_reply;
+		RandomPolicy random_policy;
+		ProtectBridge protect_bridge;
+		InstantWin instant_wins;
+
+		bool use_rave;    //whether to use rave for this simulation
+		bool use_explore; //whether to use exploration for this simulation
+		LBDists dists;    //holds the distances to the various non-ring wins as a heuristic for the minimum moves needed to win
+
+		MoveList movelist;
+		int stage; //which of the four MCTS stages is it on
+
+	public:
+		DepthStats treelen, gamelen;
+		double times[4]; //time spent in each of the stages
+		Time timestamps[4]; //timestamps for the beginning, before child creation, before rollout, after rollout
+
+		AgentThread(AgentThreadPool<AgentSolver> * p, AgentSolver * a) : AgentThreadBase<AgentSolver>(p, a) { }
+
+
+		void reset(){
+			treelen.reset();
+			gamelen.reset();
+
+			use_rave = false;
+			use_explore = false;
+
+			for(int a = 0; a < 4; a++)
+				times[a] = 0;
+		}
+
+
+	private:
+		void iterate(); //handles each iteration
+		void walk_tree(Board & board, Node * node, int depth);
+		bool create_children(const Board & board, Node * node);
+		void add_knowledge(const Board & board, Node * node, Node * child);
+		Node * choose_move(const Node * node, Side toplay, int remain) const;
+		void update_rave(const Node * node, Side toplay);
+		bool test_bridge_probe(const Board & board, const Move & move, const Move & test) const;
+
+		Outcome rollout(Board & board, Move move, int depth);
+		Move rollout_choose_move(Board & board, const Move & prev);
+		Move rollout_pattern(const Board & board, const Move & move);
+	}; 
+
+public:
+
+	static const float min_rave;
+
+	bool  ponder;     //think during opponents time?
+	int   numthreads; //number of player threads to run
+	u64   maxmem;     //maximum memory for the tree in bytes
+	bool  profile;    //count how long is spent in each stage of MCTS
+//final move selection
+	float msrave;     //rave factor in final move selection, -1 means use number instead of value
+	float msexplore;  //the UCT constant in final move selection
+//tree traversal
+	bool  parentexplore; // whether to multiple exploration by the parents winrate
+	float explore;    //greater than one favours exploration, smaller than one favours exploitation
+	float ravefactor; //big numbers favour rave scores, small ignore it
+	float decrrave;   //decrease rave over time, add this value for each empty position on the board
+	bool  knowledge;  //whether to include knowledge
+	float userave;    //what probability to use rave
+	float useexplore; //what probability to use UCT exploration
+	float fpurgency;  //what value to return for a move that hasn't been played yet
+	int   rollouts;   //number of rollouts to run after the tree traversal
+	float dynwiden;   //dynamic widening, look at first log_dynwiden(experience) number of children, 0 to disable
+	float logdynwiden; // = log(dynwiden), cached for performance
+//tree building
+	bool  shortrave;  //only update rave values on short rollouts
+	bool  keeptree;   //reuse the tree from the previous move
+	int   minimax;    //solve the minimax tree within the uct tree
+	uint  visitexpand;//number of visits before expanding a node
+	bool  prunesymmetry; //prune symmetric children from the move list, useful for proving but likely not for playing
+	uint  gcsolved;   //garbage collect solved nodes or keep them in the tree, assuming they meet the required amount of work
+
+//knowledge
+	int   localreply; //boost for a local reply, ie a move near the previous move
+	int   locality;   //boost for playing near previous stones
+	int   connect;    //boost for having connections to edges and corners
+	int   size;       //boost for large groups
+	int   bridge;     //boost replying to a probe at a bridge
+	int   dists;      //boost based on minimum number of stones needed to finish a non-ring win
+//rollout
+	int   weightedrandom; //use weighted random for move ordering based on gammas
+	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
+	int   lastgoodreply;  //use the last-good-reply rollout heuristic
+	int   instantwin;     //how deep to look for instant wins in rollouts
+
+	float gammas[4096]; //pattern weights for weighted random
+
+	Board rootboard;
+	Node  root;
+	uword nodes;
+	int   gclimit; //the minimum experience needed to not be garbage collected
+
+	uint64_t runs, maxruns;
+
+	CompactTree<Node> ctmem;
+
+	AgentThreadPool<AgentSolver> pool;
+
+	AgentSolver();
+	~AgentSolver();
+
+	void set_memlimit(uint64_t lim) { }; // in bytes
+	void clear_mem() { };
+	
+
+	void set_ponder(bool p);
+	void set_board(const Board & board, bool clear = true);
+
+	void move(const Move & m);
+
+	void search(double time, uint64_t maxruns, int verbose);
+	Move return_move(int verbose) const { return return_move(& root, rootboard.toplay(), verbose); }
+
+	double gamelen() const;
+	vecmove get_pv() const;
+	std::string move_stats(const vecmove moves) const;
+
+	bool done() {
+		//solved or finished runs
+		return (rootboard.won() >= Outcome::DRAW || root.outcome >= Outcome::DRAW || (maxruns > 0 && runs >= maxruns));
+	}
+
+	bool need_gc() {
+		//out of memory, start garbage collection
+		return (ctmem.memalloced() >= maxmem);
+	}
+
+	void start_gc() {
+		Time starttime;
+		logerr("Starting player GC with limit " + to_str(gclimit) + " ... ");
+		uint64_t nodesbefore = nodes;
+		Board copy = rootboard;
+		garbage_collect(copy, & root);
+		Time gctime;
+		ctmem.compact(1.0, 0.75);
+		Time compacttime;
+		logerr(to_str(100.0*nodes/nodesbefore, 1) + " % of tree remains - " +
+			to_str((gctime - starttime)*1000, 0)  + " msec gc, " + to_str((compacttime - gctime)*1000, 0) + " msec compact\n");
+
+		if(ctmem.meminuse() >= maxmem/2)
+			gclimit = (int)(gclimit*1.3);
+		else if(gclimit > rollouts*5)
+			gclimit = (int)(gclimit*0.9); //slowly decay to a minimum of 5
+	}
+
+	void gen_sgf(SGFPrinter<Move> & sgf, int limit) const {
+		if(limit < 0)
+			limit = root.exp.num()/1000;
+		gen_sgf(sgf, limit, root, rootboard.toplay());
+	}
+
+	void load_sgf(SGFParser<Move> & sgf) {
+		load_sgf(sgf, rootboard, root);
+	}
+
+protected:
+
+	void garbage_collect(Board & board, Node * node); //destroys the board, so pass in a copy
+	bool do_backup(Node * node, Node * backup, Side toplay);
+	Move return_move(const Node * node, Side toplay, int verbose = 0) const;
+
+	Node * find_child(const Node * node, const Move & move) const ;
+	void create_children_simple(const Board & board, Node * node);
+
+	void gen_sgf(SGFPrinter<Move> & sgf, unsigned int limit, const Node & node, Side side) const ;
+	void load_sgf(SGFParser<Move> & sgf, const Board & board, Node & node);
+
+
+};
+
+
+
+
+
+
+}; // namespace Hex
+}; // namespace Morat

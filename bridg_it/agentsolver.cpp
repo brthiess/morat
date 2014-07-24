@@ -45,7 +45,7 @@ void AgentSolver::search(double time, uint64_t max_runs, int verbose){
 	find_winner(board_matrix);
 	
 	//Find 2 Edge Disjoint Spanning Trees
-	find_edge_disjoint_trees(board_matrix);
+	//find_edge_disjoint_trees(board_matrix);
 }
 
 /**
@@ -90,18 +90,17 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
  std::vector<AgentSolver::Partition> AgentSolver::get_partitions(Adjacency_List board_matrix) {
  	
 	//Create a vector of partitions
-	std::vector<AgentSolver::Partition> partitions;
+	 std::vector<AgentSolver::Partition> partitions;
 	
 	//
-	for (int i = AgentSolver::get_number_of_vertices(); i > 0; i--) {
+	for (int i = 1; i <= AgentSolver::get_number_of_vertices(); i++) {
 		AgentSolver::Partition p (i);
-		for (int xy = 0; xy < AgentSolver::get_number_of_vertices(); xy++) {
-			p.addVertice(1, 0);
-			p.print();
-			//TODO Insert specific code
+		for (int set = 0; set < i; set++){
+			for (int vertice = 0; vertice < AgentSolver::get_number_of_vertices(); vertice++) {
+				p.addVertice(vertice, set);
+				p.print();
+			}
 		}
-		p.print();
-		partitions.push_back(p);
 	}
 	
 	//return partitions
