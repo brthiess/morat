@@ -88,9 +88,26 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
  * And returns a vector of every partition
  */
  std::vector<AgentSolver::Partition> AgentSolver::get_partitions(Adjacency_List board_matrix) {
-	 
-	 
-	 //Example vertices
+ 	
+	//Create a vector of partitions
+	std::vector<AgentSolver::Partition> partitions;
+	
+	//
+	for (int i = AgentSolver::get_number_of_vertices(); i > 0; i--) {
+		AgentSolver::Partition p (i);
+		for (int xy = 0; xy < AgentSolver::get_number_of_vertices(); xy++) {
+			p.addVertice(1, 0);
+			p.print();
+			//TODO Insert specific code
+		}
+		p.print();
+		partitions.push_back(p);
+	}
+	
+	//return partitions
+	return partitions;
+	
+	 /*//Example vertices
 	 int v1 = 1;
 	 int v2 = 2;
 	 int v3 = 3;
@@ -136,6 +153,7 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 	 
 	 //Return Examples
 	 return examples;
+	 */
  }
 
 /**
