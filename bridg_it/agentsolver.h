@@ -6,6 +6,9 @@
 #include <cassert>
 #include <list>
 #include <stack>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "../lib/agentpool.h"
 #include "../lib/compacttree.h"
@@ -30,8 +33,12 @@
 #include "policy_random.h"
 
 
+
+
 namespace Morat {
 namespace Hex {
+	
+
 
 class AgentSolver : public Agent{
 public:
@@ -135,6 +142,35 @@ public:
 		}
 	};
 public:	
+
+
+
+	struct Edge {
+		int v1;
+		int v2; 
+		long id;
+		
+		Edge(int vert1, int vert2, long ID)  {
+			v1 = vert1;
+			v2 = vert2;
+			id = ID;
+		}
+
+		
+		long getID() {
+			return id;
+		}
+		
+		int getV1() {
+			return v1;
+		}
+		
+		int getV2() {
+			return v2;
+		}
+		
+	};
+
 	
 	struct Vertice_List {
 		std::vector<int> vertices;
@@ -191,7 +227,7 @@ public:
 				for (int i = 0; i < size; ++i)
 					array[i].head = NULL;
 			}
-	
+			
 			AdjacencyListNode* newAdjacencyListNode(int destination){
 				AdjacencyListNode* newNode = new AdjacencyListNode;
 				newNode->destination = destination;
@@ -203,7 +239,9 @@ public:
 				if (src == destination){
 					return;
 				}
+
 				AdjacencyListNode* newNode = newAdjacencyListNode(destination);
+
 				newNode->next = array[src].head;
 				array[src].head = newNode;
 			}
@@ -220,6 +258,18 @@ public:
 				}
 				return number_of_edges/2;
 			}
+			
+			bool find_edge(int v1, int v2) {
+				AdjacencyListNode *n = array[v1].head;
+				while(n) {
+					if (v2 == n->destination) {
+							return true;
+					}
+					n = n->next;
+				}
+				return false;
+			}
+			
 			
 			bool delete_edge(int v1, int v2) {
 
@@ -288,14 +338,15 @@ public:
 	Adjacency_List get_spanning_tree(Adjacency_List board_matrix);
 	bool is_connected(Adjacency_List tree);
 	Adjacency_List subtract_trees(Adjacency_List tree1, Adjacency_List tree2);
-	void swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, Adjacency_List *used_edges);
-	bool not_all_edges_used(Adjacency_List edges_used, Adjacency_List board_matrix);
+	void swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::vector<Edge> *used_edges);
+	bool not_all_edges_used(std::vector<Edge> edges_used, Adjacency_List board_matrix);
 	bool all_vertices_visited(std::vector<int> vertices_visited);
 	void clear(std::stack<int> &s);
 	std::vector<Partition> get_partitions(Adjacency_List board_matrix);
 	bool vertices_are_in_the_same_set(Adjacency_List al, int v1, int v2);
-	bool edge_in(Adjacency_List al, int v1, int v2);
-
+	bool edge_in(std::vector<Edge> edges, long id);
+	std::vector<Edge> get_all_edges(Adjacency_List tree);
+	long get_id();
 
 	class AgentThread : public AgentThreadBase<AgentSolver> {
 		mutable XORShift_float unitrand;
