@@ -169,6 +169,10 @@ public:
 		int get_id() { 
 			return id;
 		}
+		
+		int get_number_attached() {
+			return attached.size();
+		}
 		std::vector<int> get_attached() {return attached;}
 		bool get_visited() { return visited;}
 		void set_visited(bool Visited) {visited = Visited;}
@@ -184,12 +188,14 @@ public:
 			}
 			return false;
 		}
-		void remove_attached(int v) {
+		bool remove_attached(int v) {
 			for (int i = 0; (unsigned)i < attached.size(); i++) {
 				if (attached[i] == v) {
 					attached.erase(attached.begin() + i);
+					return true;
 				}
 			}
+			return false;
 		}
 		
 		void print() {
@@ -225,6 +231,14 @@ public:
 		
 		int getV2() {
 			return v2;
+		}
+		
+		void setV1(int v) {
+			v1 = v;
+		}
+		
+		void setV2(int v) {
+			v2 = v;
 		}
 		
 		bool get_visited() {
@@ -266,6 +280,16 @@ public:
 			
 			int get_number_of_edges() {
 				return edges.size()/2;
+			}
+			
+			int get_number_of_edges_attached_to_vertice(int vertex) {
+				for (int v = 0; (unsigned) v < vertices.size(); v++) {
+					if (vertices[v].get_id() == vertex) {
+						return vertices[v].get_number_attached();
+					}
+				}	
+				std::cerr<<"Error!  Could not find specified vertice";			
+				return -1;
 			}
 			
 			int get_number_of_vertices() {
@@ -320,6 +344,9 @@ public:
 			 * Deletes a vertice from the graph
 			 */
 			void delete_vertex(int vertex) {
+				if (vertex >= size) {
+					return;
+				}	
 				//Delete edges connected to this vertex
 				for(int v = 0; (unsigned)v < vertices.size(); v++) {
 					if (is_connected(v, vertex)) {
@@ -337,22 +364,37 @@ public:
 				vertices.erase(vertices.begin() + vertex);
 				size -= 1;
 				
+
+				
+				//Reassign references for attached vertices
+				for(int v = 0; (unsigned) v < vertices.size(); v++) {
+					for (int r = vertex; (unsigned)r < vertices.size(); r++) { 
+						std::cout<< "\nVertice: "<< vertices[v].get_id() << ", " << vertices[r].get_id();
+						if (is_connected(vertices[v].get_id(), vertices[r].get_id())) {
+							vertices[v].add_attached(vertices[r].get_id() - 1);
+							vertices[v].remove_attached(vertices[r].get_id());
+						}
+					}
+				}
+				
+				
 				//Move all id's down one
 				for (int v = vertex; (unsigned)v < vertices.size(); v++) {
 					int id = vertices[v].get_id();
 					vertices[v].set_id(id - 1);
 				}
 				
-				//Reassign references for attached vertices
-				for(int v = 0; (unsigned) v < vertices.size(); v++) {
-					for (int r = vertex; (unsigned)r < vertices.size(); r++) {
-						vertices[v].remove_attached(r);
-						vertices[v].add_attached(r-1);
+				for (int e = 0; (unsigned) e < edges.size(); e++) {
+					if (edges[e].getV1() >= vertex) {
+						edges[e].setV1(edges[e].getV1() - 1);
 					}
+					if (edges[e].getV2() >= vertex) {
+						edges[e].setV2(edges[e].getV2() - 1);
+					}					
 				}
-				
-				
 			}
+			
+				
 			
 						
 			/**
@@ -582,6 +624,7 @@ public:
 	long get_id();
 	Adjacency_List copyTree(Adjacency_List tree);
 	long get_random(long max);
+	Adjacency_List remove_problem_vertices(Adjacency_List tree);
 	
 
 	class AgentThread : public AgentThreadBase<AgentSolver> {

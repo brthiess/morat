@@ -45,13 +45,11 @@ void AgentSolver::search(double time, uint64_t max_runs, int verbose){
 	//Find out if we have won 
 	find_winner(board_matrix);
 	
+	//Get rid of problem vertices
+	board_matrix = remove_problem_vertices(board_matrix);
+	
 	//Find 2 Edge Disjoint Spanning Trees
 	find_edge_disjoint_trees(board_matrix);
-	board_matrix.delete_vertex(5);
-	std::cout <<"\n\n**Board After deleting vertex 5";
-	board_matrix.graph_to_s();
-	find_edge_disjoint_trees(board_matrix);
-	
 }
 
 /**
@@ -473,6 +471,23 @@ void AgentSolver::swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::
 
 }
 
+
+/**
+ * Is given an adjacency matrix and removes the vertices with 
+ * 0 or 1 connections to other vertices
+ */
+ AgentSolver::Adjacency_List AgentSolver::remove_problem_vertices(Adjacency_List tree) {
+	 int number_of_vertices = tree.get_number_of_vertices();
+	 std::vector<Edge> edges;
+	 for (int v = number_of_vertices - 1 ; v >= 0; v--) {
+		 if (tree.get_number_of_edges_attached_to_vertice(v) <= 1) {
+			 std::cout<<"\nFound a problem vertice at vertice: " << v;
+			 tree.delete_vertex(v);
+		 }
+	 }
+	 return tree;
+ }
+
 /**
  * Grabs all the edges from an adjacency list
  */ 
@@ -508,7 +523,9 @@ std::vector<AgentSolver::Edge> AgentSolver::get_all_edges(AgentSolver::Adjacency
 	Adjacency_List copy_tree  (number_of_vertices);
 	for (int v1 = 0; v1 < number_of_vertices; v1++) {
 		for (int v2 = 0; v2 < number_of_vertices; v2++) {
+			std::cout<<"\nCopy Tree.  V1: " << v1 << "   V2: " << v2;
 			if (tree.is_connected(v1,v2)) {
+				std::cout<<"\nTree is connected";
 				for (int i = 0; i < tree.get_number_of_duplicate_edges(v1,v2); i++){ 
 					copy_tree.addEdge(v1,v2);
 				}
