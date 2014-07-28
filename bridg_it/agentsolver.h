@@ -343,6 +343,7 @@ public:
 	bool all_vertices_visited(std::vector<int> vertices_visited);
 	void clear(std::stack<int> &s);
 	std::vector<Partition> get_partitions(Adjacency_List board_matrix);
+	std::vector<Partition> get_set_divisions(int sets, int depth, std::vector<int> levels, int numberOfVertices);
 	bool vertices_are_in_the_same_set(Adjacency_List al, int v1, int v2);
 	bool edge_in(std::vector<Edge> edges, long id);
 	std::vector<Edge> get_all_edges(Adjacency_List tree);

@@ -45,7 +45,7 @@ void AgentSolver::search(double time, uint64_t max_runs, int verbose){
 	find_winner(board_matrix);
 	
 	//Find 2 Edge Disjoint Spanning Trees
-	//find_edge_disjoint_trees(board_matrix);
+	find_edge_disjoint_trees(board_matrix);
 }
 
 /**
@@ -90,19 +90,27 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
  std::vector<AgentSolver::Partition> AgentSolver::get_partitions(Adjacency_List board_matrix) {
  	
 	//Create a vector of partitions
-	 std::vector<AgentSolver::Partition> partitions;
+	std::vector<AgentSolver::Partition> partitions;
+	
+	//Declare other variables
+	std::vector<AgentSolver::Partition> setDivisions;
+	int numberOfVertices = AgentSolver::get_number_of_vertices();
 	
 	//
-	for (int i = 1; i <= AgentSolver::get_number_of_vertices(); i++) {
-		AgentSolver::Partition p (i);
-		for (int set = 0; set < i; set++){
-			for (int vertice = 0; vertice < AgentSolver::get_number_of_vertices(); vertice++) {
-				p.addVertice(vertice, set);
-				p.print();
-			}
-		}
+	for (int i = 1; i <= numberOfVertices; i++) {
+		std::vector<int> levels;
+		std::vector<AgentSolver::Partition> temp;
+		levels.push_back(0);
+		temp = AgentSolver::get_set_divisions(i, 1, levels, numberOfVertices);
+		
+		for (int s = 0; s < (int)temp.size(); s++) {
+ 			
+ 			partitions.push_back(temp[s]);
+ 			
+ 		}
+ 		
 	}
-	
+	std::cout << "\n" << partitions.size() << " Partitions Found\n" << std::endl;
 	//return partitions
 	return partitions;
 	
@@ -116,9 +124,6 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 	 int s0 = 0;
 	 int s1 = 1;
 	 int s2 = 2;
-
-	
-
 	 
 	 //Create a partition with 3 sets
 	 AgentSolver::Partition example_one (3);
@@ -154,7 +159,54 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 	 return examples;
 	 */
  }
-
+ 
+ /**
+  * Passed the number of sets to generate partitions for.
+  *
+  * Returns a vector with all partitions for the given number of sets.
+  */
+ std::vector<AgentSolver::Partition> AgentSolver::get_set_divisions(int sets, int depth, std::vector<int> levels, int numberOfVertices) {
+ 	
+ 	std::vector<AgentSolver::Partition> partitions;
+ 	
+ 	if (depth == sets) {
+ 		
+ 		AgentSolver::Partition p (depth);
+ 		levels.push_back(numberOfVertices);
+ 		int vertice = 0;
+ 		
+ 		for (int set = 0; set < sets; set++) {
+ 		
+ 			for (; vertice < levels[set + 1]; vertice++) {
+ 				
+ 				p.addVertice(vertice, set);
+ 				
+ 			}
+ 			
+ 		}
+ 		
+ 		partitions.push_back(p);
+ 		p.print();
+ 		
+ 	} else {
+ 		
+ 		levels.push_back((levels[depth - 1] + 1));
+ 		
+ 		for (; levels[depth] < (numberOfVertices - (sets - depth - 1)); levels[depth]++) {
+ 			std::vector<AgentSolver::Partition> temp;
+ 			temp = AgentSolver::get_set_divisions(sets, depth + 1, levels, numberOfVertices);
+ 			
+ 			for (int s = 0; s < (int)temp.size(); s++) {
+ 				
+ 				partitions.push_back(temp[s]);
+ 				
+ 			}
+ 		}
+ 	}
+ 	
+ 	return partitions;
+ }
+ 
 /**
  * Will return two edge disjoint trees, unless none are found in which case, 
  * it returns only one.
