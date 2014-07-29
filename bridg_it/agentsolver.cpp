@@ -189,25 +189,7 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 	 
  }
  
- /**
-  * Pushes the given integer into every set of a partition
-  */
-  std::vector<AgentSolver::Partition> AgentSolver::push_to_all_indices(int v, std::vector<AgentSolver::Partition> partitions) {
-		for (int p = 0; (unsigned) p < partitions.size(); p++) {
-			partitions[p] = 
-		}
-		
-		std::vector<AgentSolver::Partition> p;
-		return p;
-  }
-  
-  /**
-   * Is given two partition vectors, and concatenates them
-   */
-   std::vector<AgentSolver::Partition> AgentSolver::concatenate(std::vector<AgentSolver::Partition> p1, std::vector<AgentSolver::Partition> p2) {
-		std::vector<AgentSolver::Partition> p;
-		return p;	   
-   }
+
  
  /**
   * Passed the number of sets to generate partitions for.
