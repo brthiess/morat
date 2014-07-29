@@ -255,6 +255,7 @@ public:
 			std::vector<Edge> edges;
 			
 		public: 
+			Adjacency_List() {}
 			Adjacency_List(int size) {
 				this->size = size;
 				for(int i = 0; i < size; i++) {
@@ -466,142 +467,7 @@ public:
 		struct AdjacencyListNode *head;
 	};
 	
-	class abc{
-		private:
-			int size;
-			struct AdjacencyList *array;
-
-		public:
-			abc(int size){
-				this->size = size;
-				array = new AdjacencyList[size];
-				for (int i = 0; i < size; ++i)
-					array[i].head = NULL;
-			}
-			
-			AdjacencyListNode* newAdjacencyListNode(int destination){
-				AdjacencyListNode* newNode = new AdjacencyListNode;
-				newNode->destination = destination;
-				newNode->next = NULL;
-				return newNode;
-			}
-
-			void addEdge(int src, int destination){
-				if (src == destination){
-					return;
-				}
-
-				AdjacencyListNode* newNode = newAdjacencyListNode(destination);
-
-				newNode->next = array[src].head;
-				array[src].head = newNode;
-			}
-			
-			int get_number_of_edges() {
-				int number_of_edges = 0;
-				for (int i = 0; i < size; i++) {					
-					AdjacencyListNode* n = array[i].head;
-					
-					while(n) {
-						n = n->next;
-						number_of_edges += 1;
-					}
-				}
-				return number_of_edges/2;
-			}
-			
-			int get_number_of_duplicate_edges(int v1, int v2) {
-				int number = 0;
-				AdjacencyListNode *n = array[v1].head;
-				while(n) {
-					if (v2 == n->destination) {
-							number += 1;
-					}
-					n = n->next;
-				}
-				return number;
-			}
-			
-			bool find_edge(int v1, int v2) {
-				AdjacencyListNode *n = array[v1].head;
-				while(n) {
-					if (v2 == n->destination) {
-							return true;
-					}
-					n = n->next;
-				}
-				return false;
-			}
-			
-			
-			bool delete_edge(int v1, int v2) {
-
-				AdjacencyListNode *previous_node = NULL;
-				AdjacencyListNode *n = array[v1].head;
-				while(n) {
-					if (v2 == n->destination) {
-						if (previous_node != NULL) {
-							previous_node->next = n->next;
-							return true;
-						}
-						else {
-							array[v1].head = n->next;							
-							return true;
-						}
-					}
-					previous_node = n;
-					n = n->next;
-				}
-				return false;
-			}
-			
-			bool not_empty() {
-				if (size != 0) {
-					return true;
-				}
-				return false;
-			}
-			/**
-			 * Deletes a vertice from the graph
-			 */
-			void delete_vertex(int vertex) {
-				//***********FIX********** < 5?
-				for(int v1 = 0; v1 < 5; v1++) {
-					if (is_connected(v1, vertex)) {
-						delete_edge(v1,vertex);
-						delete_edge(vertex,v1);
-					}
-				}
-			}
-			
-			/**
-			 * Returns true if the two are connected by a single edge
-			 */
-			bool is_connected(int v1, int v2) {
-				AdjacencyListNode *n = array[v1].head;
-				while(n) {
-					if (v2 == n->destination) {
-						return true;
-					}
-					n = n->next;
-				}
-				return false;
-			}
-			
-
-			void graph_to_s(){           
-				for (int i = 0; i < size; i++){
-					AdjacencyListNode* n = array[i].head;
-					std::cout<<"\n Vertex:  "<<i<<"|";
-                
-					while (n){
-						std::cout<<n->destination<<", ";
-						n = n->next;
-					}
-				}
-			}
-	};
-public:	
+	public:	
 	Adjacency_List getAdjacencyList();
 	int get_number_of_vertices(Adjacency_List tree);
 	int xy_to_vertice(int xy);
@@ -628,6 +494,8 @@ public:
 	Adjacency_List remove_problem_vertices(Adjacency_List tree);
 	std::vector<Partition> push_to_all_indices(int i, std::vector<Partition> partitions);
 	std::vector<Partition> concatenate(std::vector<Partition> p1, std::vector<Partition> p2);
+	void get_best_move(std::vector<Adjacency_List> trees);
+	int edge_to_xy(Edge e);
 
 	  
 	

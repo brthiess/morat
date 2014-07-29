@@ -43,13 +43,15 @@ void AgentSolver::search(double time, uint64_t max_runs, int verbose){
 	printf("\nBoard Matrix");
 	board_matrix.graph_to_s();
 	//Find out if we have won 
-	find_winner(board_matrix);
+	//find_winner(board_matrix);
 	
 	//Get rid of problem vertices
 	board_matrix = remove_problem_vertices(board_matrix);
 	
 	//Find 2 Edge Disjoint Spanning Trees
-	find_edge_disjoint_trees(board_matrix);
+	std::vector<AgentSolver::Adjacency_List> trees = find_edge_disjoint_trees(board_matrix);
+	
+	AgentSolver::get_best_move(trees);
 }
 
 /**
@@ -84,6 +86,70 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 		printf("Found a loss");
 		return Side::NONE;
 	}
+	
+
+}
+/**
+ * Is given a vector of edge disjoint trees
+ * And determines the best move to play
+ */
+void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) {
+	AgentSolver::Adjacency_List tree1;
+	AgentSolver::Adjacency_List tree2;
+	
+	
+	int best_move = -1;
+	
+	//Found Win
+	if (trees.size() >= 2){
+		std::cout <<  "\nFound Win :)";
+		//Grab the trees
+		tree1 = trees.at(0);
+		tree2 = trees.at(1);		
+	}
+	else {
+		std::cout << "\nNo win found :(";
+		root.outcome == Outcome::UNKNOWN;
+		return;
+	}
+	
+	//Delete the edge that connects the starting vertice and the finishing vertice
+	tree1.delete_edge(0, tree1.get_number_of_vertices() - 1);
+	tree2.delete_edge(0, tree2.get_number_of_vertices() - 1);
+	
+
+	//Swap trees so that tree2 is not connected and tree1 is
+	if (!is_connected(tree1) && is_connected(tree2)){
+		printf("\nTree 1 is not connected and tree 2 is");
+		Adjacency_List temp_tree;
+		temp_tree = tree1;
+		tree1 = tree2;
+		tree2 = temp_tree;	
+	}
+	
+	//Grab all edges from tree 1
+	std::vector<AgentSolver::Edge> edges = get_all_edges(tree1);
+	for (int e = 0; (unsigned) e < edges.size(); e++) {
+		int v1 = edges.at(e).getV1(); 
+		int v2 = edges.at(e).getV2();
+		
+		if (!vertices_are_in_the_same_set(tree2, v1, v2)) {
+			printf("\nVertices are not in the same set in tree 2");
+			std::cout << "\nPlay Move: "<< v1 << ", " << v2;
+			best_move = AgentSolver::edge_to_xy(edges.at(e));
+			break;
+		}
+	}
+	
+	
+	Move m = rootboard.yx(best_move);
+	
+	root.outcome = rootboard.toplay();
+	root.bestmove = m;	
+	
+	std::cout << "\n\nBest Move: " << best_move;
+	
+	
 	
 }
 
@@ -541,6 +607,7 @@ void AgentSolver::swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::
 		 if (tree.get_number_of_edges_attached_to_vertice(v) <= 1) {
 			 std::cout<<"\nFound a problem vertice at vertice: " << v;
 			 tree.delete_vertex(v);
+			 v = tree.get_number_of_vertices();
 		 }
 	 }
 	 return tree;
@@ -806,6 +873,86 @@ int AgentSolver::xy_to_vertice(int xy) {
 	return vertice_number;
  }
  
+ /**
+  * Is given an edge, and returns an xy value representing the middle 
+  * of that edge
+  */
+ int AgentSolver::edge_to_xy(AgentSolver::Edge e) {
+	 int size = rootboard.get_size();
+	 int final_xy = -1;
+	 
+	 int v1 = e.getV1();
+	 int v2 = e.getV2();
+	 
+	 
+	 //Initialize XY of the vertices
+	 int v1_xy = -1;
+	 int v2_xy = -1;
+	 std::cout<< "\n Edge V1: " << v1 << "  Edge V2: " << v2;
+	for (int xy = rootboard.vecsize() - 1; xy >= 0 ; xy--) {
+		 if (rootboard.toplay() == Side::P1) {
+			 xy = xy_from_whites_perspective(xy);
+		 }
+		 std::cout << "\nxy_to_vertice(" << xy << ") = " << xy_to_vertice(xy); 
+		 if (xy_to_vertice(xy) == v1) {
+			 if (rootboard.toplay() == Side::P1) {
+				v1_xy = xy_from_whites_perspective(xy);			 
+			 }
+			 else {
+				v1_xy = xy;
+			 }
+		 }
+		 else if (xy_to_vertice(xy) == v2) {
+			 if (rootboard.toplay() == Side::P1) {
+				v2_xy = xy_from_whites_perspective(xy);			 
+			 }
+			 else {
+				v2_xy = xy;
+			 }
+		 }
+		 if (rootboard.toplay() == Side::P1) {
+			 xy = xy_from_whites_perspective(xy);
+		 }		 
+	 }
+	 
+	 
+	 //Swap if v1_xy is on starting or finishing vertice
+	 if (v1_xy == 0 || v1_xy >= (size*(size-1))) {
+		 int temp = v1_xy;
+		 v1_xy = v2_xy;
+		 v2_xy = temp;
+	 }
+	 
+	 std::cout<< "\nV1_XY = " << v1_xy << "\nV2_XY = " << v2_xy << "\n";
+	 
+		 
+	 //4 Cases:
+	 //If v2_xy is above v1_xy
+	 if (v1_xy - v2_xy >= size) {
+		 final_xy = v1_xy - size;
+	 }
+	 //If v2_xy is to the right
+	 else if (v1_xy - v2_xy == -2) {
+		 final_xy = v1_xy + 1;
+	 }
+	 //If v2_xy is below
+	 else if (v1_xy - v2_xy <= -size) {
+		 final_xy = v1_xy + size;
+	 }
+	 //If v2_xy is to the left
+	 else if (v1_xy - v2_xy == 2) {
+		 final_xy =  v1_xy - 1;
+	 }
+	
+	if (rootboard.toplay() == Side::P1) {
+		return xy_from_whites_perspective(final_xy);
+	}
+	else {
+		return final_xy;
+	}
+	
+ }
+ 
 
 bool AgentSolver::xy_is_a_vertice(int xy) {
 	if (xy % 2 == 1 && AgentSolver::xy_from_whites_perspective(xy) % 2 == 1) {
@@ -859,8 +1006,7 @@ void AgentSolver::set_board(const Board & board, bool clear){
 
 
 Move AgentSolver::return_move(const Node * node, Side toplay, int verbose) const {
-	Move * m = new Move("a1");
-	return *m;
+	return root.bestmove;
 }
 
 long AgentSolver::get_id(){
