@@ -95,15 +95,16 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
  	
 	//Create a vector of partitions
 	std::vector<AgentSolver::Partition> partitions;
+	//partitions.reserve();//
 	
 	//Declare other variables
-	std::vector<AgentSolver::Partition> setDivisions;
 	int numberOfVertices = board_matrix.get_number_of_vertices();
 	
 	//
 	for (int i = 1; i <= numberOfVertices; i++) {
 		std::vector<int> levels;
 		std::vector<AgentSolver::Partition> temp;
+		//temp.reserve();//
 		levels.push_back(0);
 		temp = AgentSolver::get_set_divisions(i, 1, levels, numberOfVertices);
 		
@@ -114,54 +115,11 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
  		}
  		
 	}
+	
 	std::cout << "\n" << partitions.size() << " Partitions Found\n" << std::endl;
 	//return partitions
 	return partitions;
-	
-	 /*//Example vertices
-	 int v1 = 1;
-	 int v2 = 2;
-	 int v3 = 3;
-	 int v4 = 4;
-	 
-	 //Example Sets
-	 int s0 = 0;
-	 int s1 = 1;
-	 int s2 = 2;
-	 
-	 //Create a partition with 3 sets
-	 AgentSolver::Partition example_one (3);
-	 
-	 //Add vertice 4 to set 2, add vertice 3 to set 1, etc...
-	 example_one.addVertice(v4, s2);
-	 example_one.addVertice(v3, s1);
-	 example_one.addVertice(v2, s1);
-	 example_one.addVertice(v1, s0);
-	 
-	 //Print this partition to the terminal
-	 example_one.print();
-	 
-	 //Create another example partition with 2 sets this time
-	 AgentSolver::Partition example_two (2);
-	 example_two.addVertice(v4, s0);
-	 example_two.addVertice(v3, s1);
-	 example_two.addVertice(v2, s1);
-	 example_two.addVertice(v1, s0);	 
-	 
-	 //Print this partition to the terminal
-	 example_two.print();
-	 
-	 
-	 //Create a vector of example partitions
-	 std::vector<AgentSolver::Partition> examples;
-	 
-	 //Add 'example_one' and 'example_two' to the examples vector
-	 examples.push_back(example_one);
-	 examples.push_back(example_two);
-	 
-	 //Return Examples
-	 return examples;
-	 */
+
  }
  
  /**
@@ -172,6 +130,7 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
  std::vector<AgentSolver::Partition> AgentSolver::get_set_divisions(int sets, int depth, std::vector<int> levels, int numberOfVertices) {
  	
  	std::vector<AgentSolver::Partition> partitions;
+ 	//partitions.reserve();//
  	
  	if (depth == sets) {
  		
@@ -190,7 +149,7 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
  		}
  		
  		partitions.push_back(p);
- 		p.print();
+ 		//p.print();
  		
  	} else {
  		
