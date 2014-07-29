@@ -93,6 +93,27 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
  */
  std::vector<AgentSolver::Partition> AgentSolver::get_partitions(Adjacency_List board_matrix) {
  	
+ 	//Create a vector of paritions
+ 	std::vector<AgentSolver::Partition> partitions;
+
+ 	
+ 	int numberOfVertices = board_matrix.get_number_of_vertices();
+	
+ 	//Insert an empty partition with one set
+ 	partitions.push_back(Partition(1));
+ 	
+ 	for (int i = 0; i < numberOfVertices; i++) {
+		//Clone the partitions
+		std::vector<AgentSolver::Partition> clone = partitions;
+		//Insert i, into every set of the clone
+		clone = push_to_all_indices(i, clone);
+		//Merge the two partition vectors
+		partitions = concatenate(clone, partitions);
+	}
+ 	
+ 	/*
+ 	
+ 	
 	//Create a vector of partitions
 	std::vector<AgentSolver::Partition> partitions;
 	
@@ -118,7 +139,8 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 	//return partitions
 	return partitions;
 	
-	 /*//Example vertices
+	 
+	 //Example vertices
 	 int v1 = 1;
 	 int v2 = 2;
 	 int v3 = 3;
@@ -162,7 +184,30 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 	 //Return Examples
 	 return examples;
 	 */
+	 
+	 	std::vector<AgentSolver::Partition> p;
+		return p;
  }
+ 
+ /**
+  * Pushes the given integer into every set of a partition
+  */
+  std::vector<AgentSolver::Partition> AgentSolver::push_to_all_indices(int v, std::vector<AgentSolver::Partition> partitions) {
+		for (int p = 0; (unsigned) p < partitions.size(); p++) {
+			partitions[p] = 
+		}
+		
+		std::vector<AgentSolver::Partition> p;
+		return p;
+  }
+  
+  /**
+   * Is given two partition vectors, and concatenates them
+   */
+   std::vector<AgentSolver::Partition> AgentSolver::concatenate(std::vector<AgentSolver::Partition> p1, std::vector<AgentSolver::Partition> p2) {
+		std::vector<AgentSolver::Partition> p;
+		return p;	   
+   }
  
  /**
   * Passed the number of sets to generate partitions for.

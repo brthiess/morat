@@ -626,6 +626,10 @@ public:
 	Adjacency_List copyTree(Adjacency_List tree);
 	long get_random(long max);
 	Adjacency_List remove_problem_vertices(Adjacency_List tree);
+	std::vector<Partition> push_to_all_indices(int i, std::vector<Partition> partitions);
+	std::vector<Partition> concatenate(std::vector<Partition> p1, std::vector<Partition> p2);
+
+	  
 	
 
 	class AgentThread : public AgentThreadBase<AgentSolver> {
