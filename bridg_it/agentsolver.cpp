@@ -134,7 +134,7 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 		int v2 = edges.at(e).getV2();
 		
 		if (!vertices_are_in_the_same_set(tree2, v1, v2)) {
-			printf("\nVertices are not in the same set in tree 2");
+			std::cout << "\n V1 : " << v1 << " and V2: " << v2 << "are not in the same set";
 			std::cout << "\nPlay Move: "<< v1 << ", " << v2;
 			best_move = AgentSolver::edge_to_xy(edges.at(e));
 			break;
@@ -714,11 +714,13 @@ bool AgentSolver::vertices_are_in_the_same_set(Adjacency_List al, int v1, int v2
 		}
 		//If both vertices were visited in the same run
 		if (std::find(vertice_set.begin(), vertice_set.end(), v1 ) != vertice_set.end() && std::find(vertice_set.begin(), vertice_set.end(), v2 ) != vertice_set.end()) {
+			std::cout << "\nBoth Vertices visited in the same run";
 			return true;
 		}
 		//Else if one or the other, but not both were found in the same run
 		else if ((std::find(vertice_set.begin(), vertice_set.end(), v1 ) == vertice_set.end() && std::find(vertice_set.begin(), vertice_set.end(), v2 ) != vertice_set.end()) ||
 				 (std::find(vertice_set.begin(), vertice_set.end(), v1 ) != vertice_set.end() && std::find(vertice_set.begin(), vertice_set.end(), v2 ) == vertice_set.end())){
+			std::cout << "\nOne or the other visited in the same run.  Not both";
 			return false;
 		}		
 		
@@ -736,6 +738,7 @@ bool AgentSolver::vertices_are_in_the_same_set(Adjacency_List al, int v1, int v2
 			if (std::find(visited_vertices.begin(), visited_vertices.end(), v) == visited_vertices.end()) {
 				s.push(v);
 				visited_vertices.push_back(v);
+				vertice_set.push_back(v);
 				break;
 			}
 		}
