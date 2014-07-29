@@ -111,20 +111,21 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 		partitions = concatenate(clone, partitions);
 	}
  	
- 	/*
+ 	
  	
  	
 	//Create a vector of partitions
 	std::vector<AgentSolver::Partition> partitions;
+	//partitions.reserve();//
 	
 	//Declare other variables
-	std::vector<AgentSolver::Partition> setDivisions;
 	int numberOfVertices = board_matrix.get_number_of_vertices();
 	
 	//
 	for (int i = 1; i <= numberOfVertices; i++) {
 		std::vector<int> levels;
 		std::vector<AgentSolver::Partition> temp;
+		//temp.reserve();//
 		levels.push_back(0);
 		temp = AgentSolver::get_set_divisions(i, 1, levels, numberOfVertices);
 		
@@ -135,11 +136,12 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
  		}
  		
 	}
+	
 	std::cout << "\n" << partitions.size() << " Partitions Found\n" << std::endl;
 	//return partitions
 	return partitions;
 	
-	 
+	 /*
 	 //Example vertices
 	 int v1 = 1;
 	 int v2 = 2;
@@ -185,8 +187,6 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 	 return examples;
 	 */
 	 
-	 	std::vector<AgentSolver::Partition> p;
-		return p;
  }
  
  /**
@@ -217,6 +217,7 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
  std::vector<AgentSolver::Partition> AgentSolver::get_set_divisions(int sets, int depth, std::vector<int> levels, int numberOfVertices) {
  	
  	std::vector<AgentSolver::Partition> partitions;
+ 	//partitions.reserve();//
  	
  	if (depth == sets) {
  		
@@ -235,7 +236,7 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
  		}
  		
  		partitions.push_back(p);
- 		p.print();
+ 		//p.print();
  		
  	} else {
  		
