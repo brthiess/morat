@@ -91,28 +91,7 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
  * Is given a graph (represented by an adjacency list) 
  * And returns a vector of every partition
  */
- std::vector<AgentSolver::Partition> AgentSolver::get_partitions(Adjacency_List board_matrix) {
- 	
- 	//Create a vector of paritions
- 	std::vector<AgentSolver::Partition> partitions;
-
- 	
- 	int numberOfVertices = board_matrix.get_number_of_vertices();
-	
- 	//Insert an empty partition with one set
- 	partitions.push_back(Partition(1));
- 	
- 	for (int i = 0; i < numberOfVertices; i++) {
-		//Clone the partitions
-		std::vector<AgentSolver::Partition> clone = partitions;
-		//Insert i, into every set of the clone
-		clone = push_to_all_indices(i, clone);
-		//Merge the two partition vectors
-		partitions = concatenate(clone, partitions);
-	}
- 	
- 	
- 	
+ std::vector<AgentSolver::Partition> AgentSolver::get_partitions(Adjacency_List board_matrix) { 	
  	
 	//Create a vector of partitions
 	std::vector<AgentSolver::Partition> partitions;
