@@ -30,7 +30,7 @@
  ****************************/
 
 namespace Morat {
-namespace Hex {
+namespace BridgIt {
 
 
 
@@ -1170,5 +1170,5 @@ void AgentSolver::load_sgf(SGFParser<Move> & sgf, const Board & board, Node & no
 
 
 
-}; // namespace Hex
+}; // namespace BridgIt
 }; // namespace Morat

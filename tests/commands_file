@@ -1,37 +1,153 @@
 mcts
 size 5
-genmove
+genmove -t 5
 solver
 size 5
-genmove
+genmove -t 5
 mcts
 size 7
-genmove
+genmove -t 5
 solver
 size 7
-genmove
+genmove -t 5
 mcts
 size 9
-genmove
+genmove -t 5
 solver
 size 9
-genmove
+genmove -t 5
 mcts
 size 11
-genmove
+genmove -t 5
 solver
 size 11
-genmove
+genmove -t 5
 mcts
 size 13
-genmove
+genmove -t 5
 solver
 size 13
-genmove
+genmove -t 5
 mcts
 size 15
-genmove
+genmove -t 5
 solver
 size 15
-genmove
+genmove -t 5
+mcts
+size 5
+white d4
+black b2
+genmove -t 5
+solver
+size 5
+white d4
+black b2
+genmove -t 5
+mcts
+size 5
+white b2
+black c3
+genmove -t 5
+solver
+size 5
+white b2
+black c3
+genmove -t 5
+mcts
+size 5
+white c3
+black b2
+white c5
+black d4
+genmove -t 5 
+solver
+size 5
+white c3
+black b2
+white c5
+black d4
+genmove -t 5 
+mcts
+size 5
+white c5
+genmove -t 5
+solver
+size 5
+white c5
+genmove -t 5
+mcts
+size 7
+white c5
+black d4
+white c7
+genmove -t 5
+solver
+size 7
+white c5
+black d4
+white c7
+genmove -t 5
+mcts
+size 7
+white c5
+black d2
+white c7
+genmove -t 5
+solver
+size 7
+white c5
+black d2
+white c7
+genmove -t 5
+mcts
+size 5
+white d2
+genmove -t 5
+solver
+size 5
+white d2
+genmove -t 5
+mcts
+size 5
+white d4
+genmove -t 5
+solver
+size 5
+white d4
+genmove -t 5
+mcts
+size 5
+white c3
+genmove -t 5
+solver
+size 5
+white c3
+genmove -t 5
+print
+mcts
+size 5
+white b4
+genmove -t 5
+solver
+size 5
+white b4
+genmove -t 5
+mcts
+size 5
+white b2
+genmove -t 5
+solver
+size 5
+white b2
+genmove -t 5
+mcts
+size 5
+white b2
+genmove -t 5
+print
+solver
+size 5
+white b2
+genmove -t 5
 quit

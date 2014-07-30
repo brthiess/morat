@@ -4,7 +4,7 @@
 #include "board.h"
 
 using namespace Morat;
-using namespace Hex;
+using namespace BridgIt;
 
 void test_game(Board b, std::vector<std::string> moves, Outcome outcome) {
 	REQUIRE(b.num_moves() == 0);
@@ -23,7 +23,7 @@ void test_game(Board b, std::vector<std::string> moves, Outcome outcome) {
 	}
 }
 
-TEST_CASE("Hex::Board", "[hex][board]") {
+TEST_CASE("BridgIt::Board", "[hex][board]") {
 	Board b(7);
 
 	SECTION("Basics") {

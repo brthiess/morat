@@ -18,7 +18,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace BridgIt {
 
 /*
  * the board is represented as a flattened 2d array of the form:
@@ -706,5 +706,5 @@ public:
 	}
 };
 
-}; // namespace Hex
+}; // namespace BridgIt
 }; // namespace Morat

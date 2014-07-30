@@ -60,6 +60,12 @@ test: \
 		rex/agentpns.o \
 		rex/agentpns_test.o \
 		rex/board_test.o \
+		bridg_it/agentmcts.o \
+		bridg_it/agentmctsthread.o \
+		bridg_it/agentmcts_test.o \
+		bridg_it/agentpns.o \
+		bridg_it/agentpns_test.o \
+		bridg_it/board_test.o \
 		cylindrical_hex/agentmcts.o \
 		cylindrical_hex/agentmctsthread.o \
 		cylindrical_hex/agentmcts_test.o \

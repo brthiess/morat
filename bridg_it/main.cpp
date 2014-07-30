@@ -9,7 +9,7 @@
 
 
 using namespace Morat;
-using namespace Hex;
+using namespace BridgIt;
 
 using namespace std;
 

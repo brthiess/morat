@@ -155,10 +155,12 @@ def analyzeResults(actual_results, theoretical_results, game_type):
 		#If this was an MCTS test, then the next one is an identical test but for PNS
 		#Check if that one has the same result
 		if('_mcts' in theoretical_results[t].test_number):
-			if(actual_results[a] == actual_results[a + 1]):
+			if(actual_results[a] in actual_results[a + 1] or actual_results[a+1] in actual_results[a]  ):
 				number_of_agreeing_tests += 2
 			#Else if they did not agree, note it
 			else:
+				print (actual_results[a])
+				print (actual_results[a+1])
 				conflicting_tests.append(theoretical_results[t])
 				conflicting_tests.append(theoretical_results[t+1])
 		t += 1
@@ -270,8 +272,8 @@ def runTests(tests, game_type):
 	analyzeResults(actual_results, theoretical_results, game_type)
 
 	#Delete unnecessary files
-	os.remove("test_results")
-	os.remove("commands_file")
+	#os.remove("test_results")
+	#os.remove("commands_file")
 
 	
 	

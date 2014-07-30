@@ -8,7 +8,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace BridgIt {
 
 GTPResponse GTP::gtp_mcts(vecstr args){
 	delete agent;
@@ -370,5 +370,5 @@ GTPResponse GTP::gtp_load_sgf(vecstr args){
 	return true;
 }
 
-}; // namespace Hex
+}; // namespace BridgIt
 }; // namespace Morat

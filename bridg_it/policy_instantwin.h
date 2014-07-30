@@ -9,7 +9,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace BridgIt {
 
 class InstantWin : public Policy {
 	int max_rollout_moves;
@@ -97,5 +97,5 @@ public:
 	}
 };
 
-}; // namespace Hex
+}; // namespace BridgIt
 }; // namespace Morat

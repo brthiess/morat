@@ -30,7 +30,7 @@
  ****************************/
 
 namespace Morat {
-namespace Hex {
+namespace BridgIt {
 
 
 
@@ -100,21 +100,26 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 	
 	int best_move = -1;
 	
+	pool.pause();
+	
 	//Found Win
 	if (trees.size() >= 2){
-		std::cout <<  "\nSolved as a win";
+		logerr("Solved as a win\n");
+
+		//Here for testing purposes
+		logerr("PV:\n");
 		//Grab the trees
 		tree1 = trees.at(0);
 		tree2 = trees.at(1);		
 	}
 	else {
-		std::cout << "\nSolved as a loss";
+		logerr("Solved as a loss\n");
+		logerr("PV:\n");
 		root.outcome == Outcome::UNKNOWN;
 		return;
 	}
 	
-	//Here for testing purposes
-	std::cout << "\n PV:";
+	pool.reset();
 	
 	//Delete the edge that connects the starting vertice and the finishing vertice
 	tree1.delete_edge(0, tree1.get_number_of_vertices() - 1);
@@ -1392,5 +1397,5 @@ void AgentSolver::load_sgf(SGFParser<Move> & sgf, const Board & board, Node & no
 
 
 
-}; // namespace Hex
+}; // namespace BridgIt
 }; // namespace Morat

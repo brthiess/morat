@@ -3,7 +3,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace BridgIt {
 
 using namespace std;
 
@@ -283,5 +283,5 @@ GTPResponse GTP::gtp_pns_params(vecstr args){
 	return GTPResponse(true, errs);
 }
 
-}; // namespace Hex
+}; // namespace BridgIt
 }; // namespace Morat

@@ -7,7 +7,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace BridgIt {
 
 class Policy {
 public:
@@ -31,5 +31,5 @@ public:
 	void rollout_end(const MoveList & movelist, int won) { }
 };
 
-}; // namespace Hex
+}; // namespace BridgIt
 }; // namespace Morat

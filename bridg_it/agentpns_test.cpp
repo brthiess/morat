@@ -4,9 +4,9 @@
 #include "agentpns.h"
 
 using namespace Morat;
-using namespace Hex;
+using namespace BridgIt;
 
-TEST_CASE("Hex::AgentPNS::Node::to_s/from_s", "[hex][agentpns]") {
+TEST_CASE("BridgIt::AgentPNS::Node::to_s/from_s", "[hex][agentpns]") {
 	AgentPNS::Node n(Move("a1"));
 	auto s = n.to_s();
 	AgentPNS::Node k;

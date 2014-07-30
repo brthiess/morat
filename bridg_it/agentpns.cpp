@@ -7,7 +7,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace BridgIt {
 
 std::string AgentPNS::Node::to_s() const {
 	return "AgentPNS::Node"
@@ -363,5 +363,5 @@ void AgentPNS::load_sgf(SGFParser<Move> & sgf, const Board & board, Node & node)
 	}
 }
 
-}; // namespace Hex
+}; // namespace BridgIt
 }; // namespace Morat

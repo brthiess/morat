@@ -8,7 +8,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace BridgIt {
 
 
 
@@ -461,5 +461,5 @@ Move AgentSolver::AgentThread::rollout_choose_move(Board & board, const Move & p
 }
 
 
-}; // namespace Hex
+}; // namespace BridgIt
 }; // namespace Morat

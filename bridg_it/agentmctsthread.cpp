@@ -8,7 +8,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace BridgIt {
 
 void AgentMCTS::AgentThread::iterate(){
 	INCR(agent->runs);
@@ -456,5 +456,5 @@ Move AgentMCTS::AgentThread::rollout_choose_move(Board & board, const Move & pre
 	return random_policy.choose_move(board, prev);
 }
 
-}; // namespace Hex
+}; // namespace BridgIt
 }; // namespace Morat

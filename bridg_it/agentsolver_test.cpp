@@ -4,9 +4,9 @@
 #include "agentsolver.h"
 
 using namespace Morat;
-using namespace Hex;
+using namespace BridgIt;
 
-TEST_CASE("Hex::AgentSolver::Node::to_s/from_s", "[hex][agentsolver]") {
+TEST_CASE("BridgIt::AgentSolver::Node::to_s/from_s", "[hex][agentsolver]") {
 	AgentSolver::Node n(Move("a1"));
 	auto s = n.to_s();
 	AgentSolver::Node k;

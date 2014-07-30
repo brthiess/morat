@@ -8,7 +8,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace BridgIt {
 
 void AgentAB::search(double time, uint64_t maxiters, int verbose) {
 	reset();
@@ -202,5 +202,5 @@ void AgentAB::tt_set(const Node & n) {
 	*(tt(n.hash)) = n;
 }
 
-}; // namespace Hex
+}; // namespace BridgIt
 }; // namespace Morat

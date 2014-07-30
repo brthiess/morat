@@ -36,7 +36,7 @@
 
 
 namespace Morat {
-namespace Hex {
+namespace BridgIt {
 	
 
 
@@ -683,5 +683,5 @@ protected:
 
 
 
-}; // namespace Hex
+}; // namespace BridgIt
 }; // namespace Morat

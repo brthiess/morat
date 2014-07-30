@@ -122,15 +122,64 @@ genmove -t 5
 endtest
 
 test
-12
+13
 expected_outcome
-1
+0
 commands
-size 7
-white c5
-black d6
-white c7
+size 5
+white d2
 genmove -t 5
 endtest
+
+test
+14
+expected_outcome
+0
+commands
+size 5
+white d4
+genmove -t 5
+endtest
+
+test
+15
+expected_outcome
+0
+commands
+size 5
+white c3
+genmove -t 5
+endtest
+
+test
+16
+expected_outcome
+0
+commands
+size 5
+white b4
+genmove -t 5
+endtest
+
+test
+17
+expected_outcome
+0
+commands
+size 5
+white b2
+genmove -t 5
+endtest
+
+test
+18
+expected_outcome
+0
+commands
+size 5
+white b2
+genmove -t 5
+endtest
+
 
 
