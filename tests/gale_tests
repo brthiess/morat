@@ -1,0 +1,55 @@
+test
+1
+expected_outcome
+1
+commands
+size 5
+genmove -t 5
+endtest
+
+test
+2
+expected_outcome
+1
+commands
+size 7
+genmove -t 5
+endtest
+
+test
+3
+expected_outcome
+1
+commands
+size 9
+genmove -t 5
+endtest
+
+test
+4
+expected_outcome
+1
+commands
+size 11
+genmove -t 5
+endtest
+
+test
+5
+expected_outcome
+1
+commands
+size 13
+genmove -t 5
+endtest
+
+test
+6
+expected_outcome
+1
+commands
+size 15
+genmove -t 5
+endtest
+
+

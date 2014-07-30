@@ -14,6 +14,7 @@ HEX = 1
 REX = 2
 CHEX = 3
 Y = 4
+GALE = 5
 
 
 
@@ -51,7 +52,7 @@ def getTests(tests):
 	return t
 
 #Reads from the test file created by user and parses out the relevant data
-def getCommands(tests):
+def getCommands(tests, game_type):
 	#This is a check to see if we have found a test
 	found_test = False
 	#Check to see if we have found the commands for that test
@@ -86,17 +87,24 @@ def getCommands(tests):
 			found_size = False
 			found_test = False
 			found_commands = False
-			#Append either mcts or pns to the commands list
+			#Append either mcts or pns or solver to the commands list
 			test_commands.append("mcts")
 			test_commands.extend(commands)
-			test_commands.append("pns")
-			test_commands.extend(commands)
+			if (game_type == GALE):
+				test_commands.append("solver")
+				test_commands.extend(commands)
+			else:
+				test_commands.append("pns")
+				test_commands.extend(commands)
 			commands = []
 			#Append a test to the list with the specified test number and
 			#expected outcome.  The last two are False because we do not 
 			#know if the test passed yet
 			theoretical_results.append(Test(str(test_number) + '_mcts', expected_outcome, False, False))
-			theoretical_results.append(Test(str(test_number) + '_pns', expected_outcome, False, False))
+			if (game_type == GALE):
+				theoretical_results.append(Test(str(test_number) + '_solver', expected_outcome, False, False))
+			else :
+				theoretical_results.append(Test(str(test_number) + '_pns', expected_outcome, False, False))
 			continue
 		#Append all of the commands to the list
 		if (found_commands):
@@ -108,9 +116,12 @@ def getCommands(tests):
 	return test_commands, theoretical_results
 
 #Analyze the actual results of the script versus what should have happened
-def analyzeResults(actual_results, theoretical_results):
+def analyzeResults(actual_results, theoretical_results, game_type):
 	t = 0		
-					
+	
+	for a in actual_results:
+		print (a)
+			
 	if(len(actual_results) != len(theoretical_results)):
 		print("Error in analysis: Actual Results #: "  + str(len(actual_results)) + "  Theoretical Results #: " + str(len(theoretical_results)))
 	
@@ -119,10 +130,11 @@ def analyzeResults(actual_results, theoretical_results):
 	number_of_passed_tests = 0
 	number_of_MCTS_passed_tests = 0
 	number_of_PNS_passed_tests = 0
+	number_of_solver_passed_tests = 0
 	number_of_agreeing_tests = 0
 	#List of all failed tests
 	failed_tests = []
-	#List of all conflicting tests between MCTS and PNS
+	#List of all conflicting tests between MCTS and PNS or Solver
 	conflicting_tests = []
 	unknown_tests = []
 	for a in range(0, len(actual_results)):
@@ -135,6 +147,8 @@ def analyzeResults(actual_results, theoretical_results):
 				number_of_MCTS_passed_tests += 1
 			elif ('_pns' in theoretical_results[t].test_number):
 				number_of_PNS_passed_tests += 1
+			elif ('_solver' in theoretical_results[t].test_number):
+				number_of_solver_passed_tests += 1
 		#If they did not match it is a failed test
 		elif("Unknown" in actual_results[a]):
 			unknown_tests.append(theoretical_results[t])
@@ -155,9 +169,12 @@ def analyzeResults(actual_results, theoretical_results):
 	print("\n\n*********Analysis***********\n")
 	print("Number of Tests: " + str(number_of_tests))
 	print(str(number_of_passed_tests) + "/" + str(number_of_tests) + " Tests Passed")
-	print(str(number_of_agreeing_tests) + "/" + str(number_of_tests) + " MCTS and PNS agree with each other")
+	print(str(number_of_agreeing_tests) + "/" + str(number_of_tests) + " Tests agree with each other")
 	print(str(number_of_MCTS_passed_tests) + "/" + str(number_of_tests / 2) + " MCTS Tests Passed")
-	print(str(number_of_PNS_passed_tests) + "/" + str(number_of_tests / 2) + " PNS Tests Passed")
+	if (game_type == GALE):
+		print(str(number_of_solver_passed_tests) + "/" + str(number_of_tests / 2) + " Solver Tests Passed")
+	else:
+		print(str(number_of_PNS_passed_tests) + "/" + str(number_of_tests / 2) + " PNS Tests Passed")
 	print(str(len(failed_tests)) + "/" + str(number_of_tests) + " Tests Failed")
 	print(str(len(unknown_tests)) + "/" + str(number_of_tests) + " Tests were unknown")
 	print("Failed Tests: " )
@@ -203,10 +220,12 @@ def runTests(tests, game_type):
 		game = "Cylindrical Hex"
 	elif (game_type == Y):
 		game = "Y"
+	elif (game_type == GALE):
+		game = "Bridg It"
 	
 	#Parse out the commands and the results from the test file
 	#to obtain a list of commands that the program can execute
-	test_commands, theoretical_results = getCommands(tests)
+	test_commands, theoretical_results = getCommands(tests, game_type)
 	
 	#Print the commands to a file
 	#which will be used to later to
@@ -238,6 +257,8 @@ def runTests(tests, game_type):
 		output = external_command("../chex -f commands_file")
 	elif (game_type == Y):
 		output = external_command("../moy -f commands_file")
+	elif (game_type == GALE):
+		output = external_command("../gale -f commands_file")
 	print(output)
 	#Stop the timer
 	elapsed = (time.clock() - start)
@@ -249,18 +270,18 @@ def runTests(tests, game_type):
 	actual_results = parseResults('test_results')
 	
 	#Analyze the results
-	analyzeResults(actual_results, theoretical_results)
+	analyzeResults(actual_results, theoretical_results, game_type)
 
 	#Delete unnecessary files
-	os.remove("test_results")
-	os.remove("commands_file")
+	#os.remove("test_results")
+	#os.remove("commands_file")
 
 	
 	
 
 if __name__ == '__main__':
 	#Open Test File
-	game = raw_input("Which program do you want to run tests for? (nhex, rex, chex): ")
+	game = raw_input("Which program do you want to run tests for? (nhex, rex, chex, gale): ")
 	if ("rex" in game):
 		rex_tests = getTests('rex_tests')
 		runTests(rex_tests, REX)
@@ -270,6 +291,9 @@ if __name__ == '__main__':
 	elif("chex" in game):
 		chex_tests = getTests('chex_tests')
 		runTests(chex_tests, CHEX)
+	elif("gale" in game):
+		gale_tests = getTests('gale_tests')
+		runTests(gale_tests, GALE)
 	
 	
 

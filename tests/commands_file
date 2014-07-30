@@ -1,0 +1,37 @@
+mcts
+size 5
+genmove
+solver
+size 5
+genmove
+mcts
+size 7
+genmove
+solver
+size 7
+genmove
+mcts
+size 9
+genmove
+solver
+size 9
+genmove
+mcts
+size 11
+genmove
+solver
+size 11
+genmove
+mcts
+size 13
+genmove
+solver
+size 13
+genmove
+mcts
+size 15
+genmove
+solver
+size 15
+genmove
+quit
