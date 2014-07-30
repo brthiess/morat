@@ -496,6 +496,7 @@ public:
 	std::vector<Partition> concatenate(std::vector<Partition> p1, std::vector<Partition> p2);
 	void get_best_move(std::vector<Adjacency_List> trees);
 	int edge_to_xy(Edge e);
+	Move get_random_move();
 
 	  
 	

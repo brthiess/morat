@@ -133,16 +133,24 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 		int v1 = edges.at(e).getV1(); 
 		int v2 = edges.at(e).getV2();
 		
-		if (!vertices_are_in_the_same_set(tree2, v1, v2)) {
+		if (!vertices_are_in_the_same_set(tree2, v1, v2) && tree1.get_number_of_duplicate_edges(v1, v2) == 1) {
 			std::cout << "\n V1 : " << v1 << " and V2: " << v2 << "are not in the same set";
 			std::cout << "\nPlay Move: "<< v1 << ", " << v2;
 			best_move = AgentSolver::edge_to_xy(edges.at(e));
 			break;
 		}
 	}
+	Move m;
 	
-	
-	Move m = rootboard.yx(best_move);
+	if (best_move != -1) {
+		m = rootboard.yx(best_move);
+	}
+	//Board position is so good that we can win regardless if we play first or second
+	else {
+		std::cout <<"\n\nPlaying Random Move!";
+		m = get_random_move();
+		best_move = rootboard.xy(m);
+	}
 	
 	root.outcome = rootboard.toplay();
 	root.bestmove = m;	
@@ -151,6 +159,21 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 	
 	
 	
+}
+
+/**
+ * Returns a random move
+ */
+ 
+Move AgentSolver::get_random_move() {
+	for (int x = 1; x < rootboard.vecsize(); x++) {
+		for (int y = 1; y < rootboard.vecsize(); y++) {
+			if (rootboard.valid_move(x,y)) {
+				return Move(x,y);
+			}
+		}
+	}
+	return Move(1,1);
 }
 
 /**
