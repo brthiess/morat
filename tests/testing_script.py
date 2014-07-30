@@ -118,9 +118,6 @@ def getCommands(tests, game_type):
 #Analyze the actual results of the script versus what should have happened
 def analyzeResults(actual_results, theoretical_results, game_type):
 	t = 0		
-	
-	for a in actual_results:
-		print (a)
 			
 	if(len(actual_results) != len(theoretical_results)):
 		print("Error in analysis: Actual Results #: "  + str(len(actual_results)) + "  Theoretical Results #: " + str(len(theoretical_results)))
