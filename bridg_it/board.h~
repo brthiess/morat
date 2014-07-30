@@ -413,14 +413,16 @@ public:
 			s += white + reset;
 			s += '\n';
 		}
-		s += "  "; //s += string(size + 2, ' ');
+		s += "  ";
 		for(int i = 0; i < size; i++) {
 			s += black + " ";
 			if (size >= 10) {
 				s += " ";
 			}
 		}
-
+		
+		s += "\nMoves Remaining: ";
+		s += (num_cells - nummoves);;
 		s += reset;
 		return s;
 	}

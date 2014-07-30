@@ -28,7 +28,7 @@ TEST_CASE("Hex::Board", "[hex][board]") {
 
 	SECTION("Basics") {
 		REQUIRE(b.get_size() == 7);
-		REQUIRE(b.movesremain() == 25);
+		REQUIRE(b.movesremain() == 27);
 	}
 
 	SECTION("valid moves") {
