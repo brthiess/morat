@@ -52,4 +52,85 @@ size 15
 genmove -t 5
 endtest
 
+test
+7
+expected_outcome
+1
+commands
+size 5
+white d4
+black b2
+genmove -t 5
+endtest
+
+test
+8
+expected_outcome
+1
+commands
+size 5
+white b2
+black c3
+genmove -t 5
+endtest
+
+test
+9
+expected_outcome
+0
+commands
+size 5
+white c3
+black b2
+white c5
+black d4
+genmove -t 5 
+endtest
+
+test
+10
+expected_outcome
+1
+commands
+size 5
+white c5
+genmove -t 5
+endtest
+
+test
+11
+expected_outcome
+1
+commands
+size 7
+white c5
+black d4
+white c7
+genmove -t 5
+endtest
+
+test
+12
+expected_outcome
+1
+commands
+size 7
+white c5
+black d2
+white c7
+genmove -t 5
+endtest
+
+test
+12
+expected_outcome
+1
+commands
+size 7
+white c5
+black d6
+white c7
+genmove -t 5
+endtest
+
 
