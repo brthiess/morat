@@ -270,8 +270,8 @@ def runTests(tests, game_type):
 	analyzeResults(actual_results, theoretical_results, game_type)
 
 	#Delete unnecessary files
-	#os.remove("test_results")
-	#os.remove("commands_file")
+	os.remove("test_results")
+	os.remove("commands_file")
 
 	
 	
