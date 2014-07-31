@@ -40,7 +40,7 @@ namespace BridgIt {
 void AgentSolver::search(double time, uint64_t max_runs, int verbose){
 	//Get the adjacency list representation of the board
 	AgentSolver::Adjacency_List board_matrix = AgentSolver::getAdjacencyList();
-	//printf("\nBoard Matrix");
+	printf("\nBoard Matrix");
 	board_matrix.graph_to_s();
 	//Find out if we have won 
 	//find_winner(board_matrix);
@@ -75,15 +75,15 @@ Side AgentSolver::find_winner(Adjacency_List board_matrix) {
 	//then we know there are at least 2 edge disjoint spanning trees
 	//therefore we have won
 	if (number_of_edges >= winning_number) {
-		//printf("Found win");
+		printf("Found win");
 		return rootboard.toplay();
 	}
 	else if (number_of_edges >= winning_number - 1) {
-		//printf("Found win if playing first");
+		printf("Found win if playing first");
 		return rootboard.toplay();
 	}
 	else {
-		//printf("Found a loss");
+		printf("Found a loss");
 		return Side::NONE;
 	}
 	
@@ -128,7 +128,7 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 
 	//Swap trees so that tree2 is not connected and tree1 is
 	if (!is_connected(tree1) && is_connected(tree2)){
-		//printf("\nTree 1 is not connected and tree 2 is");
+		printf("\nTree 1 is not connected and tree 2 is");
 		Adjacency_List temp_tree;
 		temp_tree = tree1;
 		tree1 = tree2;
@@ -142,9 +142,9 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 		int v2 = edges.at(e).getV2();
 		
 		if (!vertices_are_in_the_same_set(tree2, v1, v2) && tree1.get_number_of_duplicate_edges(v1, v2) == 1) {
-			//std::cout << "\n V1 : " << v1 << " and V2: " << v2 << "are not in the same set";
-			//std::cout << "\nPlay Move: "<< v1 << ", " << v2;
-			best_move = AgentSolver::edge_to_xy(edges.at(e));
+			std::cout << "\n V1 : " << v1 << " and V2: " << v2 << "are not in the same set";
+			std::cout << "\nPlay Move: "<< v1 << ", " << v2;
+			best_move = AgentSolver::edge_to_xy(edges.at(e), tree1);
 			break;
 		}
 	}
@@ -155,7 +155,7 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 	}
 	//Board position is so good that we can win regardless if we play first or second
 	else {
-		//std::cout <<"\n\nPlaying Random Move!";
+		std::cout <<"\n\nPlaying Random Move!";
 		m = get_random_move();
 		best_move = rootboard.xy(m);
 	}
@@ -163,10 +163,7 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 	root.outcome = rootboard.toplay();
 	root.bestmove = m;	
 	
-	//std::cout << "\n\nBest Move: " << best_move;
-	
-	
-	
+	std::cout << "\n\nBest Move: " << best_move;
 }
 
 /**
@@ -213,7 +210,7 @@ Move AgentSolver::get_random_move() {
  		
 	}
 	
-	//std::cout << "\n" << partitions.size() << " Partitions Found\n" << std::endl;
+	std::cout << "\n" << partitions.size() << " Partitions Found\n" << std::endl;
 	//return partitions
 	return partitions;
 	
@@ -334,42 +331,42 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 	std::vector<AgentSolver::Edge> tree1_edges = AgentSolver::get_all_edges(tree1);
 	std::vector<AgentSolver::Edge> tree2_edges = AgentSolver::get_all_edges(tree2);
 	
-	//printf("\n\nOriginal Spanning Tree");
+	printf("\n\nOriginal Spanning Tree");
 	tree1.graph_to_s();
 	
-	//printf("\n\nSubtracted Tree");
+	printf("\n\nSubtracted Tree");
 	tree2.graph_to_s();
 
 	while(not_all_edges_used(edges_used, board_matrix)) {
 		
-		//printf("\n\nTree 1");
+		printf("\n\nTree 1");
 		tree1.graph_to_s();
 	
-		//printf("\n\nTree 2");
+		printf("\n\nTree 2");
 		tree2.graph_to_s();
 		//Check if both trees are connected
 		//If so then we have found 2 edge disjoint trees
 		if (is_connected(tree1) && is_connected(tree2)) {
 			edge_disjoint_trees.push_back(tree1);
 			edge_disjoint_trees.push_back(tree2);
-			//printf("\nBoth Are connected!");
-			//printf("\nConnected Tree 1");			
+			printf("\nBoth Are connected!");
+			printf("\nConnected Tree 1");			
 			tree1.graph_to_s();
-			//printf("\nConnected Tree 2");
+			printf("\nConnected Tree 2");
 			tree2.graph_to_s();
 			break;
 		}
 		//Else find a connecting edge for tree2 (so that it is fully connected)
 		//and swap it with tree1
 		else {
-			//printf("\n\nAt least one tree not connected");
+			printf("\n\nAt least one tree not connected");
 			swap_edges(&tree1, &tree2, &edges_used, &tree1_edges, &tree2_edges);			
 		}
 	}
 	
-	//printf("\n\nTree 1");
+	printf("\n\nTree 1");
 	tree1.graph_to_s();
-	//printf("\n\nTree 2");
+	printf("\n\nTree 2");
 	tree2.graph_to_s();
 	return edge_disjoint_trees;	
 }
@@ -459,7 +456,7 @@ AgentSolver::Adjacency_List AgentSolver::subtract_trees(Adjacency_List main_tree
 	AgentSolver::Adjacency_List copy_tree = copyTree(main_tree);
 
 	
-	//printf("\n***Copy Tree***");
+	printf("\n***Copy Tree***");
 	copy_tree.graph_to_s();
 	
 	//Go through all possible edge combinations and check to see if both graphs have them
@@ -469,10 +466,10 @@ AgentSolver::Adjacency_List AgentSolver::subtract_trees(Adjacency_List main_tree
 			if (subtracting_tree.is_connected(v1,v2)) {
 				for(int i = 0; i < subtracting_tree.get_number_of_duplicate_edges(v1,v2); i++) {
 					//printf("\n\n***Copy Tree Before Deleting: V1: %d V2: %d", v1, v2);
-					copy_tree.graph_to_s();
+					//copy_tree.graph_to_s();
 					copy_tree.delete_edge(v1,v2);
 					//printf("\n\n***Copy Tree After Deleting: V1: %d V2: %d", v1, v2);
-					copy_tree.graph_to_s();
+					//copy_tree.graph_to_s();
 				}
 			}
 		}	
@@ -519,11 +516,11 @@ bool AgentSolver::is_connected(Adjacency_List tree) {
 	//Check to see if we have visited all the vertices through depth first search
 	//If we have not, then the graph is not connected
 	if (visited_vertices.size() < (unsigned)number_of_vertices) {
-		//printf("\nTree is not connected");
+		printf("\nTree is not connected");
 		return false;
 	}
 	else {
-		//printf("\nTree is connected");
+		printf("\nTree is connected");
 		return true;
 	}
 }
@@ -543,7 +540,7 @@ void AgentSolver::swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::
 	
 	//Swap trees so that tree2 is not connected and tree1 is
 	if (!is_connected(*tree1) && is_connected(*tree2)){
-		//printf("\nTree 1 is not connected and tree 2 is");
+		printf("\nTree 1 is not connected and tree 2 is");
 		temp_tree = tree1;
 		tree1 = tree2;
 		tree2 = temp_tree;
@@ -552,10 +549,10 @@ void AgentSolver::swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::
 		tree2_edges = temp_edges;		
 	}
 		
-	//printf("\n\n***Trees Before Swap***");
-	//printf("\n\nTree 1");
+	printf("\n\n***Trees Before Swap***");
+	printf("\n\nTree 1");
 	tree1->graph_to_s();	
-	//printf("\n\nTree 2");
+	printf("\n\nTree 2");
 	tree2->graph_to_s();
 		
 		//Iterate through all edges in tree 1.
@@ -564,13 +561,13 @@ void AgentSolver::swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::
 			int v1 = tree1_edges->at(e).getV1(); 
 			int v2 = tree1_edges->at(e).getV2();
 			long id = tree1_edges->at(e).getID();
-			//printf("\n*****V1: %d V2: %d  ID: %ld", v1, v2, id);
+			printf("\n*****V1: %d V2: %d  ID: %ld", v1, v2, id);
 			//Check to make sure edge has not been swapped already
 			if (!edge_in(*used_edges, id)) {
-				//printf("\nEdge is not in used Edges");
+				printf("\nEdge is not in used Edges");
 				//Check to see if this edge would connect the other tree (tree 2)
 				if (!vertices_are_in_the_same_set(*tree2, v1, v2)) {
-					//printf("Vertices are not in the same set in tree 2");
+					printf("Vertices are not in the same set in tree 2");
 					//Swap edges
 					tree1->delete_edge(v1, v2);
 					tree1->delete_edge(v2, v1);
@@ -586,16 +583,17 @@ void AgentSolver::swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::
 		//If we iterated over all edges and could not find a suitable edge
 		//Pick a random edge instead
 		if ( (unsigned) e == tree1_edges->size()) {
-			//printf("\nNo Edge Found.  Picking Random edge...");
+			printf("\nNo Edge Found.  Picking Random edge...");
 
 			
 			for (int i = 0; (unsigned) i < tree1_edges->size(); i++) {
 				int v1 = tree1_edges->at(i).getV1(); 
 				int v2 = tree1_edges->at(i).getV2();
-				//printf("\n*****Random Vertices: V1: %d V2: %d  ID: %ld", v1, v2, id);
+				long id = tree1_edges->at(i).getID();
+				printf("\n*****Random Vertices: V1: %d V2: %d  ID: %ld", v1, v2, id);
 				//Check to see if this edge would connect the other tree (tree 2)
 				if (!vertices_are_in_the_same_set(*tree2, v1, v2)) {
-					//printf("Vertices are not in the same set in tree 2");
+					printf("Vertices are not in the same set in tree 2");
 					//Swap edges
 					tree1->delete_edge(v1, v2);
 					tree1->delete_edge(v2, v1);
@@ -609,11 +607,11 @@ void AgentSolver::swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::
 			}			
 		}
 			
-	//printf("\n\n***Trees After Swap***");
-	//printf("\n\nTree 1");
+	printf("\n\n***Trees After Swap***");
+	printf("\n\nTree 1");
 	tree1->graph_to_s();
 	
-	//printf("\n\nTree 2");
+	printf("\n\nTree 2");
 	tree2->graph_to_s();
 			//	1. Check to see if (v1,v2) is an edge in tree1 and it has not already been swapped previously
 			//		a. If so,Check to see if (v1,v2) are in the same set for tree2
@@ -621,7 +619,7 @@ void AgentSolver::swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::
 			//			b. If they are, then go back to 1. and repeat.
 			//		b. If not, then repeat 1.
 			
-	//printf("\n\n\n\n\n\n\n");
+	printf("\n\n\n\n\n\n\n");
 
 }
 
@@ -635,7 +633,7 @@ void AgentSolver::swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::
 	 std::vector<Edge> edges;
 	 for (int v = number_of_vertices - 1 ; v >= 0; v--) {
 		 if (tree.get_number_of_edges_attached_to_vertice(v) <= 1) {
-			 //std::cout<<"\nFound a problem vertice at vertice: " << v;
+			 std::cout<<"\nFound a problem vertice at vertice: " << v;
 			 tree.delete_vertex(v);
 			 v = tree.get_number_of_vertices();
 		 }
@@ -744,13 +742,13 @@ bool AgentSolver::vertices_are_in_the_same_set(Adjacency_List al, int v1, int v2
 		}
 		//If both vertices were visited in the same run
 		if (std::find(vertice_set.begin(), vertice_set.end(), v1 ) != vertice_set.end() && std::find(vertice_set.begin(), vertice_set.end(), v2 ) != vertice_set.end()) {
-			//std::cout << "\nBoth Vertices visited in the same run";
+			std::cout << "\nBoth Vertices visited in the same run";
 			return true;
 		}
 		//Else if one or the other, but not both were found in the same run
 		else if ((std::find(vertice_set.begin(), vertice_set.end(), v1 ) == vertice_set.end() && std::find(vertice_set.begin(), vertice_set.end(), v2 ) != vertice_set.end()) ||
 				 (std::find(vertice_set.begin(), vertice_set.end(), v1 ) != vertice_set.end() && std::find(vertice_set.begin(), vertice_set.end(), v2 ) == vertice_set.end())){
-			//std::cout << "\nOne or the other visited in the same run.  Not both";
+			std::cout << "\nOne or the other visited in the same run.  Not both";
 			return false;
 		}		
 		
@@ -784,11 +782,11 @@ bool AgentSolver::vertices_are_in_the_same_set(Adjacency_List al, int v1, int v2
  */
 bool AgentSolver::not_all_edges_used(std::vector<AgentSolver::Edge> edges_used, Adjacency_List board_matrix) {
 	if (edges_used.size() < (unsigned) board_matrix.get_number_of_edges()) {
-		//printf("\nUsed Edges Size: %d \nboard_matrix size %d", (signed)edges_used.size() ,board_matrix.get_number_of_edges());
+		printf("\nUsed Edges Size: %d \nboard_matrix size %d", (signed)edges_used.size() ,board_matrix.get_number_of_edges());
 	
 		return true;
 	}
-	//printf("\nUsed Edges Size: %d \nboard_matrix size %d", (signed)edges_used.size() ,board_matrix.get_number_of_edges());
+	printf("\nUsed Edges Size: %d \nboard_matrix size %d", (signed)edges_used.size() ,board_matrix.get_number_of_edges());
 	
 	return false;
 }
@@ -812,60 +810,60 @@ AgentSolver::Adjacency_List AgentSolver::getAdjacencyList() {
 	Side edge;
 
 
-	////printf("RootBoard.toplay() %d\n", rootboard.toplay().to_i());
+	//printf("RootBoard.toplay() %d\n", rootboard.toplay().to_i());
 	//Go through every piece on the board.  Look for vertices and check for connecting edges
 	for (int xy = 0; xy < rootboard.vecsize(); xy++) {
-		//printf("XY: %d\n", xy);
+		printf("XY: %d\n", xy);
 		//Check if piece is a vertice of the person to play next
 		if (rootboard.get(xy) == rootboard.toplay() && AgentSolver::xy_is_a_vertice(xy)) {
-			//printf("Got through\n");
+			printf("Got through\n");
 			if (AgentSolver::xy_on_board(xy, xy + size * 2) && rootboard.get(xy + size) == Side::NONE) {
-				//printf("Piece right below is empty\t");
-				//printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy + size*2));
+				printf("Piece right below is empty\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy + size*2));
 				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + size*2));
 			}
 			else if (AgentSolver::xy_on_board(xy, xy + size * 2) && rootboard.get(xy + size) == rootboard.toplay()) {
-				//printf("Piece right below is ours\t");
-				//printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy + size*2));
+				printf("Piece right below is ours\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy + size*2));
 				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + size*2));
 				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + size*2));
 			}
 		
 			//Check directly above
 			if (AgentSolver::xy_on_board(xy, xy - size * 2) && rootboard.get(xy - size) == Side::NONE) {
-				//printf("Piece right above is empty\t");
-				//printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy - size*2));
+				printf("Piece right above is empty\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy - size*2));
 				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - size*2));
 			}
 			else if (AgentSolver::xy_on_board(xy, xy - size * 2) && rootboard.get(xy - size) == rootboard.toplay()) {
-				//printf("Piece right above is ours\t");
-				//printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy - size*2));
+				printf("Piece right above is ours\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy - size*2));
 				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - size*2));
 				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - size*2));
 			}
 		
 			//Check directly to the right
 			if (AgentSolver::xy_on_board(xy, xy + 2) && rootboard.get(xy + 1) == Side::NONE) {
-				//printf("Piece to the right is empty\t");
-				//printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy + 2));
+				printf("Piece to the right is empty\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy + 2));
 				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + 2));
 			}
 			else if (AgentSolver::xy_on_board(xy, xy + 2) && rootboard.get(xy + 1) == rootboard.toplay()) {
-				//printf("Piece to the right is ours\t");
-				//printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy + 2));
+				printf("Piece to the right is ours\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy + 2));
 				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + 2));
 				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy + 2));
 			}
 			
 			//Check directly to the left
 			if (AgentSolver::xy_on_board(xy, xy - 2) && rootboard.get(xy - 1) == Side::NONE) {
-				//printf("Piece to the left is empty\t");
-				//printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy - 2));
+				printf("Piece to the left is empty\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy - 2));
 				adjacency_list.addEdge(xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - 2));
 			}		
 			else if (AgentSolver::xy_on_board(xy, xy - 2) && rootboard.get(xy - 1) == rootboard.toplay()) {
-				//printf("Piece to the left is ours\t");
-				//printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy - 2));
+				printf("Piece to the left is ours\t");
+				printf("Add edges: (%d, %d)\n", AgentSolver::xy_to_vertice(xy),  AgentSolver::xy_to_vertice(xy - 2));
 				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - 2));
 				adjacency_list.addEdge(AgentSolver::xy_to_vertice(xy), AgentSolver::xy_to_vertice(xy - 2));
 			}
@@ -910,7 +908,8 @@ int AgentSolver::xy_to_vertice(int xy) {
   * Is given an edge, and returns an xy value representing the middle 
   * of that edge
   */
- int AgentSolver::edge_to_xy(AgentSolver::Edge e) {
+ int AgentSolver::edge_to_xy(AgentSolver::Edge e, Adjacency_List tree) {
+	 e = calibrate_edge(e, tree);
 	 int size = rootboard.get_size();
 	 int final_xy = -1;
 	 
@@ -921,12 +920,12 @@ int AgentSolver::xy_to_vertice(int xy) {
 	 //Initialize XY of the vertices
 	 int v1_xy = -1;
 	 int v2_xy = -1;
-	 //std::cout<< "\n Edge V1: " << v1 << "  Edge V2: " << v2;
+	 std::cout<< "\n Edge V1: " << v1 << "  Edge V2: " << v2;
 	for (int xy = rootboard.vecsize() - 1; xy >= 0 ; xy--) {
 		 if (rootboard.toplay() == Side::P1) {
 			 xy = xy_from_whites_perspective(xy);
 		 }
-		 //std::cout << "\nxy_to_vertice(" << xy << ") = " << xy_to_vertice(xy); 
+		 std::cout << "\nxy_to_vertice(" << xy << ") = " << xy_to_vertice(xy); 
 		 if (xy_to_vertice(xy) == v1) {
 			 if (rootboard.toplay() == Side::P1) {
 				v1_xy = xy_from_whites_perspective(xy);			 
@@ -956,7 +955,7 @@ int AgentSolver::xy_to_vertice(int xy) {
 		 v2_xy = temp;
 	 }
 	 
-	 //std::cout<< "\nV1_XY = " << v1_xy << "\nV2_XY = " << v2_xy << "\n";
+	 std::cout<< "\nV1_XY = " << v1_xy << "\nV2_XY = " << v2_xy << "\n";
 	 
 		 
 	 //4 Cases:
@@ -984,7 +983,26 @@ int AgentSolver::xy_to_vertice(int xy) {
 		return final_xy;
 	}
 	
- }
+}
+
+/**
+ * Calibrate the edges to account for deleted vertices in the spanning tree
+ * so it translates back to the original tree
+ */
+AgentSolver::Edge AgentSolver::calibrate_edge(Edge e, Adjacency_List tree) {
+	
+	int number_of_vertices_in_spanning_tree = get_number_of_vertices(tree);
+	
+	int size = rootboard.get_size();
+	int number_of_vertices_on_board = (size - 1)/2 * ( (size -1)/2 -1) + 2;
+	
+	int calibration_constant = number_of_vertices_on_board - number_of_vertices_in_spanning_tree;
+	
+	//Calibrate the edges.  
+	e.setV1(e.getV1() + calibration_constant);
+	e.setV2(e.getV2() + calibration_constant);
+	return e;	
+}
  
 
 bool AgentSolver::xy_is_a_vertice(int xy) {

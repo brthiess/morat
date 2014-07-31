@@ -123,7 +123,6 @@ endtest
 
 test
 13
-
 expected_outcome
 1
 commands
@@ -182,7 +181,7 @@ endtest
 test
 18
 expected_outcome
-0
+1
 commands
 size 7
 white b2
@@ -364,4 +363,23 @@ white c7
 genmove -t 5
 endtest
 
+test
+30
+expected_outcome
+
+commands
+size
+
+genmove -t 5
+endtest
+
+test
+3
+expected_outcome
+
+commands
+size
+
+genmove -t 5
+endtest
 

@@ -4,10 +4,10 @@
 #include "board.h"
 
 using namespace Morat;
-using namespace BridgIt;
+using namespace Hex;
 
 void test_game(Board b, std::vector<std::string> moves, Outcome outcome) {
-	REQUIRE(b.num_moves() != 0);
+	REQUIRE(b.num_moves() == 0);
 	Side side = Side::P1;
 	for(auto s : moves) {
 		Outcome expected = (s == moves.back() ? outcome : Outcome::UNKNOWN);
@@ -23,12 +23,12 @@ void test_game(Board b, std::vector<std::string> moves, Outcome outcome) {
 	}
 }
 
-TEST_CASE("BridgIt::Board", "[hex][board]") {
+TEST_CASE("Hex::Board", "[hex][board]") {
 	Board b(7);
 
 	SECTION("Basics") {
 		REQUIRE(b.get_size() == 7);
-		REQUIRE(b.movesremain() == 25);
+		REQUIRE(b.movesremain() == 27);
 	}
 
 	SECTION("valid moves") {
@@ -64,8 +64,8 @@ TEST_CASE("BridgIt::Board", "[hex][board]") {
 					 "f1", "f3", "f5", "f5",
 					    "g2", "g4", "g6"	};
 		for (auto m : vertices) {
-			REQUIRE(b.onboard(m));
-			REQUIRE_FALSE(b.valid_move(m));
+			REQUIRE_FALSE(b.onboard(m));
+			REQUIRE_FALSE(b.valid_move(m);
 		}
 	}
 
@@ -83,16 +83,16 @@ TEST_CASE("BridgIt::Board", "[hex][board]") {
 	}
 
 	SECTION("Unknown_2") {
-		test_game(b, {      "b2", "c1", "b4", "c3", "d2", "c5"}, Outcome::UNKNOWN);
-		test_game(b, {"d4", "b2", "c1", "b4", "c3", "c5"}, Outcome::UNKNOWN);
+		test_game(b, {      "b2", "c1", "b4", "c3", "d2", "c5", "d4", "c7", "f2", "e1", "a1"}, Outcome::UNKNOWN);
+		test_game(b, {"d4", "b2", "c1", "b4", "c3", "b2", "c5", "d4", "c7", "f2", "e1", "a1"}, Outcome::UNKNOWN);
 	}
 
 	SECTION("Unknown_3") {
 		test_game(b, {      "b2", "f2", "b4", "f4", "c1", "e1", "c3", "e3", "d2", "e5", "d4"}, Outcome::UNKNOWN);
-		test_game(b, {"b2", "f2", "b4", "f4", "c1", "e1", "c3", "e3", "d2", "e5", "d4"}, Outcome::UNKNOWN);
+		test_game(b, {"d7", "b2", "f2", "b4", "f4", "c1", "e1", "c3", "e3", "d2", "e5", "d4"}, Outcome::UNKNOWN);
 
-		test_game(b, {      "b2", "f2", "b4", "f4", "c1", "e1", "c3", "e3", "d2", "e5", "d4", "e7"}, Outcome::UNKNOWN);
-		test_game(b, {"b2", "f2", "b4", "f4", "c1"}, Outcome::UNKNOWN);
+		test_game(b, {      "b2", "f2", "b4", "f4", "c1", "e1", "c3", "e3", "d2", "e5", "d4", "e7", "c1"}, Outcome::UNKNOWN);
+		test_game(b, {"d7", "b2", "f2", "b4", "f4", "c1", "e1", "c3", "e3", "d2", "e5", "d4", "e7", "c1"}, Outcome::UNKNOWN);
 	}
 
 	SECTION("Unknown_4") {
@@ -109,19 +109,19 @@ TEST_CASE("BridgIt::Board", "[hex][board]") {
 	
 	SECTION("White Connects") {		
 		test_game(b, 
-		{"b2", "c1", "b4", "c3", "b6"}, 
+		{"b2", "c1", "b4", "c3", "b6", "c5"}, 
 		 Outcome::P1);
 	}
 	
 	SECTION("Black Connects") {		
 		test_game(b, 
-		{"b4", "b2", "c3", "d2", "f4", "f2"}, 
+		{"b4", "b2", "c4", "d2", "f4", "f2"}, 
 		 Outcome::P2);
 	}
 	
 	SECTION("Black Connects") {		
 		test_game(b, 
-		{"b4", "b2", "c3", "d2", "f4", "f2"}, 
+		{"b4", "b2", "c4", "d2", "f4", "f2"}, 
 		 Outcome::P2);
 	}
 }

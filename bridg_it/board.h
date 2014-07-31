@@ -53,7 +53,7 @@ class Board{
 public:
 
 	static const int default_size = 9;
-	static const int min_size = 2;
+	static const int min_size = 5;
 	static const int max_size = 16;
 	static const int max_vecsize = max_size * max_size;
 

@@ -1,0 +1,19 @@
+size 13
+solver
+white l2
+black d4
+white l4
+black f4
+white l6
+black b4
+white l8
+black h4
+white l10
+black i5
+white j4
+black h6
+white j6
+black f6
+white i3
+black d6
+genmove

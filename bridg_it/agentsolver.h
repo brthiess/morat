@@ -200,7 +200,7 @@ public:
 		
 		void print() {
 			for (int v = 0; (unsigned) v < attached.size(); v++) {
-				//std::cout << attached[v] << ", ";
+				std::cout << attached[v] << ", ";
 			}
 		}		
 	};
@@ -326,7 +326,7 @@ public:
 				vertices[v1].remove_attached(v2);
 				for(int e = 0; (unsigned)e < edges.size(); e++) {
 					if (edges[e].getV1() == v1 && edges[e].getV2() == v2) {
-						//std::cout << "\nDeleting "<< v1 << " and " << v2;
+						std::cout << "\nDeleting "<< v1 << " and " << v2;
 						edges.erase(edges.begin() + e);
 						return true;
 					}
@@ -370,8 +370,8 @@ public:
 				//Reassign references for attached vertices
 				for(int v = 0; (unsigned) v < vertices.size(); v++) {
 					for (int r = vertex; (unsigned)r < vertices.size(); r++) { 
-						//std::cout<< "\nVertice: "<< vertices[v].get_id() << ", " << vertices[r].get_id();
 						if (is_connected(vertices[v].get_id(), vertices[r].get_id())) {
+							std::cout<< "\nVertice: "<< vertices[v].get_id() << ", " << vertices[r].get_id() << "Are connected.";
 							vertices[v].add_attached(vertices[r].get_id() - 1);
 							vertices[v].remove_attached(vertices[r].get_id());
 						}
@@ -413,7 +413,7 @@ public:
 			
 			void graph_to_s(){        
 				for (int v = 0; (unsigned)v < vertices.size(); v++) {
-						//std::cout << "\nVertex: " << vertices[v].get_id()<< ": ";
+						std::cout << "\nVertex: " << vertices[v].get_id()<< ": ";
 						vertices[v].print();
 					
 				}
@@ -432,7 +432,7 @@ public:
 		std::vector<int> getVertices() {return vertices;}
 		void print() {
 			for (unsigned int i = 0; i < vertices.size(); i++) {
-				//std::cout << vertices[i] << ", ";
+				std::cout << vertices[i] << ", ";
 			}
 		}
 	};
@@ -448,11 +448,11 @@ public:
 		}
 		std::vector<Vertice_List> getSets() { return sets; }		
 		void print() {
-			//std::cout << "\n****Partition*****\n";
+			std::cout << "\n****Partition*****\n";
 			for(unsigned int i = 0; i < sets.size(); i++) {
-				//std::cout << "Set #" << i << ": ";
+				std::cout << "Set #" << i << ": ";
 				sets[i].print();
-				//std::cout << "\n";
+				std::cout << "\n";
 			}
 		}
 	};
@@ -495,8 +495,9 @@ public:
 	std::vector<Partition> push_to_all_indices(int i, std::vector<Partition> partitions);
 	std::vector<Partition> concatenate(std::vector<Partition> p1, std::vector<Partition> p2);
 	void get_best_move(std::vector<Adjacency_List> trees);
-	int edge_to_xy(Edge e);
+	int edge_to_xy(Edge e, Adjacency_List tree);
 	Move get_random_move();
+	Edge calibrate_edge(Edge e, Adjacency_List tree);
 
 	  
 	
