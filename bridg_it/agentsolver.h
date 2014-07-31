@@ -145,17 +145,21 @@ public:
 
 	struct Vertex {
 		int id;
+		int original_id;
+		
 		std::vector<int> attached;
 		bool visited;
 		bool exists;
 		
 		Vertex(int ID) {
 			id = ID;
+			original_id = ID;
 			visited = false;
 			exists = true;
 		}
 		Vertex(int ID, std::vector<int> Attached) {
 			id = ID;
+			original_id = ID;
 			attached = Attached;
 			visited = false;
 			exists = true;
@@ -168,6 +172,13 @@ public:
 		}	
 		int get_id() { 
 			return id;
+		}
+		int get_original_id() {
+			return original_id;
+		} 
+		
+		void set_original_id(int id) {
+			original_id = id;
 		}
 		
 		int get_number_attached() {
@@ -341,6 +352,24 @@ public:
 				return false;
 			}
 			
+			void set_original_id(int vertex, int original_id) {
+				//Find the vertex specified and set its original id
+				for (int v = 0; (unsigned)v < vertices.size(); v++) {
+					if (vertices[v].get_id() == vertex) {
+						vertices[v].set_original_id(original_id);
+					}
+				}
+			}
+			
+			int get_original_id(int vertex) {
+				for (int v = 0; (unsigned)v < vertices.size(); v++) {
+					if (vertices[v].get_id() == vertex) {
+						return vertices[v].get_original_id();
+					}
+				}
+				return -1;
+			}
+			
 			/**
 			 * Deletes a vertice from the graph
 			 */
@@ -413,7 +442,7 @@ public:
 			
 			void graph_to_s(){        
 				for (int v = 0; (unsigned)v < vertices.size(); v++) {
-						std::cout << "\nVertex: " << vertices[v].get_id()<< ": ";
+						std::cout << "\nVertex: " << vertices[v].get_id()<<  "(" << vertices[v].get_original_id()<< ")" << " : ";
 						vertices[v].print();
 					
 				}
@@ -474,7 +503,6 @@ public:
 	int xy_from_whites_perspective(int xy);
 	bool xy_on_board(int xy, int xy2);
 	bool xy_is_a_vertice(int xy);
-	Side find_winner(Adjacency_List board_matrix);
 	std::vector<Adjacency_List> find_edge_disjoint_trees(Adjacency_List board_matrix);
 	Adjacency_List get_spanning_tree(Adjacency_List board_matrix);
 	bool is_connected(Adjacency_List tree);
@@ -483,8 +511,6 @@ public:
 	bool not_all_edges_used(std::vector<Edge> edges_used, Adjacency_List board_matrix);
 	bool all_vertices_visited(std::vector<int> vertices_visited, Adjacency_List treey);
 	void clear(std::stack<int> &s);
-	std::vector<Partition> get_partitions(Adjacency_List board_matrix);
-	std::vector<Partition> get_set_divisions(int sets, int depth, std::vector<int> levels, int numberOfVertices);
 	bool vertices_are_in_the_same_set(Adjacency_List al, int v1, int v2);
 	bool edge_in(std::vector<Edge> edges, long id);
 	std::vector<Edge> get_all_edges(Adjacency_List tree);
@@ -495,9 +521,8 @@ public:
 	std::vector<Partition> push_to_all_indices(int i, std::vector<Partition> partitions);
 	std::vector<Partition> concatenate(std::vector<Partition> p1, std::vector<Partition> p2);
 	void get_best_move(std::vector<Adjacency_List> trees);
-	int edge_to_xy(Edge e, Adjacency_List tree);
+	int edge_to_xy(int v1, int v2);
 	Move get_random_move();
-	Edge calibrate_edge(Edge e, Adjacency_List tree);
 
 	  
 	

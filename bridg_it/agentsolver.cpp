@@ -42,8 +42,6 @@ void AgentSolver::search(double time, uint64_t max_runs, int verbose){
 	AgentSolver::Adjacency_List board_matrix = AgentSolver::getAdjacencyList();
 	printf("\nBoard Matrix");
 	board_matrix.graph_to_s();
-	//Find out if we have won 
-	//find_winner(board_matrix);
 	
 	//Get rid of problem vertices
 	board_matrix = remove_problem_vertices(board_matrix);
@@ -54,41 +52,6 @@ void AgentSolver::search(double time, uint64_t max_runs, int verbose){
 	AgentSolver::get_best_move(trees);
 }
 
-/**
- * Is given an adjacency list of the current board state
- * 
- * Finds out if the person to play next has won the game
- * Uses the graph partitioning method
- */
-Side AgentSolver::find_winner(Adjacency_List board_matrix) {
-	
-	//Creates partitions
-	std::vector<AgentSolver::Partition> partitions = AgentSolver::get_partitions(board_matrix);
-	
-	//Simple Case:  Partition Graph into v sets where v = number of vertices
-	int winning_number = 2 * (board_matrix.get_number_of_vertices() - 1);
-	
-	//Check how many edges cross
-	int number_of_edges = board_matrix.get_number_of_edges();
-	
-	//If the number of edges that cross is greater than the winning number
-	//then we know there are at least 2 edge disjoint spanning trees
-	//therefore we have won
-	if (number_of_edges >= winning_number) {
-		printf("Found win");
-		return rootboard.toplay();
-	}
-	else if (number_of_edges >= winning_number - 1) {
-		printf("Found win if playing first");
-		return rootboard.toplay();
-	}
-	else {
-		printf("Found a loss");
-		return Side::NONE;
-	}
-	
-
-}
 /**
  * Is given a vector of edge disjoint trees
  * And determines the best move to play
@@ -144,7 +107,9 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 		if (!vertices_are_in_the_same_set(tree2, v1, v2) && tree1.get_number_of_duplicate_edges(v1, v2) == 1) {
 			std::cout << "\n V1 : " << v1 << " and V2: " << v2 << "are not in the same set";
 			std::cout << "\nPlay Move: "<< v1 << ", " << v2;
-			best_move = AgentSolver::edge_to_xy(edges.at(e), tree1);
+			v1 = tree1.get_original_id(v1);
+			v2 = tree1.get_original_id(v2);
+			best_move = AgentSolver::edge_to_xy(v1, v2);
 			break;
 		}
 	}
@@ -181,137 +146,7 @@ Move AgentSolver::get_random_move() {
 	return Move(1,1);
 }
 
-/**
- * Is given a graph (represented by an adjacency list) 
- * And returns a vector of every partition
- */
- std::vector<AgentSolver::Partition> AgentSolver::get_partitions(Adjacency_List board_matrix) { 	
- 	
-	//Create a vector of partitions
-	std::vector<AgentSolver::Partition> partitions;
-	//partitions.reserve();//
-	
-	//Declare other variables
-	int numberOfVertices = board_matrix.get_number_of_vertices();
-	
-	//
-	for (int i = 1; i <= numberOfVertices; i++) {
-		std::vector<int> levels;
-		std::vector<AgentSolver::Partition> temp;
-		//temp.reserve();//
-		levels.push_back(0);
-		temp = AgentSolver::get_set_divisions(i, 1, levels, numberOfVertices);
-		
-		for (int s = 0; s < (int)temp.size(); s++) {
- 			
- 			partitions.push_back(temp[s]);
- 			
- 		}
- 		
-	}
-	
-	std::cout << "\n" << partitions.size() << " Partitions Found\n" << std::endl;
-	//return partitions
-	return partitions;
-	
-	 /*
-	 //Example vertices
-	 int v1 = 1;
-	 int v2 = 2;
-	 int v3 = 3;
-	 int v4 = 4;
-	 
-	 //Example Sets
-	 int s0 = 0;
-	 int s1 = 1;
-	 int s2 = 2;
-	 
-	 //Create a partition with 3 sets
-	 AgentSolver::Partition example_one (3);
-	 
-	 //Add vertice 4 to set 2, add vertice 3 to set 1, etc...
-	 example_one.addVertice(v4, s2);
-	 example_one.addVertice(v3, s1);
-	 example_one.addVertice(v2, s1);
-	 example_one.addVertice(v1, s0);
-	 
-	 //Print this partition to the terminal
-	 example_one.print();
-	 
-	 //Create another example partition with 2 sets this time
-	 AgentSolver::Partition example_two (2);
-	 example_two.addVertice(v4, s0);
-	 example_two.addVertice(v3, s1);
-	 example_two.addVertice(v2, s1);
-	 example_two.addVertice(v1, s0);	 
-	 
-	 //Print this partition to the terminal
-	 example_two.print();
-	 
-	 
-	 //Create a vector of example partitions
-	 std::vector<AgentSolver::Partition> examples;
-	 
-	 //Add 'example_one' and 'example_two' to the examples vector
-	 examples.push_back(example_one);
-	 examples.push_back(example_two);
-	 
-	 //Return Examples
-	 return examples;
-	 */
-	 
- }
- 
 
- 
- /**
-  * Passed the number of sets to generate partitions for.
-  *
-  * Returns a vector with all partitions for the given number of sets.
-  */
- std::vector<AgentSolver::Partition> AgentSolver::get_set_divisions(int sets, int depth, std::vector<int> levels, int numberOfVertices) {
- 	
- 	std::vector<AgentSolver::Partition> partitions;
- 	//partitions.reserve();//
- 	
- 	if (depth == sets) {
- 		
- 		AgentSolver::Partition p (depth);
- 		levels.push_back(numberOfVertices);
- 		int vertice = 0;
- 		
- 		for (int set = 0; set < sets; set++) {
- 		
- 			for (; vertice < levels[set + 1]; vertice++) {
- 				
- 				p.addVertice(vertice, set);
- 				
- 			}
- 			
- 		}
- 		
- 		partitions.push_back(p);
- 		//p.print();
- 		
- 	} else {
- 		
- 		levels.push_back((levels[depth - 1] + 1));
- 		
- 		for (; levels[depth] < (numberOfVertices - (sets - depth - 1)); levels[depth]++) {
- 			std::vector<AgentSolver::Partition> temp;
- 			temp = AgentSolver::get_set_divisions(sets, depth + 1, levels, numberOfVertices);
- 			
- 			for (int s = 0; s < (int)temp.size(); s++) {
- 				
- 				partitions.push_back(temp[s]);
- 				
- 			}
- 		}
- 	}
- 	
- 	return partitions;
- }
- 
 /**
  * Will return two edge disjoint trees, unless none are found in which case, 
  * it returns only one.
@@ -397,6 +232,7 @@ AgentSolver::Adjacency_List AgentSolver::get_spanning_tree(Adjacency_List board_
 			//check if it is connected to the current vertice 
 			//and if it has not been visited before
 			for(int v2 = 0; v2 < number_of_vertices; v2++) {
+				spanning_tree.set_original_id(v2, board_matrix.get_original_id(v2));
 				if (board_matrix.is_connected(v1, v2) && std::find(visited_vertices.begin(), visited_vertices.end(), v2) == visited_vertices.end()) {
 					spanning_tree.addEdge(v1,v2);
 					spanning_tree.addEdge(v2,v1);
@@ -675,6 +511,7 @@ std::vector<AgentSolver::Edge> AgentSolver::get_all_edges(AgentSolver::Adjacency
 	int number_of_vertices = tree.get_number_of_vertices();
 	Adjacency_List copy_tree  (number_of_vertices);
 	for (int v1 = 0; v1 < number_of_vertices; v1++) {
+		copy_tree.set_original_id(v1, tree.get_original_id(v1));
 		for (int v2 = 0; v2 < number_of_vertices; v2++) {
 			//std::cout<<"\nCopy Tree.  V1: " << v1 << "   V2: " << v2;
 			if (tree.is_connected(v1,v2)) {
@@ -908,13 +745,9 @@ int AgentSolver::xy_to_vertice(int xy) {
   * Is given an edge, and returns an xy value representing the middle 
   * of that edge
   */
- int AgentSolver::edge_to_xy(AgentSolver::Edge e, Adjacency_List tree) {
-	 e = calibrate_edge(e, tree);
+ int AgentSolver::edge_to_xy(int v1, int v2) {
 	 int size = rootboard.get_size();
 	 int final_xy = -1;
-	 
-	 int v1 = e.getV1();
-	 int v2 = e.getV2();
 	 
 	 
 	 //Initialize XY of the vertices
@@ -983,25 +816,6 @@ int AgentSolver::xy_to_vertice(int xy) {
 		return final_xy;
 	}
 	
-}
-
-/**
- * Calibrate the edges to account for deleted vertices in the spanning tree
- * so it translates back to the original tree
- */
-AgentSolver::Edge AgentSolver::calibrate_edge(Edge e, Adjacency_List tree) {
-	
-	int number_of_vertices_in_spanning_tree = get_number_of_vertices(tree);
-	
-	int size = rootboard.get_size();
-	int number_of_vertices_on_board = (size - 1)/2 * ( (size -1)/2 -1) + 2;
-	
-	int calibration_constant = number_of_vertices_on_board - number_of_vertices_in_spanning_tree;
-	
-	//Calibrate the edges.  
-	e.setV1(e.getV1() + calibration_constant);
-	e.setV2(e.getV2() + calibration_constant);
-	return e;	
 }
  
 
