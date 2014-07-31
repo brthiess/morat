@@ -1,19 +1,26 @@
 size 13
 solver
-white l2
+white g3
 black d4
-white l4
-black f4
-white l6
-black b4
-white l8
-black h4
-white l10
-black i5
-white j4
-black h6
-white j6
-black f6
 white i3
-black d6
+black f4
+white k3
+black h4
+white l4
+black j4
+white l6
+black k5
+white l8
+black k7
+white l10
+black k9
+white k11
+black j10
+white i11
+black h10
+white g11
+black f10
+white e11
+black d10
+print
 genmove

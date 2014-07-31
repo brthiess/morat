@@ -1006,7 +1006,7 @@ AgentSolver::Edge AgentSolver::calibrate_edge(Edge e, Adjacency_List tree) {
  
 
 bool AgentSolver::xy_is_a_vertice(int xy) {
-	if (xy % 2 == 1 && AgentSolver::xy_from_whites_perspective(xy) % 2 == 1) {
+	if (xy % 2 == 1) {
 		return true;
 	}
 	else {
