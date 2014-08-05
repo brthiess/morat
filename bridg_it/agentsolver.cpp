@@ -152,7 +152,7 @@ Move AgentSolver::get_random_move() {
  */
 std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(Adjacency_List board_matrix) {
 	
-	//1. Create two identical spanning trees
+	//1. Create two identical spanning trees (tree1 and tree2)
 	
 	
 	//2. Create a graph from remaining edges (called common_chords ?)
@@ -169,7 +169,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 					//1. Repeat Step 3 but add c to t2 instead and delete c from tree1
 					
 			//d. Delete c from common_chords
-	//4. Remove edges in both tree1 and tree2
+	//4. Remove edges that are in both tree1 and tree2 from tree1 and tree2
 	//5. Remove vertices in tree1 and tree2 that are not connected to their start and end vertices
 	//6. Add tree1 and tree2 to a vector and return it
 	
