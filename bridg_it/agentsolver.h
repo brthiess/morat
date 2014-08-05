@@ -504,6 +504,7 @@ public:
 	bool xy_on_board(int xy, int xy2);
 	bool xy_is_a_vertice(int xy);
 	std::vector<Adjacency_List> find_edge_disjoint_trees(Adjacency_List board_matrix);
+	std::vector<Adjacency_List> find_edge_disjoint_trees_old(Adjacency_List board_matrix);
 	Adjacency_List get_spanning_tree(Adjacency_List board_matrix);
 	bool is_connected(Adjacency_List tree);
 	Adjacency_List subtract_trees(Adjacency_List tree1, Adjacency_List tree2);

@@ -44,7 +44,7 @@ void AgentSolver::search(double time, uint64_t max_runs, int verbose){
 	board_matrix.graph_to_s();
 	
 	//Get rid of problem vertices
-	board_matrix = remove_problem_vertices(board_matrix);
+	//board_matrix = remove_problem_vertices(board_matrix);
 	
 	//Find 2 Edge Disjoint Spanning Trees
 	std::vector<AgentSolver::Adjacency_List> trees = find_edge_disjoint_trees(board_matrix);
@@ -146,12 +146,42 @@ Move AgentSolver::get_random_move() {
 	return Move(1,1);
 }
 
+/**
+ * Will return two edge disjoint trees, unless none are found in which case, 
+ * it returns none
+ */
+std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(Adjacency_List board_matrix) {
+	
+	//1. Create two identical spanning trees
+	
+	
+	//2. Create a graph from remaining edges (called common_chords ?)
+	
+	
+	//3. For each edge c in common_chords
+			//a. add c to tree1
+			//b. Find all the edges in the cycle it created
+			//c. For each edge r in the cycle
+				//i. If r is in both tree1 and tree2
+					//1. Delete r from tree1
+					//2. Break from loop 
+				//ii. If no r's are in both trees
+					//1. Repeat Step 3 but add c to t2 instead and delete c from tree1
+					
+			//d. Delete c from common_chords
+	//4. Remove edges in both tree1 and tree2
+	//5. Remove vertices in tree1 and tree2 that are not connected to their start and end vertices
+	//6. Add tree1 and tree2 to a vector and return it
+	
+	
+}
+
 
 /**
  * Will return two edge disjoint trees, unless none are found in which case, 
  * it returns only one.
  */
-std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(Adjacency_List board_matrix) {	
+std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees_old(Adjacency_List board_matrix) {	
 	//Vector containing all edge disjoint trees found
 	std::vector<AgentSolver::Adjacency_List> edge_disjoint_trees;
 	
