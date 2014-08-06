@@ -165,7 +165,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 	
 		//2. Create a graph from remaining edges (called common_chords ?)
 	//Create a second tree by removing the edges of baseTree from the main graph
-	Adjacency_List commonChords = subtract_trees(board_matrix, baseTree);
+	Adjacency_List leftovers = subtract_trees(board_matrix, baseTree);
 	
 	//3. For each edge c in common_chords
 			//a. add c to tree1
@@ -178,9 +178,27 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 					//1. Repeat Step 3 but add c to t2 instead and delete c from tree1
 					
 			//d. Delete c from common_chords
-	//4. Remove edges that are in both tree1 and tree2 from tree1 and tree2
+			
+		//4. Remove edges that are in both tree1 and tree2 from tree1 and tree2
+	//Search for common edges between trees
+	for (int v1 = 0; v1 < board_matrix.get_number_of_vertices(); v1++) {
+		for (int v2 = 0; v2 < board_matrix.get_number_of_vertices(); v2++) {
+			if (tree1.is_connected(v1, v2) && tree2.is_connected(v1, v2)) {
+			
+				//Delete common edges
+				tree1.delete_edge(v1, v2);
+				tree2.delete_edge(v1, v2);
+				printf("Edges deleted at %d, %d.", v1, v2);
+				
+			}
+		}
+	}
 	
-	//5. Remove vertices in tree1 and tree2 that are not connected to their start and end vertices
+		//5. Remove vertices in tree1 and tree2 that are not connected to their start and end vertices
+	//determine whether both trees are connected
+	if (!(is_connected(tree1)) || !(is_connected(tree2))) {
+		
+	}
 	
 		//6. Add tree1 and tree2 to a vector and return it
 	//add edge disjoint trees to edge_disjoint_trees
