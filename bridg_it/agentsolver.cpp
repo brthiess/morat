@@ -158,7 +158,29 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 	//2. Create a graph from remaining edges (called common_chords ?)
 	
 	
+	bool checked_tree_1 = false;
+	
+	std::vector<Edge> chord_edges = get_all_edges(common_chords);
 	//3. For each edge c in common_chords
+	for (int c = 0; (unsigned) c < chord_edges.size(); c++) {
+		if (checked_tree_1 == true) {
+			swap(&tree1, &tree2);
+		}
+		tree1.addEdge(chord_edges[c]);
+		std::vector<Edge> cycle_edges = get_edges_in_cycle(tree1, chord_edges[c]);
+		for (int r = 0; (unsigned) r < cycle_edges.size(); r++) {
+			int v1 = cycle_edges[r].getV1();
+			int v2 = cycle_edges[r].getV2();
+			if (tree1.find_edge(v1, v2) && tree2.find_edge(v1, v2)) {
+				tree1.delete_edge(v1, v2);
+				break;
+			}
+			if ((unsigned) r == cycle_edges.size() - 1) {
+				c -= 1;
+				checked_tree_1 = true;
+			}			
+		}
+	}
 			//a. add c to tree1
 			//b. Find all the edges in the cycle it created
 			//c. For each edge r in the cycle
@@ -168,9 +190,17 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 				//ii. If no r's are in both trees
 					//1. Repeat Step 3 but add c to t2 instead and delete c from tree1
 					
-			//d. Delete c from common_chords
+			
+			
 	//4. Remove edges that are in both tree1 and tree2 from tree1 and tree2
+	
+	
+	
 	//5. Remove vertices in tree1 and tree2 that are not connected to their start and end vertices
+	
+	
+	
+	
 	//6. Add tree1 and tree2 to a vector and return it
 	
 	

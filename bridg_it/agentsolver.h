@@ -327,6 +327,11 @@ public:
 				return false;
 			}
 			
+			bool find_edge(Edge e) {
+				
+				
+			}
+			
 			
 			bool delete_edge(int v1, int v2) {
 				for (int v = 0; (unsigned) v < vertices.size(); v++) {
