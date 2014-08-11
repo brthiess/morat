@@ -591,7 +591,7 @@ public:
 	int edge_to_xy(int v1, int v2);
 	Move get_random_move();
 	std::vector<Edge> get_cycle_edges(Adjacency_List tree, Edge e);
-	void Augment( Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords);
+	void Augment( Adjacency_List * tree1, Adjacency_List * tree2, Adjacency_List * common_chords);
 
 	  
 	

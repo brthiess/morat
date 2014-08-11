@@ -73,15 +73,12 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 	if (trees.size() >= 2){
 		logerr("Solved as a win\n");
 
-		//Here for testing purposes
-		logerr("PV:\n");
 		//Grab the trees
 		tree1 = trees.at(0);
 		tree2 = trees.at(1);		
 	}
 	else {
 		logerr("Solved as a loss\n");
-		logerr("PV:\n");
 		root.outcome == Outcome::UNKNOWN;
 		return;
 	}
@@ -171,52 +168,6 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 	//Create a second tree by removing the edges of baseTree from the main graph
 	Adjacency_List common_chords = subtract_trees(board_matrix, baseTree);
 	
-	
-	
-	
-	
-	
-	
-		printf("\n\n*****Test Graph*******");
-	Adjacency_List test_cycle (10);
-	test_cycle.addEdge(0,1);
-	test_cycle.addEdge(1,0);
-	test_cycle.addEdge(1,2);
-	test_cycle.addEdge(2,6);
-	test_cycle.addEdge(6,2);
-	test_cycle.addEdge(6,7);
-	test_cycle.addEdge(7,6);
-	test_cycle.addEdge(7,2);
-	test_cycle.addEdge(2,7);
-	test_cycle.addEdge(0,4);
-	test_cycle.addEdge(4,0);	
-	test_cycle.addEdge(2,1);
-	test_cycle.addEdge(3,0);
-	test_cycle.addEdge(0,3);
-	test_cycle.addEdge(3,4);
-	test_cycle.addEdge(4,3);
-	test_cycle.addEdge(2,5);
-	test_cycle.addEdge(5,2);
-	test_cycle.addEdge(1,3);
-	test_cycle.addEdge(3,1);
-	
-	printf("\n\n***********Edges***********\n");
-	get_all_edges(test_cycle);
-	
-	test_cycle.graph_to_s();
-	
-	std::vector<Edge> edges = get_cycle_edges(test_cycle, Edge(0,1, 5));
-	
-	for (int i = 0; (unsigned) i < edges.size(); i++) {
-		
-		std::cout << "\nEdge: " << edges[i].getV1() << ", " << edges[i].getV2();
-	}
-	
-	
-	
-	
-	
-	
 	std::cout<< "\n\n****Augment****\n" << "Before: ";
 	
 		printf("\n\nTree 1");
@@ -225,10 +176,8 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 		printf("\n\nTree 2");
 		tree2.graph_to_s();
 	
-	Augment(tree1, tree2, common_chords);
+	Augment(&tree1, &tree2, &common_chords);
 	
-	
-
 	//6. Add tree1 and tree2 to a vector and return it
 	//add edge disjoint trees to edge_disjoint_trees
 	edge_disjoint_trees.push_back(tree1);
@@ -243,21 +192,21 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 /**
  * Algorithm to get 2 trees with max distance from each other
  */
- void AgentSolver::Augment(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords) {
-	 std::vector<Edge> c_c = get_all_edges(common_chords);
+ void AgentSolver::Augment(Adjacency_List * tree1, Adjacency_List * tree2, Adjacency_List * common_chords) {
+	 std::vector<Edge> c_c = get_all_edges(*common_chords);
 	 std::vector<Edge> cycle_edges;
 	 
 	 //For each edge c in common chords
 	 for (int c = 0; (unsigned) c < c_c.size(); c++) {
 		 //Add edge to spanning tree.  Create a cycle
-		 tree1.addEdge(c_c[c]);	
+		 tree1->addEdge(c_c[c]);	
 		 //Get the cycle
-		 cycle_edges = get_cycle_edges(tree1, c_c[c]);
+		 cycle_edges = get_cycle_edges(*tree1, c_c[c]);
 		 //For each edge in the cycle (not including c_c[c])
 		 for (int e = 1; (unsigned) e < cycle_edges.size(); e++) {
 			 //If there is an edge in both trees
-			 if (tree2.find_edge(cycle_edges[e])) {
-				 tree1.delete_edge(cycle_edges[e]);
+			 if (tree2->find_edge(cycle_edges[e])) {
+				 tree1->delete_edge(cycle_edges[e]);
 			 }
 		 }
 	 }
@@ -265,10 +214,10 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 	 
 		printf("\nAfter: ");
 		printf("\n\nTree 1");
-		tree1.graph_to_s();
+		tree1->graph_to_s();
 	
 		printf("\n\nTree 2");
-		tree2.graph_to_s();
+		tree2->graph_to_s();
 	 
 	 
 	 
@@ -416,7 +365,6 @@ AgentSolver::Adjacency_List AgentSolver::get_spanning_tree(Adjacency_List board_
 			for(int v2 = 0; v2 < number_of_vertices; v2++) {
 				spanning_tree.set_original_id(v2, board_matrix.get_original_id(v2));
 				if (board_matrix.is_connected(v1, v2) && std::find(visited_vertices.begin(), visited_vertices.end(), v2) == visited_vertices.end()) {
-					int id = get_id();
 					spanning_tree.addEdge(v1,v2, edge_to_xy(v1,v2) );
 					spanning_tree.addEdge(v2,v1, edge_to_xy(v1,v2));
 					s.push(v2);
