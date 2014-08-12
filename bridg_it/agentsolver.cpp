@@ -213,9 +213,21 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 				 break;
 			 }
 		 }
+		 //Did not find any common branches.  
+		 //Take the union of the of all the circuits created by cycle_edges in tree 1
 		 if (!found_a_common_edge) {
-			 std::cout<<"\nFound a not common edge";
+			 std::cout<<"\nDid not find a common branch";			 
 			 tree1->delete_edge(c_c[c]);
+			 std::vector<Edge> union_edges = Union(*tree2, cycle_edges);
+			 //Iterate through all of the edges in the union and check for common branches
+			 for (int e = 0; (unsigned) e < union_edges.size(); e++) {
+				 if (tree1->find_edge(union_edges[e]) && tree2->find_edge(union_edges[e])) {
+					 tree1->addEdge(c_c[c]);
+					 tree2->addEdge(tree1->get_edge(union_edges[e].get_cycle_id()));
+					 tree1->delete_edge(union_edges[e].get_cycle_id());
+					 tree2->delete_edge(union_edges[e]);					 
+				 }				 
+			 }			 
 		 }
 	 }
 	 
@@ -231,6 +243,18 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 	 
  }
 
+
+/**
+ * Is given a set of edges and a tree.  
+ * It returns the union of the cycles (in the form of a vector of edges)
+ * created by each edge being added to the tree
+ */
+ std::vector<AgentSolver::Edge> AgentSolver::Union(Adjacency_List tree, std::vector<Edge> cycle_edges) {
+	 
+	 
+	 std::vector<Edge> e;
+	 return e;
+ }
 
 /**
  * Will return two edge disjoint trees, unless none are found in which case, 

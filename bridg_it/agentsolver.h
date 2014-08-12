@@ -223,12 +223,14 @@ public:
 		int v2; 
 		long id;
 		bool visited;
+		long cycle_id;
 		
 		Edge(int vert1, int vert2, long ID)  {
 			v1 = vert1;
 			v2 = vert2;
 			id = ID;
 			visited = false;
+			cycle_id = -1;
 		}
 
 		
@@ -254,6 +256,14 @@ public:
 		
 		bool get_visited() {
 			return visited;
+		}
+		
+		void set_cycle_id(long id) {
+			cycle_id = id;
+		}
+		
+		long get_cycle_id() {
+			return cycle_id;
 		}
 		
 	};
@@ -392,7 +402,17 @@ public:
 				}		
 				return false;
 			}
-			
+			/**
+			 * Returns the edge specified by the id
+			 */
+			Edge get_edge(long id) {
+				for (int e = 0; (unsigned) e < edges.size(); e++) {
+					if (id == edges[e].getID()) {
+						return edges[e];
+					}
+				}
+				return Edge(-1, -1, -1);
+			}
 			
 			bool delete_edge(Edge edge) {
 				bool found_edge = false;
@@ -594,6 +614,7 @@ public:
 	Move get_random_move();
 	std::vector<Edge> get_cycle_edges(Adjacency_List tree, Edge e);
 	void Augment( Adjacency_List * tree1, Adjacency_List * tree2, Adjacency_List * common_chords);
+	std::vector<Edge> Union(Adjacency_List tree, std::vector<Edge> cycle_edges);
 
 	  
 	
