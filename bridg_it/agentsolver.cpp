@@ -224,7 +224,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 				 if (tree1->find_edge(union_edges[e]) && tree2->find_edge(union_edges[e])) {
 					 tree1->addEdge(c_c[c]);
 					 tree2->addEdge(tree1->get_edge(union_edges[e].get_cycle_id()));
-					 tree1->delete_edge(union_edges[e].get_cycle_id());
+					 tree1->delete_edge(tree1->get_edge(union_edges[e].get_cycle_id()));
 					 tree2->delete_edge(union_edges[e]);					 
 				 }				 
 			 }			 
@@ -251,9 +251,27 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
  */
  std::vector<AgentSolver::Edge> AgentSolver::Union(Adjacency_List tree, std::vector<Edge> cycle_edges) {
 	 
+	 std::vector<Edge> union_edges;
 	 
-	 std::vector<Edge> e;
-	 return e;
+	 
+	 
+	 for (unsigned int i = 0; i < (unsigned)cycle_edges.size(); i++) {
+	 	tree.addEdge(cycle_edges[i]);
+	 	std::vector<Edge> temp = get_cycle_edges(tree, cycle_edges[i]);
+	 	union_edges.insert(union_edges.end(), temp.begin(), temp.end());
+	 	tree.delete_edge(cycle_edges[i]);
+	 }
+	 
+	 for (unsigned int i = 0; i < (unsigned)union_edges.size() - 1; i++) {
+	 	for (unsigned int j = i + 1; j < (unsigned)union_edges.size(); j++) {
+	 		if (union_edges[i].getID() == union_edges[j].getID()) {
+	 			union_edges.erase(union_edges.begin() + j);
+	 			j -= 1;
+	 		}
+	 	}
+	 }
+	 
+	 return union_edges;
  }
 
 /**
@@ -348,6 +366,7 @@ std::vector<AgentSolver::Edge> AgentSolver::get_cycle_edges(Adjacency_List tree,
 			//Else if current node is connected to a new node that has not been visited yet
 			else if( (current_edge_vertices.back() == tree_edges[i].getV1() || current_edge_vertices.back() == tree_edges[i].getV2()) && tree_edges[i].visited == false) {
 				tree_edges[i].visited = true;
+				tree_edges[i].set_cycle_id(e.getID());
 				current_edges.push_back(tree_edges[i]);
 				current_edge = tree_edges[i];
 				if (current_edge_vertices.back() == tree_edges[i].getV2()) {

@@ -143,17 +143,94 @@ public:
 	};
 public:	
 
-
+	struct Vertex {
+		int id;
+		int original_id;
+		
+		std::vector<int> attached;
+		bool visited;
+		bool exists;
+		
+		Vertex(int ID) {
+			id = ID;
+			original_id = ID;
+			visited = false;
+			exists = true;
+		}
+		Vertex(int ID, std::vector<int> Attached) {
+			id = ID;
+			original_id = ID;
+			attached = Attached;
+			visited = false;
+			exists = true;
+		}
+		
+		
+		
+		void add_attached(int v) {
+			attached.push_back(v);
+		}	
+		int get_id() { 
+			return id;
+		}
+		int get_original_id() {
+			return original_id;
+		} 
+		
+		void set_original_id(int id) {
+			original_id = id;
+		}
+		
+		int get_number_attached() {
+			return attached.size();
+		}
+		std::vector<int> get_attached() {return attached;}
+		bool get_visited() { return visited;}
+		void set_visited(bool Visited) {visited = Visited;}
+		void set_attached(std::vector<int> Attached) {attached = Attached;}
+		void set_id(int ID) {id = ID;}
+		void set_exists(bool Exists) {exists = Exists;}
+		bool get_exists() {return exists;}
+		bool is_attached(int v) {
+			for (int i = 0; (unsigned)i < attached.size(); i++) {
+				if(v == attached[i]) {
+					return true;
+				}
+			}
+			return false;
+		}
+		bool remove_attached(int v) {
+			for (int i = 0; (unsigned)i < attached.size(); i++) {
+				if (attached[i] == v) {
+					attached.erase(attached.begin() + i);
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		void print() {
+			for (int v = 0; (unsigned) v < attached.size(); v++) {
+				std::cout << attached[v] << ", ";
+			}
+		}		
+	};
+	
+	
 
 	struct Edge {
 		int v1;
 		int v2; 
 		long id;
+		bool visited;
+		long cycle_id;
 		
 		Edge(int vert1, int vert2, long ID)  {
 			v1 = vert1;
 			v2 = vert2;
 			id = ID;
+			visited = false;
+			cycle_id = -1;
 		}
 
 		
@@ -168,6 +245,298 @@ public:
 		int getV2() {
 			return v2;
 		}
+		
+		void setV1(int v) {
+			v1 = v;
+		}
+		
+		void setV2(int v) {
+			v2 = v;
+		}
+		
+		bool get_visited() {
+			return visited;
+		}
+		
+		void set_cycle_id(long id) {
+			cycle_id = id;
+		}
+		
+		long get_cycle_id() {
+			return cycle_id;
+		}
+		
+	};
+	
+
+	class Adjacency_List {		
+		private: 
+			int size;
+			std::vector<Vertex> vertices;
+			std::vector<Edge> edges;
+			
+		public: 
+			Adjacency_List() {}
+			Adjacency_List(int size) {
+				this->size = size;
+				for(int i = 0; i < size; i++) {
+					Vertex v = (i);
+					vertices.push_back(v);
+				}
+			}
+			
+			
+			void addEdge(Edge e) {
+				int v1 = e.getV1();
+				int v2 = e.getV2();
+				
+				addEdge(v1, v2, e.getID());
+				addEdge(v2, v1, e.getID());				
+			}
+			
+			void addEdge(int v1, int v2, int id=-1){
+				if (v1 == v2){
+					return;
+				}
+				//std::cout << "\nAdd Edge.  V1: " << v1 << "\tV2: " << v2<< "\n";
+				for (int v = 0; (unsigned) v < vertices.size(); v++) {
+					if (vertices[v].get_id() == v1) {
+						v1 = v;
+					}
+				}
+				vertices[v1].add_attached(v2);
+				if (id == -1) {
+					edges.push_back(Edge(v1, v2, edges.size()));
+				}		
+				else {
+					edges.push_back(Edge(v1, v2, id));
+				}					
+			}
+			
+			std::vector<Edge> get_edges() {
+				std::vector<Edge> culled_edges = edges; 
+				for (int e = 0; (unsigned) e < culled_edges.size(); e++) {
+					for (int i = e + 1; (unsigned)i < culled_edges.size(); i++) {
+						if (culled_edges[e].getID() == culled_edges[i].getID()){
+							culled_edges.erase(culled_edges.begin() + i);
+						}			
+					} 
+				}
+				return culled_edges;
+			}
+			
+			int get_number_of_edges() {
+				return edges.size()/2;
+			}
+			
+			bool is_connected(Edge e1, Edge e2) {
+				int e1v1 = e1.getV1();
+				int e1v2 = e1.getV2();
+				int e2v1 = e2.getV1();
+				int e2v2 = e2.getV2();
+				
+				if (e1v1 == e2v2 || e1v1 == e2v1 ||
+					e1v2 == e2v2 || e1v2 == e2v1) {
+					return true;						
+				}
+				return false;
+			}
+			
+			int get_number_of_edges_attached_to_vertice(int vertex) {
+				for (int v = 0; (unsigned) v < vertices.size(); v++) {
+					if (vertices[v].get_id() == vertex) {
+						return vertices[v].get_number_attached();
+					}
+				}	
+				std::cerr<<"Error!  Could not find specified vertice";			
+				return -1;
+			}
+			
+			int get_number_of_vertices() {
+				return size;
+			}
+			
+			int get_number_of_duplicate_edges(int v1, int v2) {
+				int number = 0;
+				for (int e = 0; (unsigned)e < edges.size(); e++) {
+					if (edges[e].getV1() == v1 && edges[e].getV2() == v2) {
+						number += 1;
+					}
+				}
+				return number;
+			}
+			
+			bool find_edge(int v1, int v2) {
+				for(int e = 0; (unsigned)e < edges.size(); e++) {
+					if (edges[e].getV1() == v1 && edges[e].getV2() == v2) {
+						return true;
+					}
+				}
+				return false;
+			}
+			
+			bool find_edge(Edge edge) {
+				for (int e = 0; (unsigned) e < edges.size(); e++) {
+					if (edge.getID() == edges[e].getID()) {
+						return true;
+					}
+				}
+				return false;
+			}
+			
+			
+			bool delete_edge(int v1, int v2) {
+				for (int v = 0; (unsigned) v < vertices.size(); v++) {
+					if (vertices[v].get_id() == v1) {
+						v1 = v;
+						break;
+					}
+				}
+				vertices[v1].remove_attached(v2);
+				for(int e = 0; (unsigned)e < edges.size(); e++) {
+					if (edges[e].getV1() == v1 && edges[e].getV2() == v2) {
+						std::cout << "\nDeleting "<< v1 << " and " << v2;
+						edges.erase(edges.begin() + e);
+						return true;
+					}
+				}		
+				return false;
+			}
+			/**
+			 * Returns the edge specified by the id
+			 */
+			Edge get_edge(long id) {
+				for (int e = 0; (unsigned) e < edges.size(); e++) {
+					if (id == edges[e].getID()) {
+						return edges[e];
+					}
+				}
+				return Edge(-1, -1, -1);
+			}
+			
+			bool delete_edge(Edge edge) {
+				bool found_edge = false;
+				int v1 = edge.getV1();
+				int v2 = edge.getV2();
+				for (int v = 0; (unsigned) v < vertices.size(); v++) {
+					if (vertices[v].get_id() == v1) {
+						v1 = v;
+					}
+				}
+				vertices[v1].remove_attached(v2);
+				vertices[v2].remove_attached(v1);
+				for(int e = edges.size() - 1; e >= 0; e--) {
+					if (edge.getID() == edges[e].getID()) {
+						std::cout << "\nDeleting "<< v1 << " and " << v2;
+						edges.erase(edges.begin() + e);
+						found_edge = true;
+					}
+				}		
+				return found_edge;
+			}
+			
+			bool not_empty() {
+				if (size != 0) {
+					return true;
+				}
+				return false;
+			}
+			
+			void set_original_id(int vertex, int original_id) {
+				//Find the vertex specified and set its original id
+				for (int v = 0; (unsigned)v < vertices.size(); v++) {
+					if (vertices[v].get_id() == vertex) {
+						vertices[v].set_original_id(original_id);
+					}
+				}
+			}
+			
+			int get_original_id(int vertex) {
+				for (int v = 0; (unsigned)v < vertices.size(); v++) {
+					if (vertices[v].get_id() == vertex) {
+						return vertices[v].get_original_id();
+					}
+				}
+				return -1;
+			}
+			
+			/**
+			 * Deletes a vertice from the graph
+			 */
+			void delete_vertex(int vertex) {
+				if (vertex >= size) {
+					return;
+				}	
+				//Delete edges connected to this vertex
+				for(int v = 0; (unsigned)v < vertices.size(); v++) {
+					if (is_connected(v, vertex)) {
+						delete_edge(v,vertex);
+						delete_edge(vertex,v);
+						v -= 1;
+					}
+				}
+				//Delete all references of other vertices being attached to this vertex
+				for(int v = 0; (unsigned)v < vertices.size(); v++) {
+					if (is_connected(vertex, v)) {
+						vertices[v].remove_attached(vertex);
+					}
+				}
+				vertices.erase(vertices.begin() + vertex);
+				size -= 1;
+				
+
+				
+				//Reassign references for attached vertices
+				for(int v = 0; (unsigned) v < vertices.size(); v++) {
+					for (int r = vertex; (unsigned)r < vertices.size(); r++) { 
+						if (is_connected(vertices[v].get_id(), vertices[r].get_id())) {
+							std::cout<< "\nVertice: "<< vertices[v].get_id() << ", " << vertices[r].get_id() << "Are connected.";
+							vertices[v].add_attached(vertices[r].get_id() - 1);
+							vertices[v].remove_attached(vertices[r].get_id());
+						}
+					}
+				}
+				
+				
+				//Move all id's down one
+				for (int v = vertex; (unsigned)v < vertices.size(); v++) {
+					int id = vertices[v].get_id();
+					vertices[v].set_id(id - 1);
+				}
+				
+				for (int e = 0; (unsigned) e < edges.size(); e++) {
+					if (edges[e].getV1() >= vertex) {
+						edges[e].setV1(edges[e].getV1() - 1);
+					}
+					if (edges[e].getV2() >= vertex) {
+						edges[e].setV2(edges[e].getV2() - 1);
+					}					
+				}
+			}
+			
+				
+			
+						
+			/**
+			 * Returns true if the two are connected by a single edge
+			 */
+			bool is_connected(int v1, int v2) {
+				for(int e = 0; (unsigned)e < edges.size(); e++) {
+					if (edges[e].getV1() == v1 && edges[e].getV2() == v2) {
+						return true;
+					}
+				}
+				return false;
+			}
+			
+			
+			void graph_to_s(){        
+				for (int v = 0; (unsigned)v < vertices.size(); v++) {
+						std::cout << "\nVertex: " << vertices[v].get_id()<<  "(" << vertices[v].get_original_id()<< ")" << " : ";
+						vertices[v].print();					
+				}
+			}
+
 		
 	};
 
@@ -215,139 +584,40 @@ public:
 		struct AdjacencyListNode *head;
 	};
 	
-	class Adjacency_List{
-		private:
-			int size;
-			struct AdjacencyList *array;
-
-		public:
-			Adjacency_List(int size){
-				this->size = size;
-				array = new AdjacencyList[size];
-				for (int i = 0; i < size; ++i)
-					array[i].head = NULL;
-			}
-			
-			AdjacencyListNode* newAdjacencyListNode(int destination){
-				AdjacencyListNode* newNode = new AdjacencyListNode;
-				newNode->destination = destination;
-				newNode->next = NULL;
-				return newNode;
-			}
-
-			void addEdge(int src, int destination){
-				if (src == destination){
-					return;
-				}
-
-				AdjacencyListNode* newNode = newAdjacencyListNode(destination);
-
-				newNode->next = array[src].head;
-				array[src].head = newNode;
-			}
-			
-			int get_number_of_edges() {
-				int number_of_edges = 0;
-				for (int i = 0; i < size; i++) {					
-					AdjacencyListNode* n = array[i].head;
-					
-					while(n) {
-						n = n->next;
-						number_of_edges += 1;
-					}
-				}
-				return number_of_edges/2;
-			}
-			
-			bool find_edge(int v1, int v2) {
-				AdjacencyListNode *n = array[v1].head;
-				while(n) {
-					if (v2 == n->destination) {
-							return true;
-					}
-					n = n->next;
-				}
-				return false;
-			}
-			
-			
-			bool delete_edge(int v1, int v2) {
-
-				AdjacencyListNode *previous_node = NULL;
-				AdjacencyListNode *n = array[v1].head;
-				while(n) {
-					if (v2 == n->destination) {
-						if (previous_node != NULL) {
-							previous_node->next = n->next;
-							return true;
-						}
-						else {
-							array[v1].head = NULL;
-							return true;
-						}
-					}
-					previous_node = n;
-					n = n->next;
-				}
-				return false;
-			}
-			
-			bool not_empty() {
-				if (size != 0) {
-					return true;
-				}
-				return false;
-			}
-			
-			/**
-			 * Returns true if the two are connected by a single edge
-			 */
-			bool is_connected(int v1, int v2) {
-				AdjacencyListNode *n = array[v1].head;
-				while(n) {
-					if (v2 == n->destination) {
-						return true;
-					}
-					n = n->next;
-				}
-				return false;
-			}
-			
-
-			void graph_to_s(){           
-				for (int i = 0; i < size; i++){
-					AdjacencyListNode* n = array[i].head;
-					std::cout<<"\n Vertex:  "<<i<<"|";
-                
-					while (n){
-						std::cout<<n->destination<<", ";
-						n = n->next;
-					}
-				}
-			}
-	};
-public:	
+	public:	
 	Adjacency_List getAdjacencyList();
-	int get_number_of_vertices();
+	int get_number_of_vertices(Adjacency_List tree);
 	int xy_to_vertice(int xy);
 	int xy_from_whites_perspective(int xy);
 	bool xy_on_board(int xy, int xy2);
 	bool xy_is_a_vertice(int xy);
-	Side find_winner(Adjacency_List board_matrix);
 	std::vector<Adjacency_List> find_edge_disjoint_trees(Adjacency_List board_matrix);
+	std::vector<Adjacency_List> find_edge_disjoint_trees_old(Adjacency_List board_matrix);
 	Adjacency_List get_spanning_tree(Adjacency_List board_matrix);
 	bool is_connected(Adjacency_List tree);
 	Adjacency_List subtract_trees(Adjacency_List tree1, Adjacency_List tree2);
-	void swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::vector<Edge> *used_edges);
+	void swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::vector<Edge> *used_edges, std::vector<Edge> *tree1_edges, std::vector<Edge> * tree2_edges);
 	bool not_all_edges_used(std::vector<Edge> edges_used, Adjacency_List board_matrix);
-	bool all_vertices_visited(std::vector<int> vertices_visited);
+	bool all_vertices_visited(std::vector<int> vertices_visited, Adjacency_List treey);
 	void clear(std::stack<int> &s);
-	std::vector<Partition> get_partitions(Adjacency_List board_matrix);
-	std::vector<Partition> get_set_divisions(int sets, int depth, std::vector<int> levels, int numberOfVertices);
 	bool vertices_are_in_the_same_set(Adjacency_List al, int v1, int v2);
 	bool edge_in(std::vector<Edge> edges, long id);
 	std::vector<Edge> get_all_edges(Adjacency_List tree);
-	long get_id();
+	int get_id();
+	Adjacency_List copyTree(Adjacency_List tree);
+	long get_random(long max);
+	Adjacency_List remove_problem_vertices(Adjacency_List tree);
+	std::vector<Partition> push_to_all_indices(int i, std::vector<Partition> partitions);
+	std::vector<Partition> concatenate(std::vector<Partition> p1, std::vector<Partition> p2);
+	void get_best_move(std::vector<Adjacency_List> trees);
+	int edge_to_xy(int v1, int v2);
+	Move get_random_move();
+	std::vector<Edge> get_cycle_edges(Adjacency_List tree, Edge e);
+	void Augment( Adjacency_List * tree1, Adjacency_List * tree2, Adjacency_List * common_chords);
+	std::vector<Edge> Union(Adjacency_List tree, std::vector<Edge> cycle_edges);
+
+	  
+	
 
 	class AgentThread : public AgentThreadBase<AgentSolver> {
 		mutable XORShift_float unitrand;
