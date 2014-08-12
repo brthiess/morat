@@ -304,7 +304,6 @@ public:
 			}
 			
 			std::vector<Edge> get_edges() {
-				std::cout<<"\nGet Edges Called: ";
 				std::vector<Edge> culled_edges = edges; 
 				for (int e = 0; (unsigned) e < culled_edges.size(); e++) {
 					for (int i = e + 1; (unsigned)i < culled_edges.size(); i++) {
@@ -380,6 +379,7 @@ public:
 				for (int v = 0; (unsigned) v < vertices.size(); v++) {
 					if (vertices[v].get_id() == v1) {
 						v1 = v;
+						break;
 					}
 				}
 				vertices[v1].remove_attached(v2);
@@ -395,6 +395,7 @@ public:
 			
 			
 			bool delete_edge(Edge edge) {
+				bool found_edge = false;
 				int v1 = edge.getV1();
 				int v2 = edge.getV2();
 				for (int v = 0; (unsigned) v < vertices.size(); v++) {
@@ -403,14 +404,15 @@ public:
 					}
 				}
 				vertices[v1].remove_attached(v2);
-				for(int e = 0; (unsigned)e < edges.size(); e++) {
+				vertices[v2].remove_attached(v1);
+				for(int e = edges.size() - 1; e >= 0; e--) {
 					if (edge.getID() == edges[e].getID()) {
 						std::cout << "\nDeleting "<< v1 << " and " << v2;
 						edges.erase(edges.begin() + e);
-						return true;
+						found_edge = true;
 					}
 				}		
-				return false;
+				return found_edge;
 			}
 			
 			bool not_empty() {

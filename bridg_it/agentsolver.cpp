@@ -88,6 +88,8 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 	//Delete the edge that connects the starting vertice and the finishing vertice
 	tree1.delete_edge(0, tree1.get_number_of_vertices() - 1);
 	tree2.delete_edge(0, tree2.get_number_of_vertices() - 1);
+	tree1.delete_edge(tree1.get_number_of_vertices() - 1, 0);
+	tree2.delete_edge(tree2.get_number_of_vertices() - 1, 0);
 	
 
 	//Swap trees so that tree2 is not connected and tree1 is
@@ -121,9 +123,6 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 	}
 	//Board position is so good that we can win regardless if we play first or second
 	else {
-		std::cout <<"\n\nPlaying Random Move!";
-		m = get_random_move();
-		best_move = rootboard.xy(m);
 	}
 	
 	root.outcome = rootboard.toplay();
@@ -198,16 +197,25 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 	 
 	 //For each edge c in common chords
 	 for (int c = 0; (unsigned) c < c_c.size(); c++) {
+		 bool found_a_common_edge = false;
 		 //Add edge to spanning tree.  Create a cycle
-		 tree1->addEdge(c_c[c]);	
+		 tree1->addEdge(c_c[c]);
+		 std::cout<< "\nAdd Edge: " << c_c[c].getV1() << ", " << c_c[c].getV2();
 		 //Get the cycle
 		 cycle_edges = get_cycle_edges(*tree1, c_c[c]);
 		 //For each edge in the cycle (not including c_c[c])
-		 for (int e = 1; (unsigned) e < cycle_edges.size(); e++) {
+		 for (int e = 0; (unsigned) e < cycle_edges.size(); e++) {
 			 //If there is an edge in both trees
-			 if (tree2->find_edge(cycle_edges[e])) {
-				 tree1->delete_edge(cycle_edges[e]);
+			 if (tree2->find_edge(cycle_edges[e]) && cycle_edges[e].getID() != c_c[c].getID()) {
+				 bool did_it_delete = tree1->delete_edge(cycle_edges[e]);
+				 std::cout<< "Deleted Edge from cycle (" << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2() << ") = " << did_it_delete;
+				 found_a_common_edge = true;
+				 break;
 			 }
+		 }
+		 if (!found_a_common_edge) {
+			 std::cout<<"\nFound a not common edge";
+			 tree1->delete_edge(c_c[c]);
 		 }
 	 }
 	 
@@ -324,7 +332,7 @@ std::vector<AgentSolver::Edge> AgentSolver::get_cycle_edges(Adjacency_List tree,
 				else if (current_edge_vertices.back() == tree_edges[i].getV1()) {
 					current_edge_vertices.push_back(tree_edges[i].getV2());
 				}
-				i = 0;
+				i = -1;
 			}
 		}
 		current_edges.pop_back();
@@ -614,33 +622,7 @@ void AgentSolver::swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::
  */ 
 std::vector<AgentSolver::Edge> AgentSolver::get_all_edges(AgentSolver::Adjacency_List tree) {
 	std::vector<Edge> edges = tree.get_edges();
-	for (int e = 0; (unsigned) e < edges.size(); e++) {
-		
-		std::cout << "\nEdge  " << e << "   V1: " << edges[e].getV1()  << "   V2: " << edges[e].getV2() << "   ID: " << edges[e].getID();
-		
-	}
 	return edges;
-	/*
-	//Grab the number of vertices
-	int number_of_vertices = tree.get_number_of_vertices();
-	
-	//Make a copy
-	Adjacency_List copy_tree = copyTree(tree);	
-
-	std::vector<AgentSolver::Edge> edges;
-	
-	for (int u = 0; u < number_of_vertices; u++) {
-		for( int v = u; v < number_of_vertices; v++) {
-			if (copy_tree.delete_edge(u,v)) {
-				edges.push_back(AgentSolver::Edge(u,v, get_id()));
-				v -= 1;
-			}
-		}
-	}
-	
-
-
-	return edges;*/
 }
 
 /**
@@ -655,18 +637,6 @@ std::vector<AgentSolver::Edge> AgentSolver::get_all_edges(AgentSolver::Adjacency
 	for (int e = 0; (unsigned) e < edges.size(); e++) {
 		copy_tree.addEdge(edges[e]);	
 	}
-	/*for (int v1 = 0; v1 < number_of_vertices; v1++) {
-		copy_tree.set_original_id(v1, tree.get_original_id(v1));
-		for (int v2 = 0; v2 < number_of_vertices; v2++) {
-			//std::cout<<"\nCopy Tree.  V1: " << v1 << "   V2: " << v2;
-			if (tree.is_connected(v1,v2)) {
-				//std::cout<<"\nTree is connected";
-				for (int i = 0; i < tree.get_number_of_duplicate_edges(v1,v2); i++){ 
-					copy_tree.addEdge(v1,v2);
-				}
-			}
-		}
-	}*/
 	return copy_tree;
  }
 
@@ -724,13 +694,13 @@ bool AgentSolver::vertices_are_in_the_same_set(Adjacency_List al, int v1, int v2
 		}
 		//If both vertices were visited in the same run
 		if (std::find(vertice_set.begin(), vertice_set.end(), v1 ) != vertice_set.end() && std::find(vertice_set.begin(), vertice_set.end(), v2 ) != vertice_set.end()) {
-			std::cout << "\nBoth Vertices visited in the same run";
+			//std::cout << "\nBoth Vertices visited in the same run";
 			return true;
 		}
 		//Else if one or the other, but not both were found in the same run
 		else if ((std::find(vertice_set.begin(), vertice_set.end(), v1 ) == vertice_set.end() && std::find(vertice_set.begin(), vertice_set.end(), v2 ) != vertice_set.end()) ||
 				 (std::find(vertice_set.begin(), vertice_set.end(), v1 ) != vertice_set.end() && std::find(vertice_set.begin(), vertice_set.end(), v2 ) == vertice_set.end())){
-			std::cout << "\nOne or the other visited in the same run.  Not both";
+			//std::cout << "\nOne or the other visited in the same run.  Not both";
 			return false;
 		}		
 		
@@ -903,7 +873,7 @@ int AgentSolver::xy_to_vertice(int xy) {
 		 if (rootboard.toplay() == Side::P1) {
 			 xy = xy_from_whites_perspective(xy);
 		 }
-		 std::cout << "\nxy_to_vertice(" << xy << ") = " << xy_to_vertice(xy); 
+		 //std::cout << "\nxy_to_vertice(" << xy << ") = " << xy_to_vertice(xy); 
 		 if (xy_to_vertice(xy) == v1) {
 			 if (rootboard.toplay() == Side::P1) {
 				v1_xy = xy_from_whites_perspective(xy);			 

@@ -22,5 +22,17 @@ white g11
 black f10
 white e11
 black d10
+white b10
+black l12
+white i5
+black j12
+white b2
+black h12
+white d2
+black f12
+white f2
+black d12
+
+
 print
 genmove
