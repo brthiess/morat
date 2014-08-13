@@ -290,6 +290,12 @@ public:
 				int v1 = e.getV1();
 				int v2 = e.getV2();
 				
+				for (int i = 0; (unsigned) i < edges.size(); i++) {
+					if (e.getID() == edges[i].getID()) {
+						return;
+					}
+				}
+				
 				addEdge(v1, v2, e.getID());
 				addEdge(v2, v1, e.getID());				
 			}

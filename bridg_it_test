@@ -36,3 +36,36 @@ black d12
 
 print
 genmove
+
+
+
+
+
+
+white b2
+black c3
+white b4
+black c5
+white d4
+black d6
+white e3
+black f6
+white f4
+black g5
+white e5
+black g3
+white c1
+black f2
+white e1
+black d2
+
+
+
+
+
+
+
+
+
+
+

@@ -81,25 +81,24 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 	tree2.delete_edge(0, tree2.get_number_of_vertices() - 1);
 	tree1.delete_edge(tree1.get_number_of_vertices() - 1, 0);
 	tree2.delete_edge(tree2.get_number_of_vertices() - 1, 0);
-	/*
+	
 	//If both are still connected then we have found an easy win
 	//We can play a random move
-	if (ends_connected(tree1) && ends_connected(tree2)) {
+	if (vertices_are_in_the_same_set(tree1, 0, tree1.get_number_of_vertices() - 1) && vertices_are_in_the_same_set(tree2, 0, tree2.get_number_of_vertices() - 1)) {
 		std::cout << "\nSolved as an easy win";
 	}
 	//If one or the other is connected but not both, we have found a win
 	//but we need to make a good move
-	else if ((ends_connected(tree1) && !ends_connected(tree2)) || 
-	(!ends_connected(tree1) && ends_connected(tree2)) ) {
-		std::cout << "\nSolved as a win";
+	else if ((vertices_are_in_the_same_set(tree1, 0, tree1.get_number_of_vertices() - 1) && !vertices_are_in_the_same_set(tree2, 0, tree2.get_number_of_vertices() - 1)) || 
+	(!vertices_are_in_the_same_set(tree1, 0, tree1.get_number_of_vertices() - 1) && vertices_are_in_the_same_set(tree2, 0, tree2.get_number_of_vertices() - 1)) ) {
 	}
 	//Else neither are connected so we have lost
 	else {
 		std::cout << "\nSolved as a loss";
-	}*/
+	}
 
 	//Swap trees so that tree2 is not connected and tree1 is
-	if (!is_connected(tree1) && is_connected(tree2)){
+	if (!vertices_are_in_the_same_set(tree1, 0, tree1.get_number_of_vertices() - 1) && vertices_are_in_the_same_set(tree2, 0, tree2.get_number_of_vertices() - 1)){
 		printf("\nTree 1 is not connected and tree 2 is");
 		Adjacency_List temp_tree;
 		temp_tree = tree1;
@@ -212,6 +211,13 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 		 //Add edge to spanning tree.  Create a cycle
 		 tree1->addEdge(c_c[c]);
 		 std::cout<< "\nAdd Edge: (" << c_c[c].getV1() << ", " << c_c[c].getV2() <<")   ID: " << c_c[c].getID();
+		 
+ 		 printf("\nTree 1");
+		 tree1->graph_to_s();
+					 
+		 printf("\nTree 2");
+		 tree2->graph_to_s();
+		 
 		 //Get the cycle
 		 cycle_edges = get_cycle_edges(*tree1, c_c[c]);
 		 //For each edge in the cycle (not including c_c[c])
@@ -227,8 +233,8 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 		 //Did not find any common branches.  
 		 //Take the union of the of all the circuits created by cycle_edges in tree 1
 		 while (!found_a_common_edge) {
-			 std::cout<<"\nDid not find a common branch";			 
-			 tree1->delete_edge(c_c[c]);		 
+			 std::cout<<"\nDid not find a common branch from tree 1\nFind cycles created in tree 2";			 	 
+			 tree1->delete_edge(c_c[c]);
 			 //1. Tree 2 gets the cycle leader.  Tree 1 deletes the cycle leader
 			 //2. Tree 1 gets the common chord
 			 //3. Tree 1 keeps the common branch
@@ -249,23 +255,36 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 					 tree2->delete_edge(union_edges[e]);	
 					 std::cout<< "\nFound a common branch: Delete from Tree 2 but keep in Tree 1 (" << union_edges[e].getV1() << ", " << union_edges[e].getV2() << ")";
 					 //std::cout<< "\nCycle ID: " << union_edges[e].get_cycle_id();
+					 printf("\nTree 1");
+					 tree1->graph_to_s();
 					 
+					 printf("\nTree 2");
+					 tree2->graph_to_s();
 					 found_a_common_edge = true;
 					 break;				 
 				 }				 
 			 }	
 			 if (!found_a_common_edge) {
-				 std::cout<< "\nCycle Edges Size : " << cycle_edges.size() << "   Union Edges Size: " << union_edges.size();
+				
+				found_a_common_edge = true;
+				/* std::cout<< "\nCycle Edges Size : " << cycle_edges.size() << "   Union Edges Size: " << union_edges.size();
 				 //If cycle_edges equals union_edges
 				 //then we have found a K subgraph
 				 if (cycle_edges.size() >= union_edges.size()) {
+					 tree1->delete_edge(c_c[c]);
+					  printf("\nTree 1");
+					 tree1->graph_to_s();
+					 
+					 tree2->delete_edge(c_c[c]);
+					 printf("\nTree 2");
+					 tree2->graph_to_s();
 					 found_a_common_edge = true;					 
 					 break;
 				 }
 				 else {
 					swap(tree1, tree2);
 					cycle_edges = union_edges;
-				}
+				}*/
 			 }
 		 }
 	 }
