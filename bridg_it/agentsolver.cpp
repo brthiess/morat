@@ -69,19 +69,10 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 	
 	pool.pause();
 	
-	//Found Win
-	if (trees.size() >= 2){
-		logerr("Solved as a win\n");
+	//Grab the trees
+	tree1 = trees.at(0);
+	tree2 = trees.at(1);		
 
-		//Grab the trees
-		tree1 = trees.at(0);
-		tree2 = trees.at(1);		
-	}
-	else {
-		logerr("Solved as a loss\n");
-		root.outcome == Outcome::UNKNOWN;
-		return;
-	}
 	
 	pool.reset();
 	
@@ -90,7 +81,22 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 	tree2.delete_edge(0, tree2.get_number_of_vertices() - 1);
 	tree1.delete_edge(tree1.get_number_of_vertices() - 1, 0);
 	tree2.delete_edge(tree2.get_number_of_vertices() - 1, 0);
-	
+	/*
+	//If both are still connected then we have found an easy win
+	//We can play a random move
+	if (ends_connected(tree1) && ends_connected(tree2)) {
+		std::cout << "\nSolved as an easy win";
+	}
+	//If one or the other is connected but not both, we have found a win
+	//but we need to make a good move
+	else if ((ends_connected(tree1) && !ends_connected(tree2)) || 
+	(!ends_connected(tree1) && ends_connected(tree2)) ) {
+		std::cout << "\nSolved as a win";
+	}
+	//Else neither are connected so we have lost
+	else {
+		std::cout << "\nSolved as a loss";
+	}*/
 
 	//Swap trees so that tree2 is not connected and tree1 is
 	if (!is_connected(tree1) && is_connected(tree2)){
@@ -123,12 +129,13 @@ void AgentSolver::get_best_move(std::vector<AgentSolver::Adjacency_List> trees) 
 	}
 	//Board position is so good that we can win regardless if we play first or second
 	else {
+		std::cout<<"Playing Random Move";
+		m = get_random_move();
 	}
 	
 	root.outcome = rootboard.toplay();
 	root.bestmove = m;	
-	
-	std::cout << "\n\nBest Move: " << best_move;
+
 }
 
 /**
@@ -204,7 +211,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 		 bool found_a_common_edge = false;
 		 //Add edge to spanning tree.  Create a cycle
 		 tree1->addEdge(c_c[c]);
-		 std::cout<< "\nAdd Edge: " << c_c[c].getV1() << ", " << c_c[c].getV2();
+		 std::cout<< "\nAdd Edge: (" << c_c[c].getV1() << ", " << c_c[c].getV2() <<")   ID: " << c_c[c].getID();
 		 //Get the cycle
 		 cycle_edges = get_cycle_edges(*tree1, c_c[c]);
 		 //For each edge in the cycle (not including c_c[c])
@@ -212,6 +219,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 			 //If there is an edge in both trees
 			 if (tree2->find_edge(cycle_edges[e]) && cycle_edges[e].getID() != c_c[c].getID()) {
 				 tree1->delete_edge(cycle_edges[e]);
+				 std::cout<< "\nDeleting Edge: (" << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2() << ")  ID:"  << cycle_edges[e].getID();
 				 found_a_common_edge = true;
 				 break;
 			 }
@@ -220,9 +228,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 		 //Take the union of the of all the circuits created by cycle_edges in tree 1
 		 while (!found_a_common_edge) {
 			 std::cout<<"\nDid not find a common branch";			 
-			 tree1->delete_edge(c_c[c]);
-			 //Delete C_C[c] from Cycle Edges
-			 delete_edge(&cycle_edges, c_c[c]);			 
+			 tree1->delete_edge(c_c[c]);		 
 			 //1. Tree 2 gets the cycle leader.  Tree 1 deletes the cycle leader
 			 //2. Tree 1 gets the common chord
 			 //3. Tree 1 keeps the common branch
@@ -232,6 +238,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 			 for (int e = 0; (unsigned) e < union_edges.size(); e++) {
 				 if (tree1->find_edge(union_edges[e]) && tree2->find_edge(union_edges[e])) {
 					 //Add the common chord to tree 1
+					 std::cout << "\nAdd Common Chord Edge to Tree 1: " << c_c[c].getV1() << ", " << c_c[c].getV2();
 					 tree1->addEdge(c_c[c]);
 					 std::cout << "\nAdd Cycle Leader Edge to Tree 2 and delete from tree 1: " << tree1->get_edge(union_edges[e].get_cycle_id()).getV1() << ", " << tree1->get_edge(union_edges[e].get_cycle_id()).getV2();
 					 //Add the cycle leader to tree 2
@@ -241,8 +248,8 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 					 //Delete common branch from tree 2
 					 tree2->delete_edge(union_edges[e]);	
 					 std::cout<< "\nFound a common branch: Delete from Tree 2 but keep in Tree 1 (" << union_edges[e].getV1() << ", " << union_edges[e].getV2() << ")";
-					 std::cout << "\nAdd Common Chord Edge to Tree 1: " << c_c[c].getV1() << ", " << c_c[c].getV2();
-					 std::cout<< "\nCycle ID: " << union_edges[e].get_cycle_id();
+					 //std::cout<< "\nCycle ID: " << union_edges[e].get_cycle_id();
+					 
 					 found_a_common_edge = true;
 					 break;				 
 				 }				 
