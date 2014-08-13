@@ -167,6 +167,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 	//Create a second tree by removing the edges of baseTree from the main graph
 	Adjacency_List common_chords = subtract_trees(board_matrix, baseTree);
 	
+	
 	std::cout<< "\n\n****Augment****\n" << "Before: ";
 	
 		printf("\n\nTree 1");
@@ -174,6 +175,9 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 	
 		printf("\n\nTree 2");
 		tree2.graph_to_s();
+		
+		printf("\n\nCommon Chords");
+		common_chords.graph_to_s();
 	
 	Augment(&tree1, &tree2, &common_chords);
 	
@@ -207,27 +211,55 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 		 for (int e = 0; (unsigned) e < cycle_edges.size(); e++) {
 			 //If there is an edge in both trees
 			 if (tree2->find_edge(cycle_edges[e]) && cycle_edges[e].getID() != c_c[c].getID()) {
-				 bool did_it_delete = tree1->delete_edge(cycle_edges[e]);
-				 std::cout<< "Deleted Edge from cycle (" << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2() << ") = " << did_it_delete;
+				 tree1->delete_edge(cycle_edges[e]);
 				 found_a_common_edge = true;
 				 break;
 			 }
 		 }
 		 //Did not find any common branches.  
 		 //Take the union of the of all the circuits created by cycle_edges in tree 1
-		 if (!found_a_common_edge) {
+		 while (!found_a_common_edge) {
 			 std::cout<<"\nDid not find a common branch";			 
 			 tree1->delete_edge(c_c[c]);
+			 //Delete C_C[c] from Cycle Edges
+			 delete_edge(&cycle_edges, c_c[c]);			 
+			 //1. Tree 2 gets the cycle leader.  Tree 1 deletes the cycle leader
+			 //2. Tree 1 gets the common chord
+			 //3. Tree 1 keeps the common branch
+			 //4. Tree 2 Deletes the common branch
 			 std::vector<Edge> union_edges = Union(*tree2, cycle_edges);
 			 //Iterate through all of the edges in the union and check for common branches
 			 for (int e = 0; (unsigned) e < union_edges.size(); e++) {
 				 if (tree1->find_edge(union_edges[e]) && tree2->find_edge(union_edges[e])) {
+					 //Add the common chord to tree 1
 					 tree1->addEdge(c_c[c]);
+					 std::cout << "\nAdd Cycle Leader Edge to Tree 2 and delete from tree 1: " << tree1->get_edge(union_edges[e].get_cycle_id()).getV1() << ", " << tree1->get_edge(union_edges[e].get_cycle_id()).getV2();
+					 //Add the cycle leader to tree 2
 					 tree2->addEdge(tree1->get_edge(union_edges[e].get_cycle_id()));
+					 //Delete the cycle leader from tree 1
 					 tree1->delete_edge(tree1->get_edge(union_edges[e].get_cycle_id()));
-					 tree2->delete_edge(union_edges[e]);					 
+					 //Delete common branch from tree 2
+					 tree2->delete_edge(union_edges[e]);	
+					 std::cout<< "\nFound a common branch: Delete from Tree 2 but keep in Tree 1 (" << union_edges[e].getV1() << ", " << union_edges[e].getV2() << ")";
+					 std::cout << "\nAdd Common Chord Edge to Tree 1: " << c_c[c].getV1() << ", " << c_c[c].getV2();
+					 std::cout<< "\nCycle ID: " << union_edges[e].get_cycle_id();
+					 found_a_common_edge = true;
+					 break;				 
 				 }				 
-			 }			 
+			 }	
+			 if (!found_a_common_edge) {
+				 std::cout<< "\nCycle Edges Size : " << cycle_edges.size() << "   Union Edges Size: " << union_edges.size();
+				 //If cycle_edges equals union_edges
+				 //then we have found a K subgraph
+				 if (cycle_edges.size() >= union_edges.size()) {
+					 found_a_common_edge = true;					 
+					 break;
+				 }
+				 else {
+					swap(tree1, tree2);
+					cycle_edges = union_edges;
+				}
+			 }
 		 }
 	 }
 	 
@@ -243,6 +275,28 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 	 
  }
 
+/**
+ * Is given a vector of edges and an edge.  
+ * Deletes the edge from the vector
+ */
+ bool AgentSolver::delete_edge(std::vector<Edge> * edges, Edge e) {
+	 for (int i = 0; (unsigned) i < edges->size(); i++) {
+		 if (edges->at(i).getID() == e.getID()) {
+			 edges->erase(edges->begin() + i);
+			 return true;
+		 }		 
+	 }
+	 return false;
+ }
+
+/**
+ * Is given two pointer trees and swaps them
+ */
+ void AgentSolver::swap(Adjacency_List * tree1, Adjacency_List * tree2) {
+	 Adjacency_List temp = *tree1;
+	 *tree1 = *tree2;
+	 *tree2 = temp;	 
+ }
 
 /**
  * Is given a set of edges and a tree.  
@@ -341,6 +395,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees_o
 std::vector<AgentSolver::Edge> AgentSolver::get_cycle_edges(Adjacency_List tree, Edge e) {	
 	std::vector<Edge> current_edges;
 	std::vector<Edge> tree_edges = get_all_edges(tree);
+	e.set_cycle_id(e.getID());
 	
 	//Find the edge in the tree that corresponds to edge e
 	for (int i = 0; (unsigned) i < tree_edges.size(); i++) {

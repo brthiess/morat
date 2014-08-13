@@ -395,7 +395,7 @@ public:
 				vertices[v1].remove_attached(v2);
 				for(int e = 0; (unsigned)e < edges.size(); e++) {
 					if (edges[e].getV1() == v1 && edges[e].getV2() == v2) {
-						std::cout << "\nDeleting "<< v1 << " and " << v2;
+						//std::cout << "\nDeleting "<< v1 << " and " << v2;
 						edges.erase(edges.begin() + e);
 						return true;
 					}
@@ -427,7 +427,7 @@ public:
 				vertices[v2].remove_attached(v1);
 				for(int e = edges.size() - 1; e >= 0; e--) {
 					if (edge.getID() == edges[e].getID()) {
-						std::cout << "\nDeleting "<< v1 << " and " << v2;
+						//std::cout << "\nDeleting "<< v1 << " and " << v2;
 						edges.erase(edges.begin() + e);
 						found_edge = true;
 					}
@@ -536,6 +536,14 @@ public:
 						vertices[v].print();					
 				}
 			}
+			
+			void print_edges() {
+				for (int e = 0; (unsigned) e < edges.size(); e++) {
+					std::cout<<"\n(" << edges[e].getV1() << ", " << edges[e].getV2() << ")  ID: " << edges[e].getID() << "  Cycle ID: " << edges[e].get_cycle_id();
+					
+				}
+				
+			}
 
 		
 	};
@@ -615,7 +623,8 @@ public:
 	std::vector<Edge> get_cycle_edges(Adjacency_List tree, Edge e);
 	void Augment( Adjacency_List * tree1, Adjacency_List * tree2, Adjacency_List * common_chords);
 	std::vector<Edge> Union(Adjacency_List tree, std::vector<Edge> cycle_edges);
-
+	void swap(Adjacency_List * tree1, Adjacency_List * tree2);
+	bool delete_edge(std::vector<Edge> * edges, Edge e);
 	  
 	
 
