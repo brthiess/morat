@@ -265,26 +265,8 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 				 }				 
 			 }	
 			 if (!found_a_common_edge) {
-				
+				printf("\n***************Found K Subgraph*******************");						
 				found_a_common_edge = true;
-				/* std::cout<< "\nCycle Edges Size : " << cycle_edges.size() << "   Union Edges Size: " << union_edges.size();
-				 //If cycle_edges equals union_edges
-				 //then we have found a K subgraph
-				 if (cycle_edges.size() >= union_edges.size()) {
-					 tree1->delete_edge(c_c[c]);
-					  printf("\nTree 1");
-					 tree1->graph_to_s();
-					 
-					 tree2->delete_edge(c_c[c]);
-					 printf("\nTree 2");
-					 tree2->graph_to_s();
-					 found_a_common_edge = true;					 
-					 break;
-				 }
-				 else {
-					swap(tree1, tree2);
-					cycle_edges = union_edges;
-				}*/
 			 }
 		 }
 	 }
