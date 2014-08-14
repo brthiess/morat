@@ -631,6 +631,8 @@ public:
 	std::vector<Edge> Union(Adjacency_List tree, std::vector<Edge> cycle_edges);
 	void swap(Adjacency_List * tree1, Adjacency_List * tree2);
 	bool delete_edge(std::vector<Edge> * edges, Edge e);
+	void cull_edges(Adjacency_List *tree1, Adjacency_List * tree2, Adjacency_List board_matrix);
+	void remove_duplicate_edges(std::vector<Edge> * edges);
 	  
 	
 
