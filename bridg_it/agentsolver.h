@@ -286,18 +286,19 @@ public:
 			}
 			
 			
-			void addEdge(Edge e) {
+			bool addEdge(Edge e) {
 				int v1 = e.getV1();
 				int v2 = e.getV2();
 				
 				for (int i = 0; (unsigned) i < edges.size(); i++) {
 					if (e.getID() == edges[i].getID()) {
-						return;
+						return false;
 					}
 				}
 				
 				addEdge(v1, v2, e.getID());
-				addEdge(v2, v1, e.getID());				
+				addEdge(v2, v1, e.getID());		
+				return true;		
 			}
 			
 			void addEdge(int v1, int v2, int id=-1){
@@ -627,12 +628,13 @@ public:
 	int edge_to_xy(int v1, int v2);
 	Move get_random_move();
 	std::vector<Edge> get_cycle_edges(Adjacency_List tree, Edge e);
-	void Augment( Adjacency_List * tree1, Adjacency_List * tree2, Adjacency_List * common_chords);
+	std::vector<Adjacency_List> Augment( Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords);
 	std::vector<Edge> Union(Adjacency_List tree, std::vector<Edge> cycle_edges);
 	void swap(Adjacency_List * tree1, Adjacency_List * tree2);
 	bool delete_edge(std::vector<Edge> * edges, Edge e);
-	void cull_edges(Adjacency_List *tree1, Adjacency_List * tree2, Adjacency_List board_matrix);
+	std::vector<Adjacency_List> cull_edges(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List board_matrix);
 	void remove_duplicate_edges(std::vector<Edge> * edges);
+	void append_edges(std::vector<Edge> * main, std::vector<Edge> append);
 	  
 	
 
