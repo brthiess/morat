@@ -634,8 +634,8 @@ public:
 	void swap(Adjacency_List * tree1, Adjacency_List * tree2);
 	bool delete_edge(std::vector<Edge> * edges, Edge e);
 	std::vector<Adjacency_List> cull_edges(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List board_matrix);
-	void remove_duplicate_edges(std::vector<Edge> * edges);
-	void append_edges(std::vector<Edge> * main, std::vector<Edge> append);
+	std::vector<Edge> remove_duplicate_edges(std::vector<Edge>  edges);
+	std::vector<Edge> append_edges(std::vector<Edge> main, std::vector<Edge> append);
 	std::vector<Adjacency_List> get_max_distant_trees(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords);
 	  
 	

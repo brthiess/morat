@@ -214,10 +214,11 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
  * Is given a pointer to a vector of edges and another vector to append to it
  */
  
-void AgentSolver::append_edges(std::vector<Edge> * main, std::vector<Edge> append) {
+std::vector<AgentSolver::Edge> AgentSolver::append_edges(std::vector<Edge> main, std::vector<Edge> append) {
 	for (std::vector<Edge>::size_type e = 0; e < append.size(); e++) {
-		main->push_back(append[e]);
+		main.push_back(append[e]);
 	}	
+	return main;
 }
 
 std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords) {
@@ -253,7 +254,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 			std::cout<< "\n\nDid not find a common edge";
 		
 			std::cout << "\nAppend Cycle Edges to L_new \nL_new = \n";
-			append_edges(&l_new, cycle_edges);	
+			l_new = append_edges(l_new, cycle_edges);	
 			for (std::vector<Edge>::size_type e = 0; e < l_new.size(); e++) {
 				std::cout << "  (" << l_new[e].getV1() << ", " << l_new[e].getV2() << ")";
 			}	 
@@ -318,8 +319,8 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 			}
 			
 			//Append the new cycle edges to L
-			append_edges(&l_new, cycle_edges);
-			remove_duplicate_edges(&l_new);
+			l_new = append_edges(l_new, cycle_edges);
+			l_new = remove_duplicate_edges(l_new);
 			if (l_new.size() == l_previous.size()) {
 				std::cout << "************************Found a K subgraph************************";
 				clear(l_new);
@@ -440,7 +441,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 	std::vector<Edge> l_previous;
 	std::vector<Edge> tree2_edges = tree2.get_edges();
 
-	append_edges(&common_edges, tree2_edges);
+	common_edges = append_edges(common_edges, tree2_edges);
  
  	for(std::vector<Edge>::size_type i = 0; i < common_chords.size(); i++) {
  		for(std::vector<Edge>::size_type j = 0; j < common_edges.size(); j++) {
@@ -473,8 +474,8 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 					std::cout<< " (" << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2() << ")";				
 				}
 				printf("\n");
-				append_edges(&all_cycle_edges, cycle_edges);
- 			
+				all_cycle_edges = append_edges(all_cycle_edges, cycle_edges);
+				all_cycle_edges = remove_duplicate_edges(all_cycle_edges);
 				bool no_common_branches = true;
 				//Iterate through all edges in the cycle and check for a common branch
 				for (std::vector<Edge>::size_type j = 0; j < cycle_edges.size(); j++) {
@@ -488,8 +489,8 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 				}
 				if(no_common_branches) {
 					std::cout << "\nNo Common Branches found.  Add cycle to L_new";
-					append_edges(&l_new, cycle_edges);
-					remove_duplicate_edges(&l_new);
+					l_new = append_edges(l_new, cycle_edges);
+					l_new = remove_duplicate_edges(l_new);
 					printf("\n");
  				
 					/*std::cout<< "\nL";
@@ -521,13 +522,12 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 				}
 			}
 			common_chords = all_cycle_edges;
-			remove_duplicate_edges(&common_chords);
+			common_chords = remove_duplicate_edges(common_chords);
 			
 			std::cout << "\nSwap tree 1 and tree 2";
 			Adjacency_List temp = tree1;
 			tree1 = tree2;
-			tree2 = temp;
-			
+			tree2 = temp;			
 			l_previous = l_new;	
  		}		
  	}
@@ -592,24 +592,25 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 	 for (std::vector<Edge>::size_type i = 0; i < cycle_edges.size(); i++) {
 	 	tree.addEdge(cycle_edges[i]);
 	 	std::vector<Edge> temp = get_cycle_edges(tree, cycle_edges[i]);
-	 	append_edges(&union_edges, temp);
+	 	union_edges = append_edges(union_edges, temp);
 	 	tree.delete_edge(cycle_edges[i]);
 	 }
 	 
-	 remove_duplicate_edges(&union_edges);
+	 union_edges = remove_duplicate_edges(union_edges);
 	 
 	 return union_edges;
  }
  
- void AgentSolver::remove_duplicate_edges(std::vector<Edge> * edges) {
- 	 for (std::vector<Edge>::size_type i = 0; i < edges->size(); i++) {
-	 	for (std::vector<Edge>::size_type j = i + 1; j < edges->size(); j++) {
-	 		if (edges->at(i).getID() == edges->at(j).getID()) {
-	 			edges->erase(edges->begin() + j);
+std::vector<AgentSolver::Edge> AgentSolver::remove_duplicate_edges(std::vector<Edge>  edges) {
+ 	 for (std::vector<Edge>::size_type i = 0; i < edges.size(); i++) {
+	 	for (std::vector<Edge>::size_type j = i + 1; j < edges.size(); j++) {
+	 		if (edges.at(i).getID() == edges.at(j).getID()) {
+	 			edges.erase(edges.begin() + j);
 	 			j -= 1;
 	 		}
 	 	}
 	 }
+	 return edges;
  }
 
 /**
