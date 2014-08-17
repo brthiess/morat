@@ -183,7 +183,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 		printf("\n\nCommon Chords");
 		common_chords.graph_to_s();
 	
-	edge_disjoint_trees = Augment(tree1, tree2, common_chords);
+	edge_disjoint_trees = get_max_distant_trees(tree1, tree2, common_chords);
 	
 	
 		 
@@ -219,6 +219,125 @@ void AgentSolver::append_edges(std::vector<Edge> * main, std::vector<Edge> appen
 		main->push_back(append[e]);
 	}	
 }
+
+std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords) {
+	std::vector<Edge> c_c = get_all_edges(common_chords);
+	 std::vector<Edge> cycle_edges;
+	 std::vector<Edge> l_new;
+	 std::vector<Edge> l_previous;
+	 
+	 for (std::vector<Edge>::size_type c = 0; c < c_c.size(); c++) {
+		 bool found_a_common_edge = false;
+		 
+		 //Add the common chord to tree 1
+		 std::cout<< "\nAdd Edge: ("<< c_c[c].getV1() << ", " << c_c[c].getV2() << ")";				
+		 tree1.addEdge(c_c[c]);
+		 
+		 //Get the cycle
+		 cycle_edges = get_cycle_edges(tree1, c_c[c]);
+		 //For each edge in the cycle (not including c_c[c])
+		 for (std::vector<Edge>::size_type e = 0; e < cycle_edges.size(); e++) {
+			 //If there is an edge in both trees
+			 if (tree2.find_edge(cycle_edges[e]) && cycle_edges[e].getID() != c_c[c].getID()) {
+				 std::cout<< "\nFound a common edge: ( " << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2()<< ")";
+				 tree1.delete_edge(cycle_edges[e]);
+				 std::cout<< "\nDeleting Edge: (" << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2() << ")  ID:"  << cycle_edges[e].getID() << ")";
+				 found_a_common_edge = true;
+				 break;
+			 }
+		 }
+		 while (!found_a_common_edge) {
+
+			tree1.delete_edge(c_c[c]);
+			
+			std::cout<< "\n\nDid not find a common edge";
+		
+			std::cout << "\nAppend Cycle Edges to L_new \nL_new = \n";
+			append_edges(&l_new, cycle_edges);	
+			for (std::vector<Edge>::size_type e = 0; e < l_new.size(); e++) {
+				std::cout << "  (" << l_new[e].getV1() << ", " << l_new[e].getV2() << ")";
+			}	 
+			std::cout << "\nSwap tree 1 and tree 2";
+			Adjacency_List temp = tree1;
+			tree1 = tree2;
+			tree2 = temp;
+			//Iterate through all edges in L
+			for (std::vector<Edge>::size_type e = 0; e < l_new.size(); e++) {
+				//Get the cycle from tree 1
+				
+				if (tree1.addEdge(l_new[e])) {
+					std::cout<< "\n\nAdd Edge: ("<< l_new[e].getV1() << ", " << l_new[e].getV2() << ") ID: " << l_new[e].getID();
+					
+					cycle_edges = get_cycle_edges(tree1, l_new[e]);
+					std::cout<<"\nCycle Created from Edge: ";
+					for (std::vector<Edge>::size_type e = 0; e < cycle_edges.size(); e++) {
+						std::cout << "  (" << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2() << ")";
+					}
+
+					//Check if the cycle has a common edge
+					for (std::vector<Edge>::size_type i = 0; i < cycle_edges.size(); i++) {
+						if (tree1.find_edge(cycle_edges[i]) && tree2.find_edge(cycle_edges[i])  && cycle_edges[i].getID() != l_new[e].getID()) {
+							//Add the common chord to tree 2
+							std::cout << "\n Found a common branch: (" << cycle_edges[i].getV1() << ", " << cycle_edges[i].getV2() << ") ID: "  << cycle_edges[i].getID();
+							std::cout << "\nAdd Common Chord Edge to Tree 2: " << c_c[c].getV1() << ", " << c_c[c].getV2();
+							tree2.addEdge(c_c[c]);
+							std::cout << "\nAdd Cycle Leader Edge to Tree 1 and delete from tree 2: " << l_new[e].getV1() << ", " << l_new[e].getV2();
+							//Add the cycle leader to tree 1
+							tree1.addEdge(l_new[e]);
+							//Delete the cycle leader from tree 2
+							tree2.delete_edge(l_new[e]);
+							//Delete common branch from tree 1
+							std::cout << "\n Delete common branch from tree 1: (" << cycle_edges[i].getV1() << ", " << cycle_edges[i].getV2() << ")";
+							tree1.delete_edge(cycle_edges[i]);	
+							//std::cout<< "\nCycle ID: " << union_edges[e].get_cycle_id();
+							printf("\nTree 1");
+							tree1.graph_to_s();					
+							printf("\nTree 2");
+							tree2.graph_to_s();
+							found_a_common_edge = true;
+							break;	
+						}
+					}
+					if (!found_a_common_edge) {
+						std::cout <<"\nNo Common Edges found from this cycle";
+						std::cout<< "\nDelete Edge: ("<< l_new[e].getV1() << ", " << l_new[e].getV2() << ")";
+						tree1.delete_edge(l_new[e]);
+					}
+				}
+				if (found_a_common_edge) {
+					break;
+				}
+				else {
+					
+				}
+			}
+			if (found_a_common_edge) {
+				clear(l_new);
+				clear(l_previous);
+				break;
+			}
+			
+			//Append the new cycle edges to L
+			append_edges(&l_new, cycle_edges);
+			remove_duplicate_edges(&l_new);
+			if (l_new.size() == l_previous.size()) {
+				std::cout << "************************Found a K subgraph************************";
+				clear(l_new);
+				clear(l_previous);
+				break;
+				
+			}
+			else {
+				l_previous = l_new;				
+			}
+		}
+	}
+	std::vector<Adjacency_List> trees;
+	trees.push_back(tree1);
+	trees.push_back(tree2);
+	return trees;
+}
+
 
 
 /**
@@ -258,8 +377,11 @@ void AgentSolver::append_edges(std::vector<Edge> * main, std::vector<Edge> appen
 		 while (!found_a_common_edge) {
 			 std::cout<<"\nDid not find a common branch from tree 1\nFind cycles created in tree 2";			 	 
 			 tree1.delete_edge(c_c[c]);
-			 //1. Tree 2 gets the cycle leader.  Tree 1 deletes the cycle leader
-			 //2. Tree 1 gets the common chord
+			 
+			 
+			 //1. Tree 1 gets the common chord
+			 //2. Tree 2 gets the cycle leader.  Tree 1 deletes the cycle leader
+			 
 			 //3. Tree 1 keeps the common branch
 			 //4. Tree 2 Deletes the common branch
 			 std::vector<Edge> union_edges = Union(tree2, cycle_edges);
@@ -342,7 +464,7 @@ void AgentSolver::append_edges(std::vector<Edge> * main, std::vector<Edge> appen
  		//Add the edge to tree 1 and check for a cycle.
 
  		for (std::vector<Edge>::size_type i = 0; i < common_chords.size(); i++) {
-			std::cout<<"\n\n\nAdd Edge (" << common_chords[i].getV1() << ", " << common_chords[i].getV2() << ") to Tree 1";
+			std::cout<<"\n\n\nAdd Edge (" << common_chords[i].getV1() << ", " << common_chords[i].getV2() << ") ID: " << common_chords[i].getID() <<"   to Tree 1";
 				
 			if (tree1.addEdge(common_chords[i])) {
 				std::vector<Edge> cycle_edges = get_cycle_edges(tree1, common_chords[i]);
@@ -376,9 +498,9 @@ void AgentSolver::append_edges(std::vector<Edge> * main, std::vector<Edge> appen
 					}
 					printf("\n"); */				
 				}
- 			}
- 			std::cout<<"\nDelete Edge (" << common_chords[i].getV1() << ", " << common_chords[i].getV2() << ") to Tree 1";
-			tree1.delete_edge(common_chords[i]); 
+				std::cout<<"\nDelete Edge (" << common_chords[i].getV1() << ", " << common_chords[i].getV2() << ") to Tree 1";
+				tree1.delete_edge(common_chords[i]); 
+ 			} 			
  		}
  		
  		if (l_new.size() == l_previous.size()) {
@@ -420,6 +542,11 @@ void AgentSolver::append_edges(std::vector<Edge> * main, std::vector<Edge> appen
 			}
 		}
 		
+		std::cout<< "\n\nAfter Culling";
+		printf("\nTree1");
+		tree1.graph_to_s();
+		printf("\nTree2");
+		tree2.graph_to_s();
 		
 		
 		std::vector<Adjacency_List> trees;
@@ -660,6 +787,11 @@ AgentSolver::Adjacency_List AgentSolver::get_spanning_tree(Adjacency_List board_
 
 void AgentSolver::clear( std::stack<int> &s ) {
    std::stack<int> empty;
+   std::swap( s, empty );
+}
+
+void AgentSolver::clear( std::vector<Edge> &s ) {
+   std::vector<Edge> empty;
    std::swap( s, empty );
 }
 

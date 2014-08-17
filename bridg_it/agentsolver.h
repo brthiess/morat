@@ -615,6 +615,7 @@ public:
 	bool not_all_edges_used(std::vector<Edge> edges_used, Adjacency_List board_matrix);
 	bool all_vertices_visited(std::vector<int> vertices_visited, Adjacency_List treey);
 	void clear(std::stack<int> &s);
+	void clear(std::vector<Edge> &s);
 	bool vertices_are_in_the_same_set(Adjacency_List al, int v1, int v2);
 	bool edge_in(std::vector<Edge> edges, long id);
 	std::vector<Edge> get_all_edges(Adjacency_List tree);
@@ -635,6 +636,7 @@ public:
 	std::vector<Adjacency_List> cull_edges(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List board_matrix);
 	void remove_duplicate_edges(std::vector<Edge> * edges);
 	void append_edges(std::vector<Edge> * main, std::vector<Edge> append);
+	std::vector<Adjacency_List> get_max_distant_trees(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords);
 	  
 	
 
