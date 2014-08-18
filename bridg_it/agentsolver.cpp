@@ -254,6 +254,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 					std::cout<< "\nFound a common edge: ( " << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2()<< ")";
 					std::cout<< "\nDeleting edge from tree1: ( " << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2()<< ")";
 					tree1.delete_edge(cycle_edges[e]);
+					found_a_common_edge = true;	
 					//Get the parents of cycle edge e
 					std::vector<Edge> ancestry = cycle_edges[e].get_ancestry();
 					//For each parent, give an edge to tree 2, erase from tree 1.  Vice Versa for next gen
@@ -266,8 +267,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 						std::cout<<"\nSwap Trees";
 						Adjacency_List temp = tree1;
 						tree1 = tree2;
-						tree2 = temp;	
-						found_a_common_edge = true;	
+						tree2 = temp;							
 					    std::vector<Edge> empty1;
 					    std::vector<Edge> empty2;
 						l_new = empty1;
@@ -287,6 +287,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 					l_previous = l_new;
 				}				
 				//Swap trees
+				tree1.delete_edge(c_c[c]);	
 				std::cout<<"\nSwap Tree 1 and Tree 2";
 				Adjacency_List temp = tree1;
 				tree1 = tree2;
