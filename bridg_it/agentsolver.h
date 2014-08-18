@@ -224,6 +224,7 @@ public:
 		long id;
 		bool visited;
 		long cycle_id;
+		std::vector<Edge> ancestry;
 		
 		Edge(int vert1, int vert2, long ID)  {
 			v1 = vert1;
@@ -236,6 +237,22 @@ public:
 		
 		long getID() {
 			return id;
+		}
+		
+		std::vector<Edge> get_ancestry() {
+			return ancestry;
+		}
+		
+		Edge get_ancestry_at(int i) {
+			return ancestry[i];
+		}
+		
+		void set_ancestry(Edge e) {
+			ancestry = e.get_ancestry();			
+		}
+		
+		void add_ancestor(Edge e) {
+			ancestry.push_back(e);
 		}
 		
 		int getV1() {
@@ -637,7 +654,8 @@ public:
 	std::vector<Edge> remove_duplicate_edges(std::vector<Edge>  edges);
 	std::vector<Edge> append_edges(std::vector<Edge> main, std::vector<Edge> append);
 	std::vector<Adjacency_List> get_max_distant_trees(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords);
-	  
+	std::vector<Adjacency_List> get_max_distant_trees_old(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords);
+	 
 	
 
 	class AgentThread : public AgentThreadBase<AgentSolver> {
