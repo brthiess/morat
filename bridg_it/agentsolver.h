@@ -629,12 +629,9 @@ public:
 	bool xy_on_board(int xy, int xy2);
 	bool xy_is_a_vertice(int xy);
 	std::vector<Adjacency_List> find_edge_disjoint_trees(Adjacency_List board_matrix);
-	std::vector<Adjacency_List> find_edge_disjoint_trees_old(Adjacency_List board_matrix);
 	Adjacency_List get_spanning_tree(Adjacency_List board_matrix);
 	bool is_connected(Adjacency_List tree);
 	Adjacency_List subtract_trees(Adjacency_List tree1, Adjacency_List tree2);
-	void swap_edges(Adjacency_List *tree1, Adjacency_List *tree2, std::vector<Edge> *used_edges, std::vector<Edge> *tree1_edges, std::vector<Edge> * tree2_edges);
-	bool not_all_edges_used(std::vector<Edge> edges_used, Adjacency_List board_matrix);
 	bool all_vertices_visited(std::vector<int> vertices_visited, Adjacency_List treey);
 	void clear(std::stack<int> &s);
 	void clear(std::vector<Edge> &s);
@@ -644,23 +641,17 @@ public:
 	int get_id();
 	Adjacency_List copyTree(Adjacency_List tree);
 	long get_random(long max);
-	Adjacency_List remove_problem_vertices(Adjacency_List tree);
-	std::vector<Partition> push_to_all_indices(int i, std::vector<Partition> partitions);
-	std::vector<Partition> concatenate(std::vector<Partition> p1, std::vector<Partition> p2);
 	void get_best_move(std::vector<Adjacency_List> trees);
 	int edge_to_xy(int v1, int v2);
 	Move get_random_move();
 	std::vector<Edge> get_cycle_edges(Adjacency_List tree, Edge e);
-	std::vector<Adjacency_List> Augment( Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords);
 	std::vector<Edge> Union(Adjacency_List tree, std::vector<Edge> cycle_edges);
 	void swap(Adjacency_List * tree1, Adjacency_List * tree2);
 	bool delete_edge(std::vector<Edge> * edges, Edge e);
-	std::vector<Adjacency_List> cull_edges(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List board_matrix);
 	std::vector<Edge> remove_duplicate_edges(std::vector<Edge>  edges);
 	std::vector<Edge> append_edges(std::vector<Edge> main, std::vector<Edge> append);
 	std::vector<Adjacency_List> get_max_distant_trees(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords);
-	std::vector<Adjacency_List> get_max_distant_trees_old(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords);
-	void print_to_board(Adjacency_List tree);
+
 	
 
 	class AgentThread : public AgentThreadBase<AgentSolver> {
