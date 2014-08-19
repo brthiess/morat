@@ -440,15 +440,7 @@ public:
 			
 			bool delete_edge(Edge edge) {
 				bool found_edge = false;
-				int v1 = edge.getV1();
-				int v2 = edge.getV2();
-				for (int v = 0; (unsigned) v < vertices.size(); v++) {
-					if (vertices[v].get_id() == v1) {
-						v1 = v;
-					}
-				}
-				vertices[v1].remove_attached(v2);
-				vertices[v2].remove_attached(v1);
+
 				for(int e = edges.size() - 1; e >= 0; e--) {
 					if (edge.getID() == edges[e].getID()) {
 						//std::cout << "\nDeleting "<< v1 << " and " << v2;
@@ -456,6 +448,17 @@ public:
 						found_edge = true;
 					}
 				}		
+				if (found_edge) {
+					int v1 = edge.getV1();
+					int v2 = edge.getV2();
+					for (int v = 0; (unsigned) v < vertices.size(); v++) {
+						if (vertices[v].get_id() == v1) {
+						v1 = v;
+						}
+					}
+					vertices[v1].remove_attached(v2);
+					vertices[v2].remove_attached(v1);
+				}
 				return found_edge;
 			}
 			
@@ -561,6 +564,8 @@ public:
 				}
 			}
 			
+			
+			
 			void print_edges() {
 				for (int e = 0; (unsigned) e < edges.size(); e++) {
 					std::cout<<"\n(" << edges[e].getV1() << ", " << edges[e].getV2() << ")  ID: " << edges[e].getID() << "  Cycle ID: " << edges[e].get_cycle_id();
@@ -655,7 +660,7 @@ public:
 	std::vector<Edge> append_edges(std::vector<Edge> main, std::vector<Edge> append);
 	std::vector<Adjacency_List> get_max_distant_trees(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords);
 	std::vector<Adjacency_List> get_max_distant_trees_old(Adjacency_List tree1, Adjacency_List tree2, Adjacency_List common_chords);
-	 
+	void print_to_board(Adjacency_List tree);
 	
 
 	class AgentThread : public AgentThreadBase<AgentSolver> {

@@ -461,6 +461,10 @@ public:
 		cell->piece = Side::NONE;
 		cell->perm = 0;
 	}
+	
+	void set_toplay(Side s) {
+		toPlay = s;
+	}
 
 	int find_group(const MoveValid & m) const { return find_group(m.xy); }
 	int find_group(const Move & m) const { return find_group(xy(m)); }
@@ -641,7 +645,7 @@ public:
 		return move(MoveValid(pos, xy(pos)), checkwin, permanent);
 	}
 	bool move(const MoveValid & pos, bool checkwin = true, bool permanent = true){
-		assert(outcome < Outcome::DRAW);
+		//assert(outcome < Outcome::DRAW);
 
 		if(!valid_move(pos))
 			return false;

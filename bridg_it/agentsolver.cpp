@@ -38,6 +38,12 @@ namespace BridgIt {
  * This function is called when genmove is called
  */
 void AgentSolver::search(double time, uint64_t max_runs, int verbose){
+	if (time > 21) {
+		rolloutpattern = true;
+	}
+	else {
+		rolloutpattern = false;
+	}
 	//Get the adjacency list representation of the board
 	AgentSolver::Adjacency_List board_matrix = AgentSolver::getAdjacencyList();
 	printf("\nBoard Matrix");
@@ -186,21 +192,21 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::find_edge_disjoint_trees(A
 		 
 		printf("\n\nBefore Culling: ");
 		printf("\n\nTree 1");
-		edge_disjoint_trees[0].graph_to_s();
+		print_to_board(edge_disjoint_trees[0]);
 	
 		printf("\n\nTree 2");
-		edge_disjoint_trees[1].graph_to_s();
+		print_to_board(edge_disjoint_trees[1]);
 	
-	edge_disjoint_trees = cull_edges(edge_disjoint_trees[0], edge_disjoint_trees[1], board_matrix);
+	//edge_disjoint_trees = cull_edges(edge_disjoint_trees[0], edge_disjoint_trees[1], board_matrix);
 	
 	
 		 
 		printf("\nAfter Culling: ");
 		printf("\n\nTree 1");
-		edge_disjoint_trees[0].graph_to_s();
+		print_to_board(edge_disjoint_trees[0]);
 	
 		printf("\n\nTree 2");
-		edge_disjoint_trees[1].graph_to_s();
+		print_to_board(edge_disjoint_trees[1]);
 	
 	//return the edge disjoint trees
 	return edge_disjoint_trees;
@@ -229,7 +235,7 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 		 bool found_a_common_edge = false;
 		 
 		 //Add the common chord to tree 1
-		 std::cout<< "\nAdd Edge: ("<< c_c[c].getV1() << ", " << c_c[c].getV2() << ")";				
+		 std::cout<< "\nAdd Edge: ("<< c_c[c].getV1() << ", " << c_c[c].getV2() << ")   ID: " << c_c[c].getID();				
 		 tree1.addEdge(c_c[c]);		 		 
 		 //Get the cycle
 		 cycle_edges = get_cycle_edges(tree1, c_c[c]);
@@ -251,8 +257,8 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 			 
 				//If there is an edge in both trees
 				if (tree1.find_edge(cycle_edges[e]) && tree2.find_edge(cycle_edges[e])) {
-					std::cout<< "\nFound a common edge: ( " << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2()<< ")";
-					std::cout<< "\nDeleting edge from tree1: ( " << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2()<< ")";
+					std::cout<< "\nFound a common edge: ( " << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2()<< ")  ID: " << cycle_edges[e].getID();
+					std::cout<< "\nDeleting edge from tree1: ( " << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2()<< ")    ID: " << cycle_edges[e].getID();
 					tree1.delete_edge(cycle_edges[e]);
 					found_a_common_edge = true;	
 					//Get the parents of cycle edge e
@@ -273,6 +279,11 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 						l_new = empty1;
 						l_previous = empty2;			 	 
 					}
+					
+					printf("\nTree1");
+					tree1.graph_to_s();
+					printf("\nTree2");
+					tree2.graph_to_s();
 					break;
 				}			
 			}
@@ -294,6 +305,15 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees(Adja
 				tree2 = temp;	
 				std::cout<< "\nCycle_Edges = Union of Tree 1 and Cycle_Edges";			
 				cycle_edges = Union(tree1, cycle_edges);
+				
+				std::cout<<"\nCycle Edges Created: ";
+				for (std::vector<Edge>::size_type e = 0; e < cycle_edges.size(); e++) {
+					std::cout<< "\n(" << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2() << ") ID: " << cycle_edges[e].getID() << "  Parents: ";
+					std::vector<Edge> ancestry = cycle_edges[e].get_ancestry();
+					for (int i = 0; (unsigned) i < ancestry.size(); i++) {
+						std::cout<< " (" << ancestry[i].getV1() << ", " << ancestry[i].getV2() << ")";
+					}
+				}				
 			}
 		}
 	 }
@@ -589,7 +609,10 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees_old(
 				}
 				std::cout<<"\nDelete Edge (" << common_chords[i].getV1() << ", " << common_chords[i].getV2() << ") to Tree 1";
 				tree1.delete_edge(common_chords[i]); 
- 			} 			
+ 			}
+ 			
+ 			print_to_board(tree1);	
+ 			print_to_board(tree2);	
  		}
  		
  		if (l_new.size() == l_previous.size()) {
@@ -663,6 +686,15 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees_old(
 	 std::vector<Edge> union_edges;
 	 
 	 
+	 std::cout<<"\nCycle Edges at beginning of Union: ";
+		for (std::vector<Edge>::size_type e = 0; e < cycle_edges.size(); e++) {
+			std::cout<< "\n(" << cycle_edges[e].getV1() << ", " << cycle_edges[e].getV2() << ") ID: " << cycle_edges[e].getID() << "  Parents: ";
+			std::vector<Edge> ancestry = cycle_edges[e].get_ancestry();
+			for (int i = 0; (unsigned) i < ancestry.size(); i++) {
+				std::cout<< " (" << ancestry[i].getV1() << ", " << ancestry[i].getV2() << ")";
+			}
+		}
+	 
 	 
 	 for (std::vector<Edge>::size_type i = 0; i < cycle_edges.size(); i++) {
 	 	tree.addEdge(cycle_edges[i]);
@@ -671,7 +703,25 @@ std::vector<AgentSolver::Adjacency_List> AgentSolver::get_max_distant_trees_old(
 	 	tree.delete_edge(cycle_edges[i]);
 	 }
 	 
+	 std::cout<<"\nUnion Edges Before Removing Duplicates: ";
+		for (std::vector<Edge>::size_type e = 0; e < union_edges.size(); e++) {
+			std::cout<< "\n(" << union_edges[e].getV1() << ", " << union_edges[e].getV2() << ") ID: " << union_edges[e].getID() << "  Parents: ";
+			std::vector<Edge> ancestry = union_edges[e].get_ancestry();
+			for (int i = 0; (unsigned) i < ancestry.size(); i++) {
+				std::cout<< " (" << ancestry[i].getV1() << ", " << ancestry[i].getV2() << ")";
+			}
+		}
+	 
 	 union_edges = remove_duplicate_edges(union_edges);
+	 
+	 std::cout<<"\nUnion Edges After Removing Duplicates: ";
+		for (std::vector<Edge>::size_type e = 0; e < union_edges.size(); e++) {
+			std::cout<< "\n(" << union_edges[e].getV1() << ", " << union_edges[e].getV2() << ") ID: " << union_edges[e].getID() << "  Parents: ";
+			std::vector<Edge> ancestry = union_edges[e].get_ancestry();
+			for (int i = 0; (unsigned) i < ancestry.size(); i++) {
+				std::cout<< " (" << ancestry[i].getV1() << ", " << ancestry[i].getV2() << ")";
+			}
+		}
 	 
 	 return union_edges;
  }
@@ -680,6 +730,9 @@ std::vector<AgentSolver::Edge> AgentSolver::remove_duplicate_edges(std::vector<E
  	 for (std::vector<Edge>::size_type i = 0; i < edges.size(); i++) {
 	 	for (std::vector<Edge>::size_type j = i + 1; j < edges.size(); j++) {
 	 		if (edges.at(i).getID() == edges.at(j).getID()) {
+	 			if (edges.at(i).get_ancestry().size() < edges.at(j).get_ancestry().size()) {
+					edges.at(i).set_ancestry(edges.at(j));
+				}
 	 			edges.erase(edges.begin() + j);
 	 			j -= 1;
 	 		}
@@ -760,8 +813,9 @@ std::vector<AgentSolver::Edge> AgentSolver::get_cycle_edges(Adjacency_List tree,
 	//Find the edge in the tree that corresponds to edge e
 	for (std::vector<Edge>::size_type i = 0; i < tree_edges.size(); i++) {
 		if (tree_edges[i].getV1() == e.getV1() &&
-		tree_edges[i].getV2() == e.getV2()) {
+		tree_edges[i].getV2() == e.getV2() && tree_edges[i].getID() == e.getID()) {
 			tree_edges[i].visited = true;
+			tree_edges[i].set_ancestry(e);
 			current_edges.push_back(tree_edges[i]);
 			break;
 		}		
@@ -1325,6 +1379,31 @@ int AgentSolver::xy_to_vertice(int xy) {
  }
  
  /**
+  * Prints the given edges on the board
+  */
+ void AgentSolver::print_to_board(Adjacency_List tree) {
+
+	if (rolloutpattern) {
+		tree.graph_to_s();
+		printf("\n");
+		Board copy = Board(rootboard.get_size());
+		std::vector<Edge> edges = tree.get_edges();
+		
+		for (int e = 0; (unsigned) e < edges.size(); e++) {
+			int v1 = edges[e].getV1();
+			int v2 = edges[e].getV2();
+			int xy = edge_to_xy(v1,v2);
+			Move m = copy.yx(xy);	
+			copy.set_toplay(rootboard.toplay());
+			copy.move(m);		
+		}	
+			
+		copy.to_s(true);
+		copy.print(true);
+	}
+}
+ 
+ /**
   * Is given an edge, and returns an xy value representing the middle 
   * of that edge
   */
@@ -1336,7 +1415,7 @@ int AgentSolver::xy_to_vertice(int xy) {
 	 //Initialize XY of the vertices
 	 int v1_xy = -1;
 	 int v2_xy = -1;
-	 std::cout<< "\n Edge V1: " << v1 << "  Edge V2: " << v2;
+	 //std::cout<< "\n Edge V1: " << v1 << "  Edge V2: " << v2;
 	for (int xy = rootboard.vecsize() - 1; xy >= 0 ; xy--) {
 		 if (rootboard.toplay() == Side::P1) {
 			 xy = xy_from_whites_perspective(xy);
@@ -1371,7 +1450,7 @@ int AgentSolver::xy_to_vertice(int xy) {
 		 v2_xy = temp;
 	 }
 	 
-	 std::cout<< "\nV1_XY = " << v1_xy << "\nV2_XY = " << v2_xy << "\n";
+	// std::cout<< "\nV1_XY = " << v1_xy << "\nV2_XY = " << v2_xy << "\n";
 	 
 		 
 	 //4 Cases:
